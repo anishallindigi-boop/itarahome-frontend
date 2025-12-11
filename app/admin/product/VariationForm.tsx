@@ -68,14 +68,17 @@ export default function VariationForm({ productId, onClose }: Props) {
     ]);
   };
 
-  const updateVariation = (index: number, field: keyof VariationLocal, value: string) => {
-    {
-    setVariations(prev =>
-      prev.map((v, i) =>
-        i === index ? { ...v, [field]: value } : v
-      )
-    );
-  };
+const updateVariation = (
+  index: number,
+  field: keyof VariationLocal,
+  value: string
+) => {
+  setVariations(prev =>
+    prev.map((v, i) =>
+      i === index ? { ...v, [field]: value } : v
+    )
+  );
+};
 
   const updateAttribute = (index: number, attrName: string, value: string) => {
     setVariations(prev =>
