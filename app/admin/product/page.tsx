@@ -106,7 +106,7 @@ export default function Page() {
               </button>
             </div>
 
-            <VariationForm productId={editingId} onClose={() => setShowVariationForm(false)} />
+            {/* <VariationForm productId={editingId} onClose={() => setShowVariationForm(false)} /> */}
           </motion.div>
         </div>
       )}
