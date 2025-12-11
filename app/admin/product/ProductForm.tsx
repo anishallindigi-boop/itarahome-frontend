@@ -128,11 +128,16 @@ const createProduct = async () => {
     ]);
   };
 
-  const updateVar = (i: number, key: string, value: string) => {
-    const copy = [...variations];
-    copy[i][key] = value;
-    setVariations(copy);
-  };
+// allowed keys that are *not* the nested object
+type VariationScalarKeys = Exclude<keyof Variation, 'attributes'>;
+
+const updateVar = (i: number, key: VariationScalarKeys, value: string) => {
+  const copy = [...variations];
+  copy[i][key] = value as any;   // safe assertion – value is always string here
+  setVariations(copy);
+};
+
+
 
   const updateVarAttr = (i: number, attr: string, value: string) => {
     const copy = [...variations];
