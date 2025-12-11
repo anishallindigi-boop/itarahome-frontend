@@ -357,7 +357,7 @@ const updateVar = (i: number, key: VariationScalarKeys, value: string) => {
               type="file"
                 className="border p-2 w-full"
                 placeholder="Image URL"
-                value={v.image}
+            
                 onChange={(e) => updateVar(i, "image", e.target.value)}
               />
             </div>
