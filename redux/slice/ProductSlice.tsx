@@ -51,6 +51,7 @@ export interface Product {
   attributes: Attribute[];
   variations: Variation[];
   message?: string;
+  stock?:string;
   slug?:string;
   status: 'active' | 'inactive';
 }

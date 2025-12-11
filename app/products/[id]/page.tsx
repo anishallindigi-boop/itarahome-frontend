@@ -37,7 +37,8 @@ const Page = () => {
     if (singleProduct?.variations && singleProduct.variations.length > 0) {
       const first = singleProduct.variations[0];
       setSelectedVariation(first);
-      setSelectedImage(first.image || singleProduct.product.mainImage);
+      setSelectedImage(singleProduct.product.mainImage || '');
+
     } else if (singleProduct?.product?.mainImage) {
       setSelectedImage(singleProduct.product.mainImage);
     }
