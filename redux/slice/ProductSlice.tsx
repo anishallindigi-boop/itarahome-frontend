@@ -22,6 +22,13 @@ export type Variation = {
   image: string;
 };
 
+
+export interface SingleProductResponse {
+  product: Product;
+  variations: Variation[];
+}
+
+
 export interface CreateProductInput {
   title: string;
   description: string;
@@ -56,7 +63,7 @@ interface ProductState {
   success: boolean;
   isupdated: boolean;
   isdeleted: boolean;
-  singleProduct: Product | null;
+ singleProduct: SingleProductResponse | null,
 }
 
 const initialState: ProductState = {
@@ -142,7 +149,11 @@ export const GetSingleProduct = createAsyncThunk(
 
 //--------------------get single project by slug----------------------
 
-export const getsingleproductbyslug = createAsyncThunk<Product, string, { rejectValue: string }>(
+export const getsingleproductbyslug = createAsyncThunk<
+  SingleProductResponse,
+  string,
+  { rejectValue: string }
+>(
   'product/getsingleproductbyslug',
   async (slug, { rejectWithValue }) => {
     try {
@@ -266,7 +277,7 @@ export const ProductSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(GetSingleProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+      .addCase(GetSingleProduct.fulfilled, (state, action: PayloadAction<SingleProductResponse>) => {
         state.loading = false;
         state.singleProduct = action.payload;
       })
@@ -281,7 +292,7 @@ export const ProductSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(getsingleproductbyslug.fulfilled, (state, action: PayloadAction<Product>) => {
+     .addCase(getsingleproductbyslug.fulfilled, (state, action: PayloadAction<SingleProductResponse>) => {
         state.loading = false;
         state.singleProduct = action.payload;
       })
