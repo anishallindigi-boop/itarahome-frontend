@@ -4,7 +4,7 @@ import { resetState, getsingleproductbyslug } from '@/redux/slice/ProductSlice';
 import { RootState } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { useParams } from 'next/navigation';
-import { AlertCircle, Loader2, ShoppingCart, Truck, Shield, RefreshCw, CalendarClock } from 'lucide-react';
+import { AlertCircle, Loader2, ShoppingCart, Truck, Shield, CalendarClock } from 'lucide-react';
 import Image from 'next/image';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
@@ -17,7 +17,7 @@ const Page = () => {
   const { loading, error, singleProduct } = useAppSelector((state: RootState) => state.product);
 
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
-  const [selectedImage, setSelectedImage] = useState<string>('');
+  const [selectedImage, setSelectedImage] = useState<string>(''); // stays string
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -37,10 +37,19 @@ const Page = () => {
     if (singleProduct?.variations && singleProduct.variations.length > 0) {
       const first = singleProduct.variations[0];
       setSelectedVariation(first);
-      setSelectedImage(singleProduct.product.mainImage || '');
+
+      // FIX: Ensure selectedImage never receives undefined
+      setSelectedImage(
+        first.image ||
+        singleProduct.product.mainImage ||
+        ''
+      );
 
     } else if (singleProduct?.product?.mainImage) {
-      setSelectedImage(singleProduct.product.mainImage);
+
+      setSelectedImage(
+        singleProduct.product.mainImage || ''
+      );
     }
   }, [singleProduct]);
 
@@ -98,7 +107,7 @@ const Page = () => {
     const variation = variations.find((v: any) => v.attributes.size === sizeValue);
     if (variation) {
       setSelectedVariation(variation);
-      setSelectedImage(variation.image || product.mainImage);
+      setSelectedImage(variation.image || product.mainImage || '');
     }
   };
 
@@ -110,6 +119,7 @@ const Page = () => {
     <main className="min-h-screen bg-gray-50 py-[150px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+
           {/* Image Gallery */}
           <div className="space-y-4">
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
@@ -128,7 +138,7 @@ const Page = () => {
                 {allImages.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => setSelectedImage(img)}
+                    onClick={() => setSelectedImage(img || '')}
                     className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImage === img ? 'border-blue-600' : 'border-gray-200'
                     }`}
@@ -235,29 +245,29 @@ const Page = () => {
                   <Truck className="w-10 h-10 mx-auto mb-2 text-blue-600" />
                   <p className="text-sm font-medium">Free Shipping</p>
                 </div>
-                    <div className="text-center">
-                <CalendarClock  className="w-10 h-10 mx-auto mb-2 text-blue-600" />
-                <p className="text-sm font-medium">30 Days Return</p>
+                <div className="text-center">
+                  <CalendarClock className="w-10 h-10 mx-auto mb-2 text-blue-600" />
+                  <p className="text-sm font-medium">30 Days Return</p>
                 </div>
                 <div className="text-center">
                   <Shield className="w-10 h-10 mx-auto mb-2 text-blue-600" />
                   <p className="text-sm font-medium">Secure Payment</p>
                 </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="bg-white rounded-xl p-6 shadow">
-                <h3 className="text-xl font-semibold mb-4">Description</h3>
-                <div
-                  className="prose prose-sm text-gray-600"
-                  dangerouslySetInnerHTML={{ __html: product.content || product.description }}
-                />
               </div>
             </div>
+
+            {/* Description */}
+            <div className="bg-white rounded-xl p-6 shadow">
+              <h3 className="text-xl font-semibold mb-4">Description</h3>
+              <div
+                className="prose prose-sm text-gray-600"
+                dangerouslySetInnerHTML={{ __html: product.content || product.description }}
+              />
+            </div>
+
           </div>
         </div>
-      
+      </div>
     </main>
   );
 };
