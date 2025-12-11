@@ -86,27 +86,27 @@ export default function AddProduct() {
   // ---------------------------------------------------
   // CREATE PRODUCT API
   // ---------------------------------------------------
-  const createProduct = async () => {
-    const fd = new FormData();
+const createProduct = async () => {
+  const fd = new FormData();
 
-    Object.entries(formData).forEach(([key, val]) => {
-      if (key === "gallery" && Array.isArray(val)) {
-        val.forEach((file) => fd.append("gallery", file));
-      } else if (key === "mainImage" && val) {
-        fd.append("mainImage", val);
-      } else {
-        fd.append(key, val as any);
-      }
-    });
-
-    fd.append("attributes", JSON.stringify(attributes));
-
-    const res = await dispatch(CreateProduct(fd));
-
-    if (res.payload?.product?._id) {
-      setProductId(res.payload.product._id);
+  Object.entries(formData).forEach(([key, val]) => {
+    if (key === 'gallery' && Array.isArray(val)) {
+      val.forEach((file) => fd.append('gallery', file));
+    } else if (key === 'mainImage' && val instanceof File) {
+      fd.append('mainImage', val);
+    } else if (key === 'attributes') {
+      fd.append('attributes', JSON.stringify(val));
+    } else if (typeof val === 'string') {
+      fd.append(key, val);
     }
-  };
+  });
+
+  // optional – if you want to send variations immediately
+  // fd.append('variations', JSON.stringify(variations));
+
+  const res = await dispatch(CreateProduct(fd));
+  if (res.payload?.product?._id) setProductId(res.payload.product._id);
+};
 
   // ---------------------------------------------------
   // VARIATIONS

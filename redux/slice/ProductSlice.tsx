@@ -73,27 +73,30 @@ const initialState: ProductState = {
 
 
 
+// change the thunk signature
 export const CreateProduct = createAsyncThunk(
   'product/create',
-  async (formData: CreateProductInput, { rejectWithValue }) => {
+  async (formData: FormData, { rejectWithValue }) => {   // <-- FormData instead of CreateProductInput
     try {
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',
-          'x-api-key': API_KEY,
+          'x-api-key': API_KEY!,
         },
         withCredentials: true,
       };
 
-      const response = await axios.post(`${API_URL}/api/product/create`, formData, config);
-
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Something went wrong');
+      const { data } = await axios.post(
+        `${API_URL}/api/product/create`,
+        formData,
+        config
+      );
+      return data;          // must return { product: Product, message?: string }
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Something went wrong');
     }
   }
 );
-
 
 
 
