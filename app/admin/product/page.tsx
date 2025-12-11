@@ -87,10 +87,10 @@ export default function Page() {
             </div>
 
             <ProductForm
-              product={singleProduct}
-              editingId={editingId}
-              onClose={() => setShowProductForm(false)}
-              onOpenVariations={(id: string) => openVariations(id)}
+              // product={singleProduct}
+              // editingId={editingId}
+              // onClose={() => setShowProductForm(false)}
+              // onOpenVariations={(id: string) => openVariations(id)}
             />
           </motion.div>
         </div>

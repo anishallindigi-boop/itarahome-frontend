@@ -13,6 +13,7 @@ import { RootState } from "@/redux/store";
 import Editor from "@/lib/Editor";
 import { Content } from "next/font/google";
 
+
 type AttributeValue = { value: string };
 type Attribute = { name: string; values: AttributeValue[] };
 type Variation = {
