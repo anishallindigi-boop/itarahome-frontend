@@ -14,7 +14,7 @@ export default function Products() {
     (state: RootState) => state.product
   );
 
-  console.log(products,"products")
+
   useEffect(() => {
     dispatch(GetProducts());
   }, [dispatch]);

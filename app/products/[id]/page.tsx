@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { resetState, getsingleproductbyslug } from '@/redux/slice/ProductSlice';
+import { addToCart } from '@/redux/slice/CartItemSlice';
 import { RootState } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { useParams } from 'next/navigation';
@@ -37,11 +38,30 @@ const Page = () => {
     loading: boolean; error: string | null; singleProduct: Payload | null;
   };
 
+
+  const {message} = useAppSelector((state: RootState) => state.usercart)
+
+const productId=singleProduct?.product._id
+
+
+
+
   /* ---------- local state ---------- */
   const [selectedAttr, setSelectedAttr] = useState<Record<string, string>>({});
   const [activeImg, setActiveImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [liked, setLiked] = useState(false);
+
+
+//----------add cart itrm----------
+
+const addcartitem=()=>{
+  if(productId){
+
+    dispatch(addToCart({productId,quantity}))
+  }
+}
+
 
   /* ---------- fetch ---------- */
   useEffect(() => {
@@ -173,7 +193,9 @@ const Page = () => {
             <Button
               size="lg"
               className="flex-1 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
-              disabled={!selectedVariation || (selectedVariation.stock ?? 0) <= 0}
+              // disabled={!selectedVariation || (selectedVariation.stock ?? 0) <= 0}
+onClick={addcartitem}
+
             >
               <ShoppingCart className="w-5 h-5 mr-2" />
               Add to Cart
