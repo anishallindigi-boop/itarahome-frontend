@@ -114,12 +114,12 @@ const addcartitem=()=>{
         {/* ---------- Gallery ---------- */}
         <div className="space-y-4">
           <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg bg-white">
-            <Image
+            <img
               src={`${IMAGE_URL}/${product.gallery?.[activeImg] || product.mainImage}`}
               alt={product.name}
-              fill
+            
               className="object-cover"
-              priority
+             
             />
           </div>
           <div className="flex gap-3 overflow-x-auto">
@@ -129,7 +129,7 @@ const addcartitem=()=>{
                 onClick={() => setActiveImg(idx)}
                 className={`relative w-24 h-24 shrink-0 rounded-xl overflow-hidden ring-4 transition ${activeImg === idx ? 'ring-indigo-500' : 'ring-transparent hover:ring-indigo-300'}`}
               >
-                <Image src={`${IMAGE_URL}/${img}`} alt="" fill className="object-cover" />
+                <img src={`${IMAGE_URL}/${img}`} alt=""  className="object-cover" />
               </button>
             ))}
           </div>
