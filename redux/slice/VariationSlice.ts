@@ -14,7 +14,7 @@ export type Variation = {
   sellingPrice: number;
   stock: number;
   attributes: Record<string, string>;
- image?: File | null;
+
 };
 
 export interface VariationState {
@@ -58,7 +58,7 @@ export const createVariation = createAsyncThunk<
 
     const config = {
         headers: {
-        //   'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data',
           'x-api-key': API_KEY,
         },
         withCredentials: true,

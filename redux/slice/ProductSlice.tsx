@@ -86,6 +86,7 @@ export const CreateProduct = createAsyncThunk(
   'product/create',
   async (formData: FormData, { rejectWithValue }) => {   // <-- FormData instead of CreateProductInput
     try {
+      console.log(formData,"slice")
       const config = {
         headers: {
           'Content-Type': 'multipart/form-data',

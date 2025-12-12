@@ -22,7 +22,7 @@ type Variation = {
   regularPrice: string;
   salePrice: string;
   stock: string;
-image: File | null; 
+
 };
 
 export default function AddProduct() {
@@ -88,6 +88,8 @@ export default function AddProduct() {
   // CREATE PRODUCT API
   // ---------------------------------------------------
 const createProduct = async () => {
+
+  console.log(formData,"violtaun",addAttribute,variations)
   const fd = new FormData();
 
   Object.entries(formData).forEach(([key, val]) => {
@@ -104,7 +106,8 @@ const createProduct = async () => {
 
   // optional – if you want to send variations immediately
   // fd.append('variations', JSON.stringify(variations));
-
+  // ✅ ADD THIS — Send attributes to backend
+  fd.append("attributes", JSON.stringify(attributes));
   const res = await dispatch(CreateProduct(fd));
   if (res.payload?.product?._id) setProductId(res.payload.product._id);
 };
@@ -124,7 +127,7 @@ const createProduct = async () => {
         regularPrice: "",
         salePrice: "",
         stock: "",
-        image: null
+     
       },
     ]);
   };
@@ -158,7 +161,7 @@ const updateVar = (i: number, key: VariationScalarKeys, value: string) => {
           sellingPrice: Number(v.salePrice),
           stock: Number(v.stock),
           attributes: v.attributes,
-          image: v.image,
+      
         })
       );
     }
@@ -354,13 +357,7 @@ const updateVar = (i: number, key: VariationScalarKeys, value: string) => {
                 onChange={(e) => updateVar(i, "stock", e.target.value)}
               />
 
-              <input
-              type="file"
-                className="border p-2 w-full"
-                placeholder="Image URL"
-            
-                onChange={(e) => updateVar(i, "image", e.target.value)}
-              />
+             
             </div>
           ))}
 

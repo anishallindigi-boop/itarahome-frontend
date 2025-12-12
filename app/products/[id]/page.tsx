@@ -1,274 +1,216 @@
-'use client'
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { resetState, getsingleproductbyslug } from '@/redux/slice/ProductSlice';
 import { RootState } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { useParams } from 'next/navigation';
-import { AlertCircle, Loader2, ShoppingCart, Truck, Shield, CalendarClock } from 'lucide-react';
+import {
+  AlertCircle, Loader2, ShoppingCart, Truck, Shield, CalendarClock,
+  Check, Package, Heart, Share2, Star
+} from 'lucide-react';
 import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
+const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL as string;
+
+/* ---------- types (same as before) ---------- */
+type Attribute = { name: string; values: { value: string; _id: string }[]; _id: string };
+type Variation = {
+  _id: string; sku: string; regularPrice: number; sellingPrice: number; stock: number;
+  attributes: Record<string, string>;
+};
+type Product = {
+  _id: string; name: string; description: string; content: string;
+  price: string; discountPrice: string; stock: number | null;
+  categoryId: { name: string }; attributes: Attribute[]; mainImage: string; gallery: string[];
+  isActive: boolean; slug: string;
+};
+type Payload = { product: Product; variations: Variation[] };
 
 const Page = () => {
   const params = useParams();
   const slug = params?.id as string | undefined;
-
   const dispatch = useAppDispatch();
-  const { loading, error, singleProduct } = useAppSelector((state: RootState) => state.product);
+  const { loading, error, singleProduct } = useAppSelector((state: RootState) => state.product) as {
+    loading: boolean; error: string | null; singleProduct: Payload | null;
+  };
 
-  const [selectedVariation, setSelectedVariation] = useState<any>(null);
-  const [selectedImage, setSelectedImage] = useState<string>(''); // stays string
+  /* ---------- local state ---------- */
+  const [selectedAttr, setSelectedAttr] = useState<Record<string, string>>({});
+  const [activeImg, setActiveImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [liked, setLiked] = useState(false);
 
+  /* ---------- fetch ---------- */
   useEffect(() => {
-    if (slug) {
-      dispatch(getsingleproductbyslug(slug));
-    }
+    if (slug) dispatch(getsingleproductbyslug(slug));
+    return () => { dispatch(resetState()); };
   }, [dispatch, slug]);
 
+  /* ---------- defaults ---------- */
   useEffect(() => {
-    return () => {
-      dispatch(resetState());
-    };
-  }, [dispatch]);
-
-  // Set default variation & image when product loads
-  useEffect(() => {
-    if (singleProduct?.variations && singleProduct.variations.length > 0) {
-      const first = singleProduct.variations[0];
-      setSelectedVariation(first);
-
-      // FIX: Ensure selectedImage never receives undefined
-      setSelectedImage(
-        first.image ||
-        singleProduct.product.mainImage ||
-        ''
-      );
-
-    } else if (singleProduct?.product?.mainImage) {
-
-      setSelectedImage(
-        singleProduct.product.mainImage || ''
-      );
+    if (singleProduct?.product?.attributes?.length) {
+      const defaults: Record<string, string> = {};
+      singleProduct.product.attributes.forEach(a => {
+        if (a.values?.[0]?.value) defaults[a.name] = a.values[0].value;
+      });
+      setSelectedAttr(defaults);
     }
   }, [singleProduct]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600 font-medium">Loading product...</p>
-        </div>
-      </div>
+  /* ---------- variation ---------- */
+  const selectedVariation = React.useMemo(() => {
+    if (!singleProduct?.variations?.length) return null;
+    return singleProduct.variations.find(v =>
+      Object.entries(selectedAttr).every(([k, val]) => v.attributes[k] === val)
     );
-  }
+  }, [singleProduct, selectedAttr]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-        <div className="max-w-lg w-full">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Product</h2>
-            <p className="text-red-600 mb-6">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  /* ---------- price ---------- */
+  const finalPrice = selectedVariation?.sellingPrice || Number(singleProduct?.product?.discountPrice) || Number(singleProduct?.product?.price);
+  const ogPrice    = selectedVariation?.regularPrice  || Number(singleProduct?.product?.price);
+  const discount   = ogPrice && finalPrice && ogPrice > finalPrice ? Math.round(((ogPrice - finalPrice) / ogPrice) * 100) : 0;
 
-  if (!singleProduct) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-500 text-lg">Product not found</p>
-        </div>
-      </div>
-    );
-  }
+  /* ---------- loading / error ---------- */
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-rose-50">
+      <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+    </div>
+  );
+  if (error || !singleProduct) return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <AlertCircle className="w-12 h-12 text-rose-500" />
+      <p className="text-lg">Product not found or an error occurred.</p>
+    </div>
+  );
 
-  const product = singleProduct.product;
-  const variations = singleProduct.variations || [];
-
-  const allImages = Array.from(new Set([
-    product.mainImage,
-    ...(product.gallery || []),
-    ...variations.map((v: any) => v.image).filter(Boolean)
-  ]));
-
-  const handleVariationChange = (sizeValue: string) => {
-    const variation = variations.find((v: any) => v.attributes.size === sizeValue);
-    if (variation) {
-      setSelectedVariation(variation);
-      setSelectedImage(variation.image || product.mainImage || '');
-    }
-  };
-
-  const finalPrice = selectedVariation?.sellingPrice ?? product.price;
-  const originalPrice = selectedVariation?.regularPrice ?? product.discountPrice ?? product.price;
-  const hasDiscount = finalPrice < originalPrice;
+  const { product } = singleProduct;
 
   return (
-    <main className="min-h-screen bg-gray-50 py-[150px]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-rose-50 py-[100px]">
+      <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-10">
+        {/* ---------- Gallery ---------- */}
+        <div className="space-y-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden shadow-lg bg-white">
+            <Image
+              src={`${IMAGE_URL}/${product.gallery?.[activeImg] || product.mainImage}`}
+              alt={product.name}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+          <div className="flex gap-3 overflow-x-auto">
+            {[product.mainImage, ...(product.gallery || [])].map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImg(idx)}
+                className={`relative w-24 h-24 shrink-0 rounded-xl overflow-hidden ring-4 transition ${activeImg === idx ? 'ring-indigo-500' : 'ring-transparent hover:ring-indigo-300'}`}
+              >
+                <Image src={`${IMAGE_URL}/${img}`} alt="" fill className="object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* Image Gallery */}
-          <div className="space-y-4">
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-white shadow-lg">
-              <Image
-                src={`${IMAGE_URL}/${selectedImage}`}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-              />
+        {/* ---------- Details ---------- */}
+        <div className="flex flex-col gap-5">
+          <div>
+            <p className="text-sm font-medium text-indigo-600 mb-1">itarahome</p>
+            <h1 className="text-4xl font-bold text-stone-800">{product.name}</h1>
+            <div className="flex items-center gap-2 mt-2">
+              {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-500" />)}
+              <span className="text-sm text-stone-500">(4.9 / 5)</span>
             </div>
+          </div>
 
-            {/* Thumbnails */}
-            {allImages.length > 1 && (
-              <div className="grid grid-cols-5 gap-3">
-                {allImages.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedImage(img || '')}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === img ? 'border-blue-600' : 'border-gray-200'
-                    }`}
-                  >
-                    <Image
-                      src={`${IMAGE_URL}/${img}`}
-                      alt={`thumb ${i + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
+          <div className="flex items-baseline gap-3">
+            <span className="text-4xl font-bold text-indigo-600">₹{finalPrice}</span>
+            {discount > 0 && (
+              <>
+                <span className="text-xl text-stone-400 line-through">₹{ogPrice}</span>
+                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-semibold">{discount}% off</span>
+              </>
             )}
           </div>
 
-          {/* Product Details */}
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">{product.name}</h1>
 
-              {/* Price */}
-              <div className="flex items-baseline gap-4 mb-6">
-                <span className="text-4xl font-bold text-blue-600">₹{finalPrice}</span>
-                {hasDiscount && (
-                  <>
-                    <span className="text-2xl text-gray-500 line-through">₹{originalPrice}</span>
-                    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-bold">
-                      {Math.round(((originalPrice - finalPrice) / originalPrice) * 100)}% OFF
-                    </span>
-                  </>
-                )}
-              </div>
-
-              {/* Size Selector */}
-              {product.attributes?.[0]?.values?.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3">Select Size</h3>
-                  <div className="flex gap-3">
-                    {product.attributes[0].values.map((size: any) => {
-                      const available = variations.some((v: any) => v.attributes.size === size.value && v.stock > 0);
-                      const isSelected = selectedVariation?.attributes?.size === size.value;
-
-                      return (
-                        <button
-                          key={size._id}
-                          onClick={() => handleVariationChange(size.value)}
-                          disabled={!available}
-                          className={`w-16 h-16 rounded-lg border-2 font-medium transition-all ${
-                            isSelected
-                              ? 'border-blue-600 bg-blue-50 text-blue-700'
-                              : available
-                              ? 'border-gray-300 hover:border-gray-400'
-                              : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                          }`}
-                        >
-                          {size.value.toUpperCase()}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Stock */}
-              <p className="text-green-600 font-medium mb-6">
-                {selectedVariation?.stock ?? product.stock} piece{selectedVariation?.stock > 1 ? 's' : ''} in stock
-              </p>
-
-              {/* Quantity */}
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-3">Quantity</h3>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-12 h-12 rounded-lg border border-gray-300 hover:bg-gray-100 text-xl"
-                  >
-                    −
-                  </button>
-                  <span className="text-xl font-bold w-16 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-12 h-12 rounded-lg border border-gray-300 hover:bg-gray-100 text-xl"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex gap-4 mb-8">
-                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3">
-                  <ShoppingCart className="w-6 h-6" />
-                  Add to Cart
-                </button>
-                <button className="bg-black hover:bg-gray-800 text-white font-bold py-4 px-10 rounded-xl transition">
-                  Buy Now
-                </button>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="grid grid-cols-3 gap-6 py-6 border-t border-gray-200">
-                <div className="text-center">
-                  <Truck className="w-10 h-10 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm font-medium">Free Shipping</p>
-                </div>
-                <div className="text-center">
-                  <CalendarClock className="w-10 h-10 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm font-medium">30 Days Return</p>
-                </div>
-                <div className="text-center">
-                  <Shield className="w-10 h-10 mx-auto mb-2 text-blue-600" />
-                  <p className="text-sm font-medium">Secure Payment</p>
-                </div>
+<p>{product.description}</p>
+          {/* attributes – button style */}
+          {product.attributes?.map(attr => (
+            <div key={attr._id} className="grid gap-3">
+              <label className="text-sm font-semibold text-stone-700 flex items-center gap-2">
+                <Package className="w-4 h-4 text-indigo-500" />
+                {attr.name}
+              </label>
+              <div className="flex flex-wrap gap-3">
+                {attr.values.map(v => {
+                  const active = selectedAttr[attr.name] === v.value;
+                  return (
+                    <button
+                      key={v._id}
+                      onClick={() => setSelectedAttr(prev => ({ ...prev, [attr.name]: v.value }))}
+                      className={`relative px-4 py-2 rounded-xl border-2 transition-all ${active ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-stone-200 bg-white hover:border-indigo-300'}`}
+                    >
+                      {v.value}
+                      {active && <Check className="inline-block w-4 h-4 ml-2" />}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          ))}
 
-            {/* Description */}
-            <div className="bg-white rounded-xl p-6 shadow">
-              <h3 className="text-xl font-semibold mb-4">Description</h3>
-              <div
-                className="prose prose-sm text-gray-600"
-                dangerouslySetInnerHTML={{ __html: product.content || product.description }}
-              />
+          {/* qty + cta */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center border rounded-xl bg-white">
+              <button className="px-4 py-2" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+              <span className="px-5 font-semibold">{quantity}</span>
+              <button className="px-4 py-2" onClick={() => setQuantity(q => q + 1)}>+</button>
             </div>
-
+            <Button
+              size="lg"
+              className="flex-1 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              disabled={!selectedVariation || (selectedVariation.stock ?? 0) <= 0}
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Add to Cart
+            </Button>
+            <button
+              onClick={() => setLiked(p => !p)}
+              className="p-3 rounded-xl border-2 border-stone-200 bg-white hover:border-rose-300 transition"
+            >
+              <Heart className={`w-5 h-5 ${liked ? 'fill-rose-500 text-rose-500' : 'text-stone-400'}`} />
+            </button>
+            <button className="p-3 rounded-xl border-2 border-stone-200 bg-white hover:border-indigo-300 transition">
+              <Share2 className="w-5 h-5 text-stone-600" />
+            </button>
           </div>
+
+          {/* perks */}
+          <div className="grid grid-cols-3 gap-3 text-xs text-stone-600">
+            <Card className="p-3 flex items-center gap-2 bg-white shadow-sm"><Truck className="w-4 h-4 text-indigo-500" />Free shipping</Card>
+            <Card className="p-3 flex items-center gap-2 bg-white shadow-sm"><Shield className="w-4 h-4 text-indigo-500" />Secure checkout</Card>
+            <Card className="p-3 flex items-center gap-2 bg-white shadow-sm"><CalendarClock className="w-4 h-4 text-indigo-500" />Easy returns</Card>
+          </div>
+
+ 
+
+          {/* stock */}
+          <p className="text-sm text-stone-600">
+            Stock: <span className="font-semibold">{(selectedVariation?.stock ?? product.stock ?? 0) > 0 ? 'In stock' : 'Out of stock'}</span>
+          </p>
         </div>
       </div>
-    </main>
+       <div className='max-w-7xl mx-auto'>
+                {/* description */}
+          <Card className="p-5 bg-white shadow-sm">
+            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: product.content }} />
+          </Card>
+       </div>
+    </div>
   );
 };
 
