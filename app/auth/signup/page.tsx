@@ -18,7 +18,6 @@ export default function Page() {
     name: "",
     email: "",
     phone: "",
-    password: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +44,7 @@ export default function Page() {
         <input name="name" placeholder="Name" value={form.name} onChange={handleChange} required className="w-full p-3 border rounded" />
         <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required className="w-full p-3 border rounded" />
         <input name="phone" placeholder="Phone" value={form.phone} onChange={handleChange} required className="w-full p-3 border rounded" />
-        <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required className="w-full p-3 border rounded" />
+    
         <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white p-3 rounded">{loading ? "Creating..." : "Sign Up"}</button>
       </form>
     </section>

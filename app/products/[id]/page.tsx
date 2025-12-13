@@ -5,7 +5,7 @@ import { resetState, getsingleproductbyslug } from '@/redux/slice/ProductSlice';
 import { addToCart } from '@/redux/slice/CartItemSlice';
 import { RootState } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { useParams } from 'next/navigation';
+import { useParams,useRouter } from 'next/navigation';
 import {
   AlertCircle, Loader2, ShoppingCart, Truck, Shield, CalendarClock,
   Check, Package, Heart, Share2, Star
@@ -13,6 +13,7 @@ import {
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import LoginPopup from '@/app/elements/LoginPopup';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL as string;
 
@@ -34,17 +35,24 @@ const Page = () => {
   const params = useParams();
   const slug = params?.id as string | undefined;
   const dispatch = useAppDispatch();
+  const router=useRouter()
   const { loading, error, singleProduct } = useAppSelector((state: RootState) => state.product) as {
     loading: boolean; error: string | null; singleProduct: Payload | null;
   };
 
 
-  const {message} = useAppSelector((state: RootState) => state.usercart)
+  const [showLogin, setShowLogin] = useState(false);
+
+    const { isAuthenticated} = useAppSelector(
+      (state: RootState) => state.auth
+    );
+
+  const {message,success} = useAppSelector((state: RootState) => state.usercart)
 
 const productId=singleProduct?.product._id
 
 
-
+console.log(isAuthenticated,"is",success)
 
   /* ---------- local state ---------- */
   const [selectedAttr, setSelectedAttr] = useState<Record<string, string>>({});
@@ -55,12 +63,28 @@ const productId=singleProduct?.product._id
 
 //----------add cart itrm----------
 
-const addcartitem=()=>{
-  if(productId){
-
-    dispatch(addToCart({productId,quantity}))
+const addcartitem = () => {
+  if (!isAuthenticated) {
+    setShowLogin(true);
+    return;
   }
-}
+
+  if (productId) {
+    dispatch(addToCart({ productId, quantity }));
+  }
+
+};
+
+
+useEffect(() => {
+  if (isAuthenticated && showLogin && productId) {
+    dispatch(addToCart({ productId, quantity }));
+    setShowLogin(false);
+  }
+  if(success){
+    router.push('/cart')
+  }
+}, [isAuthenticated,success]);
 
 
   /* ---------- fetch ---------- */
@@ -218,7 +242,7 @@ onClick={addcartitem}
             <Card className="p-3 flex items-center gap-2 bg-white shadow-sm"><CalendarClock className="w-4 h-4 text-indigo-500" />Easy returns</Card>
           </div>
 
- 
+ {showLogin && <LoginPopup />}
 
           {/* stock */}
           <p className="text-sm text-stone-600">

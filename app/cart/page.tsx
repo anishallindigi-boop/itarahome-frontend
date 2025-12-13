@@ -74,14 +74,15 @@ export default function CartPage() {
     );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-10">
+    <div className="max-w-5xl mx-auto px-4 py-[100px]">
       <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
 
       <div className="grid md:grid-cols-3 gap-6">
         {/* ---------- items list ---------- */}
         <div className="md:col-span-2 space-y-4">
           {items.map((it) => (
-            <Card key={it.cartId} className="flex gap-4 p-4">
+            <Card key={it.cartId} className="gap-4 p-4">
+              <div className='flex gap-6'>
               <Image
                 src={`${IMAGE_URL}/${it.image}`}
                 alt={it.name}
@@ -122,6 +123,7 @@ export default function CartPage() {
                 >
                   <Trash2 className="w-4 h-4 text-rose-600" />
                 </Button>
+              </div>
               </div>
             </Card>
           ))}

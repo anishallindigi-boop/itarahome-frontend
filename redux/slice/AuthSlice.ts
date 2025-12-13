@@ -41,7 +41,7 @@ const initialState: AuthState = {
 // 1. Register
 export const createuser = createAsyncThunk<
   { message: string },
-  { name: string; email: string; phone: string; password: string },
+  { name: string; email: string; phone: string; },
   { rejectValue: string }
 >("auth/register", async (payload, { rejectWithValue }) => {
   try {
@@ -73,7 +73,7 @@ export const sendOTP = createAsyncThunk<
 
 // 3. Verify OTP (login)
 export const verifyotp = createAsyncThunk<
-  { message: string },
+  { message: string; user: Auth },
   { phone: string; otp: string },
   { rejectValue: string }
 >("auth/verifyotp", async ({ phone, otp }, { rejectWithValue }) => {
@@ -118,7 +118,9 @@ export const logoutuser = createAsyncThunk<
     const res = await axios.post(
       `${API_URL}/api/auth/logout`,
       {},
-      { withCredentials: true }
+      { withCredentials: true ,
+          headers: { "x-api-key": API_KEY },
+      }
     );
     return res.data;
   } catch (err: any) {
@@ -183,12 +185,14 @@ export const AuthSlice = createSlice({
         state.error = null;
         state.isOTPVerified = false;
       })
-      .addCase(verifyotp.fulfilled, (state, action) => {
-        state.loading = false;
-        state.message = action.payload.message;
-        state.isAuthenticated = true;
-        state.isOTPVerified = true;
-      })
+ .addCase(verifyotp.fulfilled, (state, action) => {
+  state.loading = false;
+  state.message = action.payload.message;
+  state.user = action.payload.user;      // ✅ ADD THIS
+  state.isAuthenticated = true;
+  state.isOTPVerified = true;
+})
+
       .addCase(verifyotp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Invalid OTP";

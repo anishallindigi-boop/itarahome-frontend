@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, User, Search } from 'lucide-react';
+import { Menu, X, ChevronDown, User, Search, LogOut, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -10,6 +10,11 @@ import { getCartItems } from '@/redux/slice/CartItemSlice';
 import { RootState } from '@/redux/store';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { CartPopover } from './CartPopover';
+import { logoutuser ,resetState} from '@/redux/slice/AuthSlice';
+import LoginPopup from './LoginPopup';
+import { useRouter } from 'next/navigation';
+
+import { toast } from "sonner"
 
 /* ---------- one-time helper ---------- */
 const useOnce = (fn: () => void) => {
@@ -24,10 +29,17 @@ const useOnce = (fn: () => void) => {
 
 /* ---------- component ---------- */
 export default function HeaderImproved() {
+  const router = useRouter();
+
   const [open, setOpen] = React.useState(false);
   const [active, setActive] = React.useState<string | null>(null);
+  const [showLogin, setShowLogin] = React.useState(false);
+  const [showProfile, setShowProfile] = React.useState(false);
 
   const dispatch = useAppDispatch();
+
+  const { isAuthenticated, user,message ,error} = useAppSelector(
+    (state: RootState) => state.auth)
 
   /* ---------- fetch cart once ---------- */
   useOnce(() => dispatch(getCartItems()));
@@ -35,9 +47,9 @@ export default function HeaderImproved() {
   
   /* ---------- read & flatten cart ---------- */
 
-    const {message,cart} = useAppSelector((state: RootState) => state.usercart)
+    const {cart} = useAppSelector((state: RootState) => state.usercart)
 
-    console.log(cart,"cart")
+
 const cartitems = React.useMemo(
   () =>
     (cart || []).map((c: any) => ({
@@ -49,6 +61,31 @@ const cartitems = React.useMemo(
     })),
   [cart]
 );
+
+
+
+  /* ---------- handlers ---------- */
+  const handleUserClick = () => {
+    if (!isAuthenticated) {
+      setShowLogin(true);
+      return;
+    }
+    setShowProfile((p) => !p);
+  };
+
+  React.useEffect(() => {
+    if (isAuthenticated) setShowLogin(false);
+  }, [isAuthenticated]);
+
+
+React.useEffect(() => {
+  if (message) {
+    toast.success(message);
+    dispatch(resetState());
+  }
+}, [message]);
+
+
     
   const menu = [
     { label: 'Home', href: '/' },
@@ -92,12 +129,65 @@ const cartitems = React.useMemo(
 
         {/* RIGHT */}
         <div className="flex items-center gap-3 justify-end w-1/3">
-          <Button variant="ghost" size="icon">
-            <User className="w-5 h-5" />
-          </Button>
+        <div className="relative">
+         <Button variant="ghost" size="icon" onClick={handleUserClick}>
+              <User className="w-5 h-5" />
+            </Button>
+
+            {/* PROFILE DROPDOWN */}
+            <AnimatePresence>
+              {isAuthenticated && showProfile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-[10001]"
+                >
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm font-semibold">
+                      {user?.name || 'My Account'}
+                    </p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </div>
+
+                  <Link
+                    href="/profile"
+                    onClick={() => setShowProfile(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <User size={16} /> Profile
+                  </Link>
+
+                  <Link
+                    href="/orders"
+                    onClick={() => setShowProfile(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <Package size={16} /> Orders
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      dispatch(logoutuser());
+                      setShowProfile(false);
+                      router.refresh();
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           <CartPopover items={cartitems} />
         </div>
       </header>
+
+
+
+         {/* ================= LOGIN POPUP ================= */}
+      {showLogin && <LoginPopup />}
 
       {/* Drawer remains identical */}
 

@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       },
           {
         protocol: 'https',
-        hostname: 'itarahome.2xinvestor.in',
+        hostname: 'sitarahome-backend-production.up.railway.app',
         pathname: '/uploads/**',
       },
     ],

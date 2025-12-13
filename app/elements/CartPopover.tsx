@@ -22,7 +22,7 @@ export type CartItem = {
 
 export function CartPopover({ items }: { items: CartItem[] }) {
   /* guard + debug */
-console.log(items,"items")
+
 
   if (!Array.isArray(items)) return null;
 
