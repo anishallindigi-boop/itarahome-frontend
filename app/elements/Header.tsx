@@ -151,7 +151,7 @@ React.useEffect(() => {
                   </div>
 
                   <Link
-                    href="/profile"
+                    href="/dashboard/profile"
                     onClick={() => setShowProfile(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
                   >
@@ -159,7 +159,7 @@ React.useEffect(() => {
                   </Link>
 
                   <Link
-                    href="/orders"
+                    href="/dashboard/orders"
                     onClick={() => setShowProfile(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
                   >

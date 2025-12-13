@@ -16,7 +16,7 @@ import {
 } from '@/redux/slice/CartItemSlice';
 import { useOnce } from '@/lib/useOnce';
 
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL as string;
+const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
 
 /* ---------- flatten shape ---------- */
 type TCartRec = {
@@ -83,7 +83,7 @@ export default function CartPage() {
           {items.map((it) => (
             <Card key={it.cartId} className="gap-4 p-4">
               <div className='flex gap-6'>
-              <Image
+              <img
                 src={`${IMAGE_URL}/${it.image}`}
                 alt={it.name}
                 width={96}
