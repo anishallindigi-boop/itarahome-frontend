@@ -68,7 +68,7 @@ export const getCartItems = createAsyncThunk(
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async (
-    { productId, quantity,productvariationid }: { productId: string; quantity: number,productvariationid:string },
+    { productId, quantity,productvariationid }: { productId: string; quantity: number,productvariationid?:string },
     { rejectWithValue }
   ) => {
     try {
