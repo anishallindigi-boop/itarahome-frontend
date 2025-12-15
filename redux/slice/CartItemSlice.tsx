@@ -9,6 +9,7 @@ interface CartItem {
   _id?: string;
   productId: string;
   quantity: number;
+  productvariationid:string
   message?: string;
 }
 
@@ -67,11 +68,12 @@ export const getCartItems = createAsyncThunk(
 export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async (
-    { productId, quantity }: { productId: string; quantity: number },
+    { productId, quantity,productvariationid }: { productId: string; quantity: number,productvariationid:string },
     { rejectWithValue }
   ) => {
     try {
 
+      console.log(productId,quantity,productvariationid)
           const config = {
       headers: {
         // 'Content-Type': 'multipart/form-data',
@@ -83,6 +85,7 @@ export const addToCart = createAsyncThunk(
   
         productId,
         quantity,
+        productvariationid
       },config);
       return res.data;
     } catch (err: any) {

@@ -52,7 +52,6 @@ const Page = () => {
 const productId=singleProduct?.product._id
 
 
-console.log(isAuthenticated,"is",success)
 
   /* ---------- local state ---------- */
   const [selectedAttr, setSelectedAttr] = useState<Record<string, string>>({});
@@ -63,28 +62,6 @@ console.log(isAuthenticated,"is",success)
 
 //----------add cart itrm----------
 
-const addcartitem = () => {
-  if (!isAuthenticated) {
-    setShowLogin(true);
-    return;
-  }
-
-  if (productId) {
-    dispatch(addToCart({ productId, quantity }));
-  }
-
-};
-
-
-useEffect(() => {
-  if (isAuthenticated && showLogin && productId) {
-    dispatch(addToCart({ productId, quantity }));
-    setShowLogin(false);
-  }
-  if(success){
-    router.push('/cart')
-  }
-}, [isAuthenticated,success]);
 
 
   /* ---------- fetch ---------- */
@@ -112,10 +89,49 @@ useEffect(() => {
     );
   }, [singleProduct, selectedAttr]);
 
+
+const productvariationid = selectedVariation?._id || null;
+
+
   /* ---------- price ---------- */
   const finalPrice = selectedVariation?.sellingPrice || Number(singleProduct?.product?.discountPrice) || Number(singleProduct?.product?.price);
   const ogPrice    = selectedVariation?.regularPrice  || Number(singleProduct?.product?.price);
   const discount   = ogPrice && finalPrice && ogPrice > finalPrice ? Math.round(((ogPrice - finalPrice) / ogPrice) * 100) : 0;
+
+
+
+
+const addcartitem = () => {
+  if (!isAuthenticated) {
+    setShowLogin(true);
+    return;
+  }
+
+  if (productId) {
+    dispatch(addToCart({ productId, quantity,productvariationid}));
+  }
+
+};
+
+
+useEffect(() => {
+  if (isAuthenticated && showLogin && productId) {
+    dispatch(addToCart({ productId, quantity,productvariationid}));
+    setShowLogin(false);
+  }
+  if(success){
+    router.push('/cart')
+  }
+}, [isAuthenticated,success]);
+
+
+
+
+
+
+
+
+
 
   /* ---------- loading / error ---------- */
   if (loading) return (
@@ -218,6 +234,7 @@ useEffect(() => {
               size="lg"
               className="flex-1 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
               // disabled={!selectedVariation || (selectedVariation.stock ?? 0) <= 0}
+               disabled={!!singleProduct?.variations?.length && !productvariationid}
 onClick={addcartitem}
 
             >

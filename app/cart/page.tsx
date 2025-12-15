@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
-import Image from 'next/image';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Trash2, Plus, Minus, Trash } from 'lucide-react';
+import { Minus, Plus, Trash2, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -18,61 +17,86 @@ import { useOnce } from '@/lib/useOnce';
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
 
-type TCartRec = {
-  _id: string;
-  productId: {
-    _id: string;
-    name: string;
-    mainImage: string;
-    discountPrice: number | string;
-    price: number | string;
-  };
-  quantity: number;
+/* ---------------- TYPE ---------------- */
+type CartResolvedItem = {
+  cartId: string;
+  productId: string;
+  variationId: string | null;
+  name: string;
+  image: string;
+  price: number;
+  qty: number;
+  stock: number | null;
+  attributes: Record<string, string>;
 };
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
-  const rawCart = useAppSelector((s) => (s as any).usercart.cart) as TCartRec[] | undefined;
+  const rawCart = useAppSelector(
+    (s: any) => s.usercart.cart
+  ) as any[] | undefined;
 
   useOnce(() => dispatch(getCartItems()));
 
-  const [loadingItems, setLoadingItems] = useState<string[]>([]); // track item-level loading
-  const [loadingClear, setLoadingClear] = useState(false); // track clearing cart
+  const [loadingItems, setLoadingItems] = useState<string[]>([]);
+  const [loadingClear, setLoadingClear] = useState(false);
 
-  const items = React.useMemo(
-    () =>
-      (rawCart || []).map((c) => ({
+  /* ---------------- RESOLVE CART (IMPORTANT) ---------------- */
+  const items: CartResolvedItem[] = useMemo(() => {
+    return (rawCart || []).map((c) => {
+      const hasVariation = !!c.productvariationid;
+
+      return {
         cartId: c._id,
         productId: c.productId._id,
+        variationId: hasVariation ? c.productvariationid._id : null,
+
         name: c.productId.name,
         image: c.productId.mainImage,
-        qty: c.quantity,
-        price: Number(c.productId.discountPrice || c.productId.price),
-      })),
-    [rawCart]
-  );
 
-  /* ---------- handlers ---------- */
-  const changeQty = async (cartId: string, qty: number) => {
-    setLoadingItems((prev) => [...prev, cartId]);
+        price: hasVariation
+          ? Number(c.productvariationid.sellingPrice)
+          : Number(c.productId.discountPrice || c.productId.price),
+
+        stock: hasVariation
+          ? c.productvariationid.stock
+          : c.productId.stock ?? null,
+
+        attributes: hasVariation
+          ? c.productvariationid.attributes || {}
+          : {},
+
+        qty: c.quantity,
+      };
+    });
+  }, [rawCart]);
+
+  /* ---------------- HANDLERS ---------------- */
+  const changeQty = async (cartId: string, qty: number, stock: number | null) => {
+    if (stock !== null && qty > stock) return;
+
+    setLoadingItems((p) => [...p, cartId]);
     try {
-      if (qty <= 0) await dispatch(removeCartItem(cartId));
-      else await dispatch(updateCartQuantity({ cartId, quantity: qty }));
+      if (qty <= 0) {
+        await dispatch(removeCartItem(cartId));
+      } else {
+        await dispatch(updateCartQuantity({ cartId, quantity: qty }));
+      }
     } finally {
-      setLoadingItems((prev) => prev.filter((id) => id !== cartId));
+      setLoadingItems((p) => p.filter((id) => id !== cartId));
     }
   };
 
-  const remove = async (cartId: string) => {
-    setLoadingItems((prev) => [...prev, cartId]);
+  const removeItem = async (cartId: string) => {
+    setLoadingItems((p) => [...p, cartId]);
     try {
       await dispatch(removeCartItem(cartId));
     } finally {
-      setLoadingItems((prev) => prev.filter((id) => id !== cartId));
+      setLoadingItems((p) => p.filter((id) => id !== cartId));
     }
   };
 
-  const clear = async () => {
+  const clearAll = async () => {
     setLoadingClear(true);
     try {
       await dispatch(clearCart());
@@ -81,12 +105,17 @@ export default function CartPage() {
     }
   };
 
-  /* ---------- totals ---------- */
-  const subTotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+  /* ---------------- TOTALS ---------------- */
+  const subTotal = items.reduce(
+    (sum, i) => sum + i.price * i.qty,
+    0
+  );
+
   const shipping = 0;
   const total = subTotal + shipping;
 
-  if (!items || items.length === 0)
+  /* ---------------- EMPTY ---------------- */
+  if (!items.length) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <p className="text-xl">Your cart is empty</p>
@@ -95,61 +124,87 @@ export default function CartPage() {
         </Link>
       </div>
     );
+  }
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="max-w-5xl mx-auto px-4 py-[100px]">
       <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
 
       <div className="grid md:grid-cols-3 gap-6">
-        {/* ---------- items list ---------- */}
+        {/* ITEMS */}
         <div className="md:col-span-2 space-y-4">
           {items.map((it) => {
             const isLoading = loadingItems.includes(it.cartId);
+
             return (
-              <Card key={it.cartId} className="gap-4 p-4 opacity-90 hover:opacity-100 transition">
+              <Card key={it.cartId} className="p-4">
                 <div className="flex gap-6">
                   <img
                     src={`${IMAGE_URL}/${it.image}`}
                     alt={it.name}
-                    width={96}
-                    height={96}
-                    className="rounded-lg object-cover"
+                    className="w-24 h-24 rounded object-cover"
                   />
+
                   <div className="flex-1">
                     <p className="font-semibold">{it.name}</p>
-                    <p className="text-sm text-muted-foreground">₹{it.price}</p>
 
-                    {/* qty changer */}
+                    {/* VARIATION ATTRIBUTES */}
+                    {Object.keys(it.attributes).length > 0 && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {Object.entries(it.attributes).map(([k, v]) => (
+                          <p key={k}>
+                            {k.toUpperCase()}: {v}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    <p className="text-sm mt-1">₹{it.price}</p>
+
+                    {/* QTY */}
                     <div className="flex items-center gap-2 mt-3">
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => changeQty(it.cartId, it.qty - 1)}
+                        onClick={() =>
+                          changeQty(it.cartId, it.qty - 1, it.stock)
+                        }
                         disabled={isLoading}
                       >
-                        {isLoading ? <span className="loading-dot" /> : <Minus className="w-4 h-4" />}
+                        <Minus className="w-4 h-4" />
                       </Button>
+
                       <span className="w-10 text-center">{it.qty}</span>
+
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => changeQty(it.cartId, it.qty + 1)}
-                        disabled={isLoading}
+                        onClick={() =>
+                          changeQty(it.cartId, it.qty + 1, it.stock)
+                        }
+                        disabled={
+                          isLoading ||
+                          (it.stock !== null && it.qty >= it.stock)
+                        }
                       >
-                        {isLoading ? <span className="loading-dot" /> : <Plus className="w-4 h-4" />}
+                        <Plus className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
 
                   <div className="flex flex-col items-end justify-between">
-                    <p className="font-semibold">₹{it.price * it.qty}</p>
+                    <p className="font-semibold">
+                      ₹{it.price * it.qty}
+                    </p>
+
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => remove(it.cartId)}
+                      onClick={() => removeItem(it.cartId)}
                       disabled={isLoading}
                     >
-                      {isLoading ? <span className="loading-dot" /> : <Trash2 className="w-4 h-4 text-rose-600" />}
+                      <Trash2 className="w-4 h-4 text-rose-600" />
                     </Button>
                   </div>
                 </div>
@@ -158,19 +213,20 @@ export default function CartPage() {
           })}
         </div>
 
-        {/* ---------- order summary ---------- */}
+        {/* SUMMARY */}
         <Card className="p-6 h-fit">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex justify-between mb-4">
             <h2 className="text-xl font-semibold">Order Summary</h2>
+
             <Button
               variant="ghost"
               size="sm"
-              onClick={clear}
+              onClick={clearAll}
               disabled={loadingClear}
-              className="text-rose-600 hover:text-rose-700 flex items-center"
+              className="text-rose-600"
             >
-              {loadingClear ? <span className="loading-dot mr-2" /> : <Trash className="w-4 h-4 mr-2" />}
-              Clear all
+              <Trash className="w-4 h-4 mr-1" />
+              Clear
             </Button>
           </div>
 
@@ -179,11 +235,14 @@ export default function CartPage() {
               <span>Sub-total</span>
               <span>₹{subTotal}</span>
             </div>
+
             <div className="flex justify-between text-sm">
               <span>Shipping</span>
-              <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+              <span>Free</span>
             </div>
+
             <Separator />
+
             <div className="flex justify-between font-semibold text-lg">
               <span>Total</span>
               <span>₹{total}</span>
