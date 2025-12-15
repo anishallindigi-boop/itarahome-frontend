@@ -90,7 +90,7 @@ const productId=singleProduct?.product._id
   }, [singleProduct, selectedAttr]);
 
 
-const productvariationid = selectedVariation?._id || null;
+const productvariationid = selectedVariation?._id;
 
 
   /* ---------- price ---------- */

@@ -9,7 +9,7 @@ interface CartItem {
   _id?: string;
   productId: string;
   quantity: number;
-  productvariationid:string
+  productvariationid?:string
   message?: string;
 }
 
