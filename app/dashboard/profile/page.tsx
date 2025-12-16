@@ -33,10 +33,10 @@ export default function ProfilePage() {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        street: user.address?.street || "",
-        city: user.address?.city || "",
-        state: user.address?.state || "",
-        zipCode: user.address?.zipCode || "",
+        street: user.addresses?.street || "",
+        city: user.addresses?.city || "",
+        state: user.addresses?.state || "",
+        zipCode: user.addresses?.zipCode || "",
       });
     }
   }, [user]);

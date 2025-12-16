@@ -5,14 +5,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 
-interface addres {
-        country: string,
-        street: string,
-        city: string,
-        state: string,
-        zipCode: string
-    }
-
+interface Address {
+  country?: string;
+  street?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  isDefault?: boolean;
+}
 // TYPES
 interface Auth {
   _id?: string;
@@ -20,7 +20,7 @@ interface Auth {
   email?: string;
   phone?: string;
   role?: string;
-  address?:addres;
+ addresses?: Address; // ✅ plural
   message?: string;
 }
 
