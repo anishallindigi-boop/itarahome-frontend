@@ -269,7 +269,9 @@ React.useEffect(() => {
                   {[
                     { label: 'Profile', href: '/profile' },
                     { label: 'Orders', href: '/orders' },
-                    { label: 'Help Center', href: '/help' },
+                    { label: 'Help Center', href: '/#' },
+                    { label: 'Bulk Enquiry', href: '/#-enquiry' },
+                    { label: 'Book a consoultancy for stylinng and decor', href: '/#' },
                   ].map((link) => (
                     <Link
                       key={link.label}

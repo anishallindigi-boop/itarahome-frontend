@@ -64,71 +64,62 @@ export default function Page() {
             </button>
 
 
-         <div className=" inset-0 bg-black flex items-center justify-center p-4">
-<div className=" w-full max-w-md bg-black text-white rounded-2xl shadow-2xl p-8">
+            <div className=" inset-0 bg-white flex items-center justify-center p-4">
+              <div className=" w-full max-w-md bg-white text-white rounded-2xl  p-8">
 
 
 
 
-{/* Logo */}
-<div className="flex justify-center mb-4">
-<div className="h-14 w-14 rounded-full bg-white/10 flex items-center justify-center">
-{/* Simple stylized mark */}
-<svg
-viewBox="0 0 24 24"
-className="h-8 w-8 text-white"
-fill="none"
-stroke="currentColor"
-strokeWidth="1.5"
->
-<path d="M7 7h6" strokeLinecap="round" strokeLinejoin="round" />
-<path d="M13 7v10" strokeLinecap="round" strokeLinejoin="round" />
-<path d="M17 17h-4" strokeLinecap="round" strokeLinejoin="round" />
-</svg>
-</div>
-</div>
+                {/* Logo */}
+                <div className="flex justify-center mb-4">
+                  
+                    {/* Simple stylized mark */}
+                    <img src='/logo.png' />
+                
+                </div>
 
 
-{/* Title */}
-<h2 className="text-center text-xl font-semibold mb-2">
-Join the Essentia Circle
-</h2>
+                {/* Title */}
+                <h2 className="text-center text-xl font-semibold mb-2">
+                  Join the Essentia Circle
+                </h2>
 
 
-{/* Subtext */}
-<p className="text-center text-sm text-gray-400 max-w-[24rem] mx-auto leading-relaxed mb-6">
-A 10% welcome privilege awaits. <br />
-Be the first to discover our newest pieces, bespoke launches and private showcases.
-</p>
+                {/* Subtext */}
+                <p className="text-center text-sm text-gray-400 max-w-[24rem] mx-auto leading-relaxed mb-6">
+                  Become a Part of the Itara Community
+Unlock a 10% welcome benefit as you sign up.
+Stay ahead with early access to fresh arrivals, curated launches, and intimate styling previews.
+                </p>
 
 
-{/* Email input + button */}
-<form
-className="space-y-4"
-onSubmit={(e) => {
-e.preventDefault();
-alert("Joined!");
-}}
->
-<input
-type="email"
-placeholder="Email address"
-required
-className="w-full rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/30"
-/>
+                {/* Email input + button */}
+                <form
+                  className="space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    alert("Joined!");
+                  }}
+                >
+                  <input
+                    type="email"
+                    placeholder="Email address"
+                    required
+                    className="w-full rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/30"
+                  />
 
 
-<button
-type="submit"
-className="w-full bg-white/10 text-white py-3 rounded-lg font-medium hover:bg-white/20 transition"
->
-Join Now
-</button>
-</form>
-</div>
-</div>
+                  <button
+                    type="submit"
+                    className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-black/80 transition"
+                  >
+                    Join Now
+                  </button>
+                </form>
+              </div>
+            </div>
 
-          
+
           </div>
         </div>
       )}

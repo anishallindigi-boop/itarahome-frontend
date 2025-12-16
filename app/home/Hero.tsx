@@ -22,7 +22,7 @@ export default function Hero() {
             Natural stone pieces that bring quiet luxury into everyday living.
             </h1>
             <button className="px-8 py-3 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition">
-              Get Started
+              Shop all
             </button>
           </div>
         </div>

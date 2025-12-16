@@ -22,7 +22,7 @@ export default function Products() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-extrabold mb-10 text-gray-900">
-        Latest Products
+        New Collection
       </h1>
 
       {loading && <p className="text-blue-600 font-medium">Loading products...</p>}
