@@ -2,26 +2,34 @@
 
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { getOrdersByCustomer } from "@/redux/slice/OrderSlice";
+import { getOrder } from "@/redux/slice/OrderSlice";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
 
-export default function OrdersPage() {
+export default function OrdersPage({ params }: { params: { id: string } }) {
+ const searchParams = useSearchParams();
+
+  const orderId = searchParams.get("id");
+
+
   const dispatch = useAppDispatch();
 
   // Assuming you store user email in auth slice or localStorage
 
 
-  const { orders, loading } = useAppSelector((s: any) => s.order);
+  const { order, loading } = useAppSelector((s: any) => s.order);
 
 
   useEffect(() => {
+if(orderId){
 
-      dispatch(getOrdersByCustomer());
+  dispatch(getOrder(orderId));
+}
 
   }, [dispatch]);
 
@@ -33,10 +41,10 @@ export default function OrdersPage() {
     );
   }
 
-  if (!orders || orders.length === 0) {
+  if (!order || order.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xl">You have no orders yet.</p>
+        <p className="text-xl">You have no order yet.</p>
         <Link href="/">
           <Button>Continue Shopping</Button>
         </Link>
@@ -46,9 +54,9 @@ export default function OrdersPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-[100px] space-y-6">
-      <h1 className="text-3xl font-bold mb-6">My Orders</h1>
+      <h1 className="text-3xl font-bold mb-6">My order</h1>
 
-      {orders.map((order: any) => (
+     
         <Card key={order._id} className="p-6 space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Order #{order.orderNumber}</h2>
@@ -68,19 +76,19 @@ export default function OrdersPage() {
           </div>
 
           <div className="space-y-3">
-            {order.items.map((item: any) => (
-              <div key={item.productId._id} className="flex gap-3 items-center">
+           
+              <div  className="flex gap-3 orders-center">
                 <img
-                  src={`${IMAGE_URL}/${item.productId.mainImage}`}
+                  src={`${IMAGE_URL}/${order.items[0].productId.mainImage}`}
                   className="w-14 h-14 rounded object-cover"
                 />
                 <div className="flex-1">
-                  <p className="font-medium">{item.productId.name}</p>
-                  <p className="text-xs">Qty: {item.quantity}</p>
+                  <p className="font-medium">{order.items[0].productId.name}</p>
+                  <p className="text-xs">Qty: {order.items[0].quantity}</p>
                 </div>
-                <p>₹{item.price * item.quantity}</p>
+                <p>₹{order.subtotal}</p>
               </div>
-            ))}
+          
           </div>
 
           <Separator />
@@ -107,7 +115,7 @@ export default function OrdersPage() {
             View Details
           </Link>
         </Card>
-      ))}
+   
     </div>
   );
 }

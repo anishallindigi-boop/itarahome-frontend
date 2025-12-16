@@ -97,6 +97,8 @@ export default function CheckoutPage() {
   /* ---------------- ORDER STATE ---------------- */
   const { loading } = useAppSelector((s: any) => s.order);
 
+
+
   /* ---------------- PLACE ORDER ---------------- */
   const placeOrder = async () => {
     if (!selectedShipping) {
@@ -121,7 +123,7 @@ export default function CheckoutPage() {
     }));
 
     const payload = {
-      status: "pending",
+      status: "order success",
       customerEmail: address.email,
       customerName: address.name,
       customerPhone: address.phone,
@@ -141,10 +143,11 @@ export default function CheckoutPage() {
     };
 
     const res = await dispatch(createOrder(payload));
-
+    
     if (createOrder.fulfilled.match(res)) {
+      const orderId = res.payload?.order?._id;
       dispatch(clearCart());
-      router.push("/orders");
+      router.push(`/orders?from=checkout&id=${orderId}`);
     } else {
       alert("Order failed");
     }

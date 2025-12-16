@@ -4,6 +4,15 @@ import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
+
+interface addres {
+        country: string,
+        street: string,
+        city: string,
+        state: string,
+        zipCode: string
+    }
+
 // TYPES
 interface Auth {
   _id?: string;
@@ -11,6 +20,7 @@ interface Auth {
   email?: string;
   phone?: string;
   role?: string;
+  address?:addres;
   message?: string;
 }
 
@@ -107,6 +117,24 @@ export const getuser = createAsyncThunk<Auth, void, { rejectValue: string }>(
     }
   }
 );
+
+// 6. Update Profile
+export const updateprofile = createAsyncThunk<
+  Auth,
+  Partial<Auth>,
+  { rejectValue: string }
+>("auth/updateprofile", async (payload, { rejectWithValue }) => {
+  try {
+    console.log(payload,"data")
+    const res = await axios.put(`${API_URL}/api/auth/update/profile`, payload, {
+      withCredentials: true,
+      headers: { "x-api-key": API_KEY },
+    });
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.error || "Failed to update profile");
+  }
+});
 
 // 5. Logout
 export const logoutuser = createAsyncThunk<
@@ -215,7 +243,25 @@ export const AuthSlice = createSlice({
         state.error = action.payload || "Failed to get user";
         state.user = null;
         state.isAuthenticated = false;
-      });
+      })
+
+
+      //----------update profile---------
+
+
+      .addCase(updateprofile.pending, (state) => {
+    state.loading = true;
+    state.error = null;
+  })
+  .addCase(updateprofile.fulfilled, (state, action) => {
+    state.loading = false;
+    state.user = action.payload;
+    state.message = "Profile updated successfully";
+  })
+  .addCase(updateprofile.rejected, (state, action) => {
+    state.loading = false;
+    state.error = action.payload || "Failed to update profile";
+  })
 
     // LOGOUT
     builder.addCase(logoutuser.fulfilled, (state, action) => {

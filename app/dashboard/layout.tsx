@@ -2,21 +2,41 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
-import { LogOut, User, Package, Heart, Settings, HelpCircle } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Package,
+  Heart,
+  Settings,
+  HelpCircle,
+} from "lucide-react";
 import { logoutuser } from "@/redux/slice/AuthSlice";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import clsx from "clsx";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
+const menu = [
+  { name: "Profile", href: "/dashboard/profile", icon: User },
+  { name: "Orders", href: "/dashboard/orders", icon: Package },
+  { name: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Help Center", href: "/dashboard/help", icon: HelpCircle },
+];
+
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { user, isAuthenticated } = useAppSelector((state: RootState) => state.auth);
+  const pathname = usePathname();
+
+  const { user, isAuthenticated } = useAppSelector(
+    (state: RootState) => state.auth
+  );
 
   const handleLogout = () => {
     dispatch(logoutuser());
@@ -27,42 +47,65 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-50 to-gray-100">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r shadow-sm flex flex-col p-6">
-        <div className="mb-8">
-          <h2 className="text-xl font-bold text-gray-800">Dashboard</h2>
-          <p className="text-gray-500 mt-1">{user?.name}</p>
+      <aside className="w-72 bg-white/80 backdrop-blur-xl border-r border-gray-200 shadow-xl flex flex-col">
+        {/* HEADER */}
+        <div className="p-6 border-b">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            My Account
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Welcome back, <span className="font-medium">{user?.name}</span>
+          </p>
         </div>
 
-        <nav className="flex-1 space-y-2">
-          <Link href="/dashboard/profile" className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 transition">
-            <User className="w-5 h-5 text-indigo-600" /> Profile
-          </Link>
-          <Link href="/dashboard/orders" className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 transition">
-            <Package className="w-5 h-5 text-green-600" /> Orders
-          </Link>
-          <Link href="/dashboard/wishlist" className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 transition">
-            <Heart className="w-5 h-5 text-red-600" /> Wishlist
-          </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 transition">
-            <Settings className="w-5 h-5 text-yellow-600" /> Settings
-          </Link>
-          <Link href="/dashboard/help" className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-gray-100 transition">
-            <HelpCircle className="w-5 h-5 text-blue-600" /> Help Center
-          </Link>
+        {/* NAV */}
+        <nav className="flex-1 px-4 py-6 space-y-1">
+          {menu.map(({ name, href, icon: Icon }) => {
+            const active = pathname === href;
+
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={clsx(
+                  "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                  active
+                    ? "bg-indigo-600 text-white shadow-lg"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+              >
+                <Icon
+                  className={clsx(
+                    "w-5 h-5 transition",
+                    active ? "text-white" : "text-gray-500 group-hover:text-indigo-600"
+                  )}
+                />
+                <span className="font-medium">{name}</span>
+              </Link>
+            );
+          })}
         </nav>
 
-        <button
-          onClick={handleLogout}
-          className="mt-auto w-full flex items-center gap-2 py-2 px-3 text-red-600 hover:bg-red-50 rounded-lg transition"
-        >
-          <LogOut className="w-5 h-5" /> Logout
-        </button>
+        {/* FOOTER */}
+        <div className="p-4 border-t">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition font-medium"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
+        </div>
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-6">{children}</main>
+      <main className="flex-1 p-8">
+        <div className="bg-white rounded-2xl shadow-sm border p-6 min-h-[calc(100vh-4rem)]">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

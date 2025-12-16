@@ -81,11 +81,12 @@ export const getOrder = createAsyncThunk<
   Order,
   string,
   { rejectValue: string }
->("order/getOne", async (identifier, { rejectWithValue }) => {
+>("order/getOne", async (id, { rejectWithValue }) => {
   try {
     const res = await axios.get(
-      `${API_URL}/api/order/${identifier}`,
+      `${API_URL}/api/order/get/${id}`,
       {
+          withCredentials: true,
         headers: { "x-api-key": API_KEY },
       }
     );
