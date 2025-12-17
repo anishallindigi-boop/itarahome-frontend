@@ -9,8 +9,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import { useAppDispatch } from '@/redux/hooks';
+import { removeCartItem } from '@/redux/slice/CartItemSlice';
 
 export type CartItem = {
   _id: string;
@@ -21,10 +22,17 @@ export type CartItem = {
 };
 
 export function CartPopover({ items }: { items: CartItem[] }) {
+  const dispatch = useAppDispatch();
+
   if (!Array.isArray(items)) return null;
 
   const itemCount = items.reduce((s, i) => s + i.qty, 0);
   const subTotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+
+  /* ---------------- REMOVE ITEM ---------------- */
+  const handleRemove = (cartId: string) => {
+    dispatch(removeCartItem(cartId));
+  };
 
   return (
     <DropdownMenu>
@@ -61,10 +69,9 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                   className="flex gap-3 p-2 rounded-xl hover:bg-gray-50 transition relative shadow-sm"
                 >
                   <div className="flex-shrink-0 w-16 h-16 relative">
-                    <Image
+                    <img
                       src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${item.image}`}
                       alt={item.name}
-                      fill
                       className="object-cover rounded-lg border"
                     />
                   </div>
@@ -75,8 +82,13 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                   </div>
 
                   <div className="flex flex-col justify-between items-end">
-                    <p className="text-sm font-bold text-gray-900">₹{item.price * item.qty}</p>
-                    <button className="text-red-500 hover:text-red-600 transition">
+                    <p className="text-sm font-bold text-gray-900">
+                      ₹{item.price * item.qty}
+                    </p>
+                    <button
+                      className="text-red-500 hover:text-red-600 transition"
+                      onClick={() => handleRemove(item._id)}
+                    >
                       <Trash2 size={16} />
                     </button>
                   </div>
@@ -101,7 +113,7 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                 >
                   <Link href="/cart">View Cart</Link>
                 </Button>
-                <Button className=" bg-indigo-600 hover:bg-indigo-700 transition text-white">
+                <Button className="bg-indigo-600 hover:bg-indigo-700 transition text-white">
                   <Link href="/checkout">Checkout</Link>
                 </Button>
               </div>

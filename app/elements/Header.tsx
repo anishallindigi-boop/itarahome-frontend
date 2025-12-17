@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, User, Search, LogOut, Package } from 'lucide-react';
+import { Menu, X, ChevronDown, User, Search, LogOut, Package, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -15,6 +15,7 @@ import LoginPopup from './LoginPopup';
 import { useRouter } from 'next/navigation';
 
 import { toast } from "sonner"
+import WishlistDrawer from './WishlistDrawer';
 
 /* ---------- one-time helper ---------- */
 const useOnce = (fn: () => void) => {
@@ -35,11 +36,14 @@ export default function HeaderImproved() {
   const [active, setActive] = React.useState<string | null>(null);
   const [showLogin, setShowLogin] = React.useState(false);
   const [showProfile, setShowProfile] = React.useState(false);
+   const [openWishlist, setOpenWishlist] = React.useState(false);
 
   const dispatch = useAppDispatch();
 
   const { isAuthenticated, user,message ,error} = useAppSelector(
-    (state: RootState) => state.auth)
+    (state: RootState) => state.auth);
+    const { wishlist } = useAppSelector((state: RootState) => state.wishlist);
+
 
   /* ---------- fetch cart once ---------- */
   useOnce(() => dispatch(getCartItems()));
@@ -180,6 +184,23 @@ React.useEffect(() => {
               )}
             </AnimatePresence>
           </div>
+
+           <button
+        onClick={() => setOpenWishlist(true)}
+        className="relative"
+      >
+      <Heart size={16}/>
+
+  {wishlist.length > 0 && (
+    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1
+      flex items-center justify-center rounded-full
+      bg-red-600 text-white text-[10px] font-semibold">
+      {wishlist.length}
+    </span>
+  )}
+      </button>
+
+   
           <CartPopover items={cartitems} />
         </div>
       </header>
@@ -188,6 +209,11 @@ React.useEffect(() => {
 
          {/* ================= LOGIN POPUP ================= */}
       {showLogin && <LoginPopup />}
+
+         <WishlistDrawer
+        isOpen={openWishlist}
+        onClose={() => setOpenWishlist(false)}
+      />
 
       {/* Drawer remains identical */}
 
