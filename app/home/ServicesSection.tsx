@@ -22,9 +22,9 @@ const services = [
     disabled: true,
   },
   {
-    title: 'GIFT CARDS',
+    title: 'Celebrating something special?',
     description:
-      'Give the gift of Altrove with our e-gift cards! Whether for a birthday, wedding or holiday present, a gift card is always a perfect present.',
+      'Our timeless stone pieces make refined gifts for weddings, gatherings, and corporate events. Bulk orders and customization available.',
     image: '/Gifting.avif',
     href: '/products/e-gift-card',
     cta: 'SHOP NOW',
