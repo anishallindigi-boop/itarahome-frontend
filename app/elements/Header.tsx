@@ -102,6 +102,8 @@ React.useEffect(() => {
     },
     { label: 'About Us', href: '/about-us' },
     { label: 'Contact', href: '/contact-us' },
+     { label: 'Bulk Enquiry', href: '/#' },
+     { label: 'Book Consultation', href: '/#' },
   ];
 
   return (
@@ -296,8 +298,7 @@ React.useEffect(() => {
                     { label: 'Profile', href: '/profile' },
                     { label: 'Orders', href: '/orders' },
                     { label: 'Help Center', href: '/#' },
-                    { label: 'Bulk Enquiry', href: '/#-enquiry' },
-                    { label: 'Book a consoultancy for stylinng and decor', href: '/#' },
+                   
                   ].map((link) => (
                     <Link
                       key={link.label}
