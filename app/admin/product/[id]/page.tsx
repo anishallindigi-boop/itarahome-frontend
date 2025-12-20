@@ -191,8 +191,22 @@ const addAttributeValue = (i: number, value: string) => {
         status: p.status || 'draft',
         mainImage: p.mainImage || p.image || '',
         gallery: p.gallery || [],
-        attributes: p.attributes || [],
-        variations: p.variations || [],
+       // ✅ FIXED ATTRIBUTES
+  attributes:
+    p.attributes?.map((attr: any) => ({
+      name: attr.name,
+      values: attr.values.map((v: any) => v.value),
+    })) || [],
+
+  // ✅ Variations can stay same if already flat
+  variations:
+    p.variations?.map((v: any) => ({
+      attributes: v.attributes,
+      price: v.price || '',
+      discountPrice: v.discountPrice || '',
+      stock: v.stock || '',
+      image: v.image || '',
+    })) || [],
       });
     }
   }, [singleProduct]);
