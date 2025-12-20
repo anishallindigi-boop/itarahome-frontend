@@ -29,7 +29,7 @@ interface ProductFormState {
   description: string;
   content: string;
    slug: string;
-  categoryid:string;
+  categoryid:string[];
   price: string;
   discountPrice: string;
   stock: string;
@@ -60,7 +60,7 @@ export default function ProductCreateForm() {
     description: '',
     content: '',
     price: '',
-    categoryid:'',
+    categoryid:[],
     discountPrice: '',
     stock: '',
      slug: '',

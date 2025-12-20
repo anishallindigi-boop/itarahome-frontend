@@ -6,6 +6,34 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 // -------------------- TYPES --------------------
 
+export interface CreateProductPayload {
+  name: string;
+  description: string;
+  content: string;
+  slug: string;
+  categoryid: string[];
+  price: string;
+  discountPrice: string;
+  stock: string;
+  status: 'draft' | 'published';
+  mainImage: string;
+  gallery: string[];
+  attributes: {
+    name: string;
+    values: string[];
+  }[];
+  variations: {
+    attributes: Record<string, string>;
+    price: string;
+    discountPrice: string;
+    stock: string;
+    image?: string;
+  }[];
+}
+
+
+
+
 export type AttributeValue = { value: string };
 export type Attribute = { name: string; values: AttributeValue[] };
 export type Variation = {
@@ -18,14 +46,14 @@ export type Variation = {
 };
 
 export interface Product {
-  _id: string;
+  _id?: string;
   name?: string;
   description?: string;
   image?: string;
   mainImage?: string;
   gallery?: string[];
   content?: string;
-  categoryid?:string;
+  categoryid?:string[];
   price?: string;
   discountPrice?: string;
   attributes?: Attribute[];
@@ -66,27 +94,34 @@ const initialState: ProductState = {
 // -------------------- THUNKS --------------------
 
 // Create Product
-export const createProduct = createAsyncThunk(
+export const createProduct = createAsyncThunk<
+  Product,CreateProductPayload     // request payload
+>(
   'product/create',
-  async (form: Product, { rejectWithValue }) => {
+  async (form, { rejectWithValue }) => {
     try {
+      const config = {
+        headers: {
+          'x-api-key': API_KEY,
+        },
+        withCredentials: true,
+      };
 
-console.log(form,"form slice")
+      const { data } = await axios.post(
+        `${API_URL}/api/product/create`,
+        form,
+        config
+      );
 
-     const config = {
-  headers: {
-    'x-api-key': API_KEY
-  },
-  withCredentials: true
-};
-
-      const { data } = await axios.post(`${API_URL}/api/product/create`, form, config);
-      return data;
+      return data.product; // 👈 must return Product
     } catch (err: any) {
-      return rejectWithValue(err.response?.data?.message || 'Failed to create product');
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to create product'
+      );
     }
   }
 );
+
 
 // Get All Products
 export const getProducts = createAsyncThunk(
