@@ -50,8 +50,8 @@ interface Props {
 
 export default function ProductUpdateForm() {
   const dispatch = useAppDispatch();
-const param=useParams();
-const productId=param.id;
+const params=useParams();
+const productId = params?.id as string;
 
 
   const [openMain, setOpenMain] = useState(false);
@@ -166,7 +166,7 @@ const addAttributeValue = (i: number, value: string) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(updateProduct({ id: productId, formData: form }));
+    dispatch(updateProduct({ id: productId, form: form }));
   };
 
   /* ---------------- FETCH PRODUCT ---------------- */

@@ -201,7 +201,7 @@ export const UpdateProductStatus = createAsyncThunk<
 // Update Product
 export const updateProduct = createAsyncThunk(
   'product/update',
-  async ({ id, formData }: { id: string; formData: FormData }, { rejectWithValue }) => {
+  async ({ id, form }: { id: string; form: CreateProductPayload }, { rejectWithValue }) => {
     try {
   const config = {
   headers: {
@@ -210,7 +210,7 @@ export const updateProduct = createAsyncThunk(
   withCredentials: true
 };
 
-      const { data } = await axios.post(`${API_URL}/api/product/update/${id}`, formData, config);
+      const { data } = await axios.post(`${API_URL}/api/product/update/${id}`, form, config);
       return data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Failed to update product');
