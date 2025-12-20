@@ -19,7 +19,6 @@ export type Variation = {
 
 export interface Product {
   _id: string;
-  title: string;
   name?: string;
   description?: string;
   image?: string;
