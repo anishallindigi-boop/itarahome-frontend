@@ -2,86 +2,114 @@
 
 import React, { useEffect } from 'react';
 import { Edit, Trash2, Layers } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { RootState } from '@/redux/store';
+
 import {
   getProducts,
   deleteProduct,
   UpdateProductStatus,
   resetState,
 } from '@/redux/slice/ProductSlice';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 export default function ProductTable() {
   const dispatch = useAppDispatch();
-  const router=useRouter();
+  const router = useRouter();
+
   const { products, loading, error, success, message } = useAppSelector(
     (state: RootState) => state.product
   );
+
   const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
-  // Fetch products on mount
+  /* ================= FETCH PRODUCTS ================= */
   useEffect(() => {
     dispatch(getProducts());
   }, [dispatch]);
 
-  // Handle toast messages and refresh
+  /* ================= TOAST + REFRESH ================= */
   useEffect(() => {
-    if (message) toast.success(message);
-    if (error) toast.error(error);
-    if (success) dispatch(getProducts()); // refresh after delete/update
-    return () => dispatch(resetState());
+    if (message) {
+      toast.success(message);
+      dispatch(resetState());
+    }
+
+    if (error) {
+      toast.error(error);
+      dispatch(resetState());
+    }
+
+    if (success) {
+      dispatch(getProducts());
+      dispatch(resetState());
+    }
   }, [message, error, success, dispatch]);
 
-  // Delete product
+  /* ================= ACTION HANDLERS ================= */
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
       dispatch(deleteProduct(id));
     }
   };
 
-  // Edit product (example: navigate to edit page or open modal)
   const handleEdit = (id: string) => {
-if(id){
-router.push(`/admin/product/${id}`)
-}
+    router.push(`/admin/product/${id}`);
   };
 
-  // Open variations modal/page
   const handleVariations = (id: string) => {
-    console.log('Variations', id);
+    router.push(`/admin/product/${id}/variations`);
   };
 
-  // Toggle product status
   const handleToggleStatus = (id: string, status: 'draft' | 'published') => {
-    dispatch(UpdateProductStatus({ id, status }));
+    dispatch(
+      UpdateProductStatus({
+        id,
+        status: status === 'published' ? 'draft' : 'published',
+      })
+    );
   };
 
-  if (loading) return <p>Loading products...</p>;
+  /* ================= UI STATES ================= */
+  if (loading) {
+    return <p className="p-4">Loading products...</p>;
+  }
 
+  if (!products || products.length === 0) {
+    return <p className="p-4 text-gray-500">No products found</p>;
+  }
+
+  /* ================= TABLE ================= */
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50 border-b">
             <tr>
-              {['Product', 'Category', 'Stock', 'Price', 'Status', 'Actions'].map(
-                (h) => (
-                  <th
-                    key={h}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                  >
-                    {h}
-                  </th>
-                )
-              )}
+              {[
+                'Product',
+                'Category',
+                'Stock',
+                'Price',
+                'Status',
+                'Actions',
+              ].map((h) => (
+                <th
+                  key={h}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody className="divide-y">
-            {(products || []).map((p, idx) => (
-              <tr key={p._id || idx} className="hover:bg-gray-50">
-                {/* Product Info */}
+            {products.map((p: any) => (
+              <tr key={p._id} className="hover:bg-gray-50">
+                {/* PRODUCT */}
                 <td className="px-6 py-4 flex items-center gap-3">
                   <img
                     src={`${IMAGE_URL}${p.mainImage || p.image || ''}`}
@@ -98,54 +126,54 @@ router.push(`/admin/product/${id}`)
                   </div>
                 </td>
 
-               <td className="px-6 py-4 text-sm">
-  {Array.isArray(p.categoryid) && p.categoryid.length > 0
-    ? p.categoryid.map(cat => cat.name || cat).join(', ')
-    : '-'}
-</td>
-
-                {/* Stock */}
-                <td className="px-6 py-4 text-sm">{p.stock || '-'}</td>
-
-                {/* Price */}
-                <td className="px-6 py-4 text-sm">{p.price || '-'}</td>
-
-                {/* Status */}
+                {/* CATEGORY */}
                 <td className="px-6 py-4 text-sm">
+                  {Array.isArray(p.categoryid) && p.categoryid.length > 0
+                    ? p.categoryid.map((c: any) => c.name).join(', ')
+                    : '-'}
+                </td>
+
+                {/* STOCK */}
+                <td className="px-6 py-4 text-sm">{p.stock ?? '-'}</td>
+
+                {/* PRICE */}
+                <td className="px-6 py-4 text-sm">₹{p.price ?? '-'}</td>
+
+                {/* STATUS */}
+                <td className="px-6 py-4">
                   <button
-                    onClick={() =>
-                      handleToggleStatus(
-                        p._id,
-                        p.status === 'published' ? 'draft' : 'published'
-                      )
-                    }
-                    className={`px-2 py-1 rounded text-white text-xs ${
-                      p.status === 'published' ? 'bg-green-500' : 'bg-gray-400'
+                    onClick={() => handleToggleStatus(p._id, p.status)}
+                    className={`px-3 py-1 rounded-full text-xs text-white ${
+                      p.status === 'published'
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
                     }`}
                   >
                     {p.status === 'published' ? 'Published' : 'Draft'}
                   </button>
                 </td>
 
-                {/* Actions */}
-                <td className="px-6 py-4 flex space-x-2">
+                {/* ACTIONS */}
+                <td className="px-6 py-4 flex gap-2">
                   <button
                     onClick={() => handleEdit(p._id)}
                     className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit size={16} />
                   </button>
+
                   <button
                     onClick={() => handleVariations(p._id)}
                     className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
                   >
-                    <Layers className="h-4 w-4" />
+                    <Layers size={16} />
                   </button>
+
                   <button
                     onClick={() => handleDelete(p._id)}
                     className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 size={16} />
                   </button>
                 </td>
               </tr>
