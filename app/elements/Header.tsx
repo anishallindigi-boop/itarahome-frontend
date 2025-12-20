@@ -102,8 +102,8 @@ React.useEffect(() => {
     },
     { label: 'About Us', href: '/about-us' },
     { label: 'Contact', href: '/contact-us' },
-     { label: 'Bulk Enquiry', href: '/#' },
-     { label: 'Book Consultation', href: '/#' },
+     { label: 'Bulk Enquiry', href: '/enquiry-form ' },
+     { label: 'Book Consultation', href: '/styling-consultation-form' },
   ];
 
   return (

@@ -56,9 +56,10 @@ export const createVariation = createAsyncThunk<
 >("variation/create", async (data, { rejectWithValue }) => {
   try {
 
+
+    console.log(data,"slice")
     const config = {
         headers: {
-          'Content-Type': 'multipart/form-data',
           'x-api-key': API_KEY,
         },
         withCredentials: true,

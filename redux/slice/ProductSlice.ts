@@ -4,15 +4,10 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
-/* ===================== TYPES ===================== */
+// -------------------- TYPES --------------------
 
 export type AttributeValue = { value: string };
-
-export type Attribute = {
-  name: string;
-  values: AttributeValue[];
-};
-
+export type Attribute = { name: string; values: AttributeValue[] };
 export type Variation = {
   attributes: Record<string, string>;
   sku: string;
@@ -22,85 +17,146 @@ export type Variation = {
   image: string;
 };
 
-
-export interface SingleProductResponse {
-  product: Product;
-  variations: Variation[];
-}
-
-
-export interface CreateProductInput {
-  title: string;
-  description: string;
-  image: File | null;
-  attributes: Attribute[];
-  variations: Variation[];
-}
-
 export interface Product {
   _id: string;
   title: string;
-  name: string;
-  description: string;
-  image: string;
-  mainImage?:string;
-  gallery?:string[];
-  content:string;
-  price?:string;
-  discountPrice?:string;
-  attributes: Attribute[];
-  variations: Variation[];
+  name?: string;
+  description?: string;
+  image?: string;
+  mainImage?: string;
+  gallery?: string[];
+  content?: string;
+  categoryid?:string;
+  price?: string;
+  discountPrice?: string;
+  attributes?: Attribute[];
+  variations?: Variation[];
   message?: string;
-  stock?:string;
-  slug?:string;
-  status: 'active' | 'inactive';
+  stock?: string;
+  slug?: string;
+  status: 'draft' | 'published';
+}
+
+export interface SingleProductResponse {
+  product: Product;
+  variations?: Variation[];
 }
 
 interface ProductState {
   products: Product[];
+  singleProduct: SingleProductResponse | null;
   loading: boolean;
   error: string | null;
   message: string | null;
   success: boolean;
-  isupdated: boolean;
-  isdeleted: boolean;
- singleProduct: SingleProductResponse | null,
+  isUpdated: boolean;
+  isDeleted: boolean;
 }
 
 const initialState: ProductState = {
   products: [],
+  singleProduct: null,
   loading: false,
   error: null,
   message: null,
   success: false,
-  isupdated: false,
-  isdeleted: false,
-  singleProduct: null,
+  isUpdated: false,
+  isDeleted: false,
 };
 
+// -------------------- THUNKS --------------------
 
-
-
-// change the thunk signature
-export const CreateProduct = createAsyncThunk(
+// Create Product
+export const createProduct = createAsyncThunk(
   'product/create',
-  async (formData: FormData, { rejectWithValue }) => {   // <-- FormData instead of CreateProductInput
+  async (form: Product, { rejectWithValue }) => {
     try {
-      console.log(formData,"slice")
-      const config = {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'x-api-key': API_KEY!,
-        },
-        withCredentials: true,
-      };
 
-      const { data } = await axios.post(
-        `${API_URL}/api/product/create`,
-        formData,
-        config
+console.log(form,"form slice")
+
+     const config = {
+  headers: {
+    'x-api-key': API_KEY
+  },
+  withCredentials: true
+};
+
+      const { data } = await axios.post(`${API_URL}/api/product/create`, form, config);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to create product');
+    }
+  }
+);
+
+// Get All Products
+export const getProducts = createAsyncThunk(
+  'product/getAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/api/product/getAll`, null, {
+        headers: { 'x-api-key': API_KEY! },
+      });
+      return data.products;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch products');
+    }
+  }
+);
+
+// Get Single Product by ID
+export const getProductById = createAsyncThunk(
+  'product/getById',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/api/product/get/${id}`, null, {
+        headers: { 'x-api-key': API_KEY },
+        withCredentials: true,
+      });
+      return data.product;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch product');
+    }
+  }
+);
+
+// Get Single Product by Slug
+export const getProductBySlug = createAsyncThunk(
+  'product/getBySlug',
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(`${API_URL}/api/product/getBySlug/${slug}`, null, {
+        headers: { 'x-api-key': API_KEY! },
+      });
+      return data.product;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch product by slug');
+    }
+  }
+);
+
+
+// -----------------------update product status--------------s
+
+export const UpdateProductStatus = createAsyncThunk<
+  any, // returned type (updated product)
+  { id: string; status: 'draft' | 'published' },
+  { rejectValue: string }
+>(
+  'product/updateStatus',
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/product/update-status/${id}`,
+        { status },
+        {
+          headers: {
+            'x-api-key': API_KEY,
+          },
+          withCredentials: true,
+        }
       );
-      return data;          // must return { product: Product, message?: string }
+      return res.data; // { success, message, product }
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message || 'Something went wrong');
     }
@@ -108,237 +164,168 @@ export const CreateProduct = createAsyncThunk(
 );
 
 
-
-//----------------------get all products----------------------
-
-export const GetProducts = createAsyncThunk(
-  'product/get',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${API_URL}/api/product/all`, {
-        headers: { 'x-api-key': API_KEY },
-      });
-
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Something went wrong');
-    }
-  }
-);
-
-
-
-
-//---------------------------------GET SINGLE PRODUCT-------------------
-
-export const GetSingleProduct = createAsyncThunk(
-  'product/getsingle',
-  async (id: string, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${API_URL}/api/product/get-single/${id}`, {
-        withCredentials: true,
-        headers: { 'x-api-key': API_KEY }
-      });
-
-      return response.data.product;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Something went wrong');
-    }
-  }
-);
-
-
-
-//--------------------get single project by slug----------------------
-
-export const getsingleproductbyslug = createAsyncThunk<
-  SingleProductResponse,
-  string,
-  { rejectValue: string }
->(
-  'product/getsingleproductbyslug',
-  async (slug, { rejectWithValue }) => {
-    try {
-      const res = await axios.get(`${API_URL}/api/product/slug/${slug}`,{
-        headers:{
-          'x-api-key':API_KEY
-        }
-      });
-      return res.data.data;
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || 'Error fetching projects';
-      return rejectWithValue(errorMessage);
-    }
-  }
-);
-
-
-
-//------------------------------------------UPDATE PRODUCT----------------------------------\
-
-
-export const UpdateProduct = createAsyncThunk(
+// Update Product
+export const updateProduct = createAsyncThunk(
   'product/update',
-  async ({ id, form }: { id: string; form: CreateProductInput }, { rejectWithValue }) => {
+  async ({ id, formData }: { id: string; formData: FormData }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/api/product/update/${id}`, form, {
-        withCredentials: true,
-        headers: { 'x-api-key': API_KEY },
-      });
+  const config = {
+  headers: {
+    'x-api-key': API_KEY
+  },
+  withCredentials: true
+};
 
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Something went wrong');
+      const { data } = await axios.post(`${API_URL}/api/product/update/${id}`, formData, config);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to update product');
     }
   }
 );
 
-
-
-
-
-
-
-//----------------------------delete product------------------
-
-
-export const DeleteProduct = createAsyncThunk(
+// Delete Product
+export const deleteProduct = createAsyncThunk(
   'product/delete',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${API_URL}/api/product/delete/${id}`, {
+      const { data } = await axios.post(`${API_URL}/api/product/delete/${id}`, null, {
+        headers: { 'x-api-key': API_KEY! },
         withCredentials: true,
-        headers: { 'x-api-key': API_KEY },
       });
-
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Something went wrong');
+      return data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to delete product');
     }
   }
 );
 
-
-
-
-
-
-
-
+// -------------------- SLICE --------------------
 export const ProductSlice = createSlice({
   name: 'product',
   initialState,
   reducers: {
     resetState: (state) => {
       state.products = [];
+      state.singleProduct = null;
       state.loading = false;
       state.error = null;
       state.message = null;
       state.success = false;
-      state.isupdated = false;
-      state.isdeleted = false;
-      state.singleProduct = null;
+      state.isUpdated = false;
+      state.isDeleted = false;
     },
   },
-
-  extraReducers(builder) {
+  extraReducers: (builder) => {
     builder
-      
-      // CREATE PRODUCT
-      .addCase(CreateProduct.pending, (state) => {
+      // CREATE
+      .addCase(createProduct.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(CreateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+      .addCase(createProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.loading = false;
         state.success = true;
-        state.message = action.payload.message as string;
         state.products.push(action.payload);
+        state.message = action.payload.message || 'Product created';
       })
-      .addCase(CreateProduct.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(createProduct.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // GET PRODUCTS
-      .addCase(GetProducts.pending, (state) => {
+      // GET ALL
+      .addCase(getProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(GetProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
+      .addCase(getProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
         state.loading = false;
         state.products = action.payload;
       })
-      .addCase(GetProducts.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(getProducts.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // GET SINGLE PRODUCT
-      .addCase(GetSingleProduct.pending, (state) => {
+      // GET BY ID
+      .addCase(getProductById.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(GetSingleProduct.fulfilled, (state, action: PayloadAction<SingleProductResponse>) => {
+      .addCase(getProductById.fulfilled, (state, action: PayloadAction<Product>) => {
         state.loading = false;
-        state.singleProduct = action.payload;
+        state.singleProduct = { product: action.payload };
       })
-      .addCase(GetSingleProduct.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(getProductById.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-//---------get single by slug product
-
-  .addCase(getsingleproductbyslug.pending, (state) => {
+      // GET BY SLUG
+      .addCase(getProductBySlug.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-     .addCase(getsingleproductbyslug.fulfilled, (state, action: PayloadAction<SingleProductResponse>) => {
+      .addCase(getProductBySlug.fulfilled, (state, action: PayloadAction<Product>) => {
         state.loading = false;
-        state.singleProduct = action.payload;
+        state.singleProduct = { product: action.payload };
       })
-      .addCase(getsingleproductbyslug.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(getProductBySlug.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       })
 
 
+ // UPDATE STATUS
+    .addCase(UpdateProductStatus.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(UpdateProductStatus.fulfilled, (state, action) => {
+      state.loading = false;
+      state.message = action.payload.message;
+      const index = state.products.findIndex(p => p._id === action.payload.product._id);
+      if (index !== -1) {
+        state.products[index] = action.payload.product; // update product in list
+      }
+    })
+    .addCase(UpdateProductStatus.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
 
-      // UPDATE PRODUCT
-      .addCase(UpdateProduct.pending, (state) => {
+      // UPDATE
+      .addCase(updateProduct.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(UpdateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+      .addCase(updateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.loading = false;
-        state.message = action.payload.message as string;
-        state.isupdated = true;
+        state.isUpdated = true;
+        state.message = action.payload.message || 'Product updated';
       })
-      .addCase(UpdateProduct.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(updateProduct.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // DELETE PRODUCT
-      .addCase(DeleteProduct.pending, (state) => {
+      // DELETE
+      .addCase(deleteProduct.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(DeleteProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+      .addCase(deleteProduct.fulfilled, (state, action: PayloadAction<Product>) => {
         state.loading = false;
-        state.message = action.payload.message as string;
-        state.isdeleted = true;
+        state.isDeleted = true;
+        state.message = action.payload.message || 'Product deleted';
       })
-      .addCase(DeleteProduct.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(deleteProduct.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
       });
   },
 });
-
-
-
 
 export const { resetState } = ProductSlice.actions;
 export default ProductSlice.reducer;

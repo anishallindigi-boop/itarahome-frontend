@@ -39,7 +39,7 @@ const ProjectTable: React.FC<ProjectTableProps>  = ({filtered,openEdit,handleDel
                 <div className="flex items-center">
                  
                   <div>
-                    <div className="text-sm font-medium text-gray-900">{p.categoryname}</div>
+                    <div className="text-sm font-medium text-gray-900">{p.name}</div>
                     {/* <div className="text-sm text-gray-500">{p.}</div> */}
                   </div>
                 </div>
@@ -47,21 +47,19 @@ const ProjectTable: React.FC<ProjectTableProps>  = ({filtered,openEdit,handleDel
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div className="flex items-center">
                   
-                  {p.categorydescription}
+                  {p.name}
                 </div>
               </td>
               
            
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${p.status === 'completed'
+                  className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${p.isActive === true
                       ? 'bg-green-100 text-green-800'
-                      : p.status === 'ongoing'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-orange-100 text-orange-800'
+                      : 'bg-red-100 text-red-800'
                     }`}
                 >
-                  {p.status}
+                  {p.isActive ? 'Active' : 'Inactive'}
                 </span>
               </td>
              

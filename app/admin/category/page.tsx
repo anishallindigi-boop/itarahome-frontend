@@ -40,6 +40,9 @@ const Page = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CategoryFormState>(initialForm);
 
+
+
+
   // Unified handler for text + file
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

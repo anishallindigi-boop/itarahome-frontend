@@ -8,18 +8,22 @@ import OrderSlice from './slice/OrderSlice';
 import  BlogCategorySlice  from './slice/BlogCategorySlice';
 import BlogSlice from './slice/BlogSlice';
 import  WishlistSlice  from './slice/WishlistSlice';
+import VariationSlice from './slice/VariationSlice';
+import ImageSlice from './slice/ImageSlice'
 
 const store = configureStore({
   reducer: {
     auth: AuthSlice,
     productcategory: ProductCategorySlice,
     product: ProductSlice,
+    variation:VariationSlice,
     usercart: CartItemSlice,
     shippingmethod:ShippingMethodSlice,
     order:OrderSlice,
        blogcategory:BlogCategorySlice,
     blog:BlogSlice,
-    wishlist:WishlistSlice
+    wishlist:WishlistSlice,
+    image: ImageSlice,
   },
 
 })
