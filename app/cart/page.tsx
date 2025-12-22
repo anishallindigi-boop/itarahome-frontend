@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Minus, Plus, Trash2, Trash } from 'lucide-react';
@@ -15,84 +14,91 @@ import {
 } from '@/redux/slice/CartItemSlice';
 import { useOnce } from '@/lib/useOnce';
 
-const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL;
+const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
-/* ---------------- TYPE ---------------- */
-type CartResolvedItem = {
-  cartId: string;
-  productId: string;
-  variationId: string | null;
-  name: string;
-  image: string;
-  price: number;
-  qty: number;
-  stock: number | null;
-  attributes: Record<string, string>;
+type CartItem = {
+  _id: string;
+  productId: {
+    _id: string;
+    name: string;
+    mainImage: string;
+    price: number;
+    discountPrice?: number;
+    stock?: number;
+  };
+  variationId: {
+    _id?: string;
+    price: number;
+    discountPrice?: number;
+    image?: string;
+    attributes?: Record<string, string>;
+    stock?: number;
+  } | null;
+  quantity: number;
 };
 
 export default function CartPage() {
   const dispatch = useAppDispatch();
-  const rawCart = useAppSelector(
-    (s: any) => s.usercart.cart
-  ) as any[] | undefined;
-
-  useOnce(() => dispatch(getCartItems()));
+  const rawCart = useAppSelector((s: any) => s.usercart.cart) as CartItem[] | undefined;
 
   const [loadingItems, setLoadingItems] = useState<string[]>([]);
   const [loadingClear, setLoadingClear] = useState(false);
 
-  /* ---------------- RESOLVE CART (IMPORTANT) ---------------- */
-  const items: CartResolvedItem[] = useMemo(() => {
-    return (rawCart || []).map((c) => {
-      const hasVariation = !!c.productvariationid;
+  // Fetch cart on mount
+  useOnce(() => dispatch(getCartItems()));
+
+  /* ---------------- RESOLVED CART ITEMS ---------------- */
+  const items = useMemo(() => {
+    if (!rawCart) return [];
+
+    return rawCart.map((item) => {
+      const hasVariation = !!item.variationId;
+      const variation = item.variationId;
 
       return {
-        cartId: c._id,
-        productId: c.productId._id,
-        variationId: hasVariation ? c.productvariationid._id : null,
-
-        name: c.productId.name,
-        image: c.productId.mainImage,
-
+        cartId: item._id,
+        productId: item.productId._id,
+        name: item.productId.name,
+        // Image priority: variation image → product mainImage
+        image: hasVariation && variation?.image
+          ? variation.image
+          : item.productId.mainImage,
+        // Price priority: variation discount → variation price → product discount → product price
         price: hasVariation
-          ? Number(c.productvariationid.sellingPrice)
-          : Number(c.productId.discountPrice || c.productId.price),
-
-        stock: hasVariation
-          ? c.productvariationid.stock
-          : c.productId.stock ?? null,
-
-        attributes: hasVariation
-          ? c.productvariationid.attributes || {}
-          : {},
-
-        qty: c.quantity,
+          ? (variation?.discountPrice ?? variation?.price ?? item.productId.price)
+          : (item.productId.discountPrice ?? item.productId.price),
+        // Stock from variation or product
+        stock: hasVariation ? variation?.stock ?? null : item.productId.stock ?? null,
+        // Attributes only if variation exists
+        attributes: hasVariation ? variation?.attributes ?? {} : {},
+        qty: item.quantity,
       };
     });
   }, [rawCart]);
 
   /* ---------------- HANDLERS ---------------- */
-  const changeQty = async (cartId: string, qty: number, stock: number | null) => {
-    if (stock !== null && qty > stock) return;
+  const changeQty = async (cartId: string, newQty: number, stock: number | null) => {
+    if (stock !== null && newQty > stock) return;
 
-    setLoadingItems((p) => [...p, cartId]);
+    setLoadingItems((prev) => [...prev, cartId]);
+
     try {
-      if (qty <= 0) {
+      if (newQty <= 0) {
         await dispatch(removeCartItem(cartId));
       } else {
-        await dispatch(updateCartQuantity({ cartId, quantity: qty }));
+        await dispatch(updateCartQuantity({ cartId, quantity: newQty }));
       }
     } finally {
-      setLoadingItems((p) => p.filter((id) => id !== cartId));
+      setLoadingItems((prev) => prev.filter((id) => id !== cartId));
     }
   };
 
   const removeItem = async (cartId: string) => {
-    setLoadingItems((p) => [...p, cartId]);
+    setLoadingItems((prev) => [...prev, cartId]);
     try {
       await dispatch(removeCartItem(cartId));
     } finally {
-      setLoadingItems((p) => p.filter((id) => id !== cartId));
+      setLoadingItems((prev) => prev.filter((id) => id !== cartId));
     }
   };
 
@@ -106,106 +112,108 @@ export default function CartPage() {
   };
 
   /* ---------------- TOTALS ---------------- */
-  const subTotal = items.reduce(
-    (sum, i) => sum + i.price * i.qty,
-    0
-  );
+  const subTotal = useMemo(() => {
+    return items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  }, [items]);
 
-  const shipping = 0;
-  const total = subTotal + shipping;
+  const total = subTotal; // Shipping is free
 
-  /* ---------------- EMPTY ---------------- */
+  /* ---------------- EMPTY STATE ---------------- */
   if (!items.length) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-xl">Your cart is empty</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
+          <p className="text-muted-foreground">Looks like you haven't added anything yet.</p>
+        </div>
         <Link href="/">
-          <Button>Continue Shopping</Button>
+          <Button size="lg">Continue Shopping</Button>
         </Link>
       </div>
     );
   }
 
-  /* ---------------- UI ---------------- */
+  /* ---------------- MAIN UI ---------------- */
   return (
-    <div className="max-w-5xl mx-auto px-4 py-[100px]">
-      <h1 className="text-3xl font-bold mb-6">Shopping Cart</h1>
+    <div className="max-w-6xl mx-auto px-4 py-[100px]">
+      <h1 className="text-4xl font-bold mb-8">Shopping Cart</h1>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* ITEMS */}
-        <div className="md:col-span-2 space-y-4">
-          {items.map((it) => {
-            const isLoading = loadingItems.includes(it.cartId);
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Cart Items */}
+        <div className="lg:col-span-2 space-y-6">
+          {items.map((item) => {
+            const isLoading = loadingItems.includes(item.cartId);
+            const isOutOfStock = item.stock !== null && item.qty >= item.stock;
 
             return (
-              <Card key={it.cartId} className="p-4">
-                <div className="flex gap-6">
-                  <img
-                    src={`${IMAGE_URL}/${it.image}`}
-                    alt={it.name}
-                    className="w-24 h-24 rounded object-cover"
-                  />
+              <Card key={item.cartId} className="p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row gap-6">
+                  {/* Product Image */}
+                  <div className="shrink-0">
+                    <img
+                      src={`${IMAGE_URL}${item.image}`}
+                      alt={item.name}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  </div>
 
+                  {/* Product Details */}
                   <div className="flex-1">
-                    <p className="font-semibold">{it.name}</p>
+                    <h3 className="text-lg font-semibold">{item.name}</h3>
 
-                    {/* VARIATION ATTRIBUTES */}
-                    {Object.keys(it.attributes).length > 0 && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {Object.entries(it.attributes).map(([k, v]) => (
-                          <p key={k}>
-                            {k.toUpperCase()}: {v}
+                    {/* Variation Attributes */}
+                    {Object.keys(item.attributes).length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {Object.entries(item.attributes).map(([key, value]) => (
+                          <p key={key} className="text-sm text-muted-foreground capitalize">
+                            {key}: <span className="font-medium text-foreground">{value}</span>
                           </p>
                         ))}
                       </div>
                     )}
 
-                    <p className="text-sm mt-1">₹{it.price}</p>
+                    {/* Price */}
+                    <p className="text-xl font-semibold mt-4">₹{item.price}</p>
+                  </div>
 
-                    {/* QTY */}
-                    <div className="flex items-center gap-2 mt-3">
+                  {/* Quantity & Remove */}
+                  <div className="flex flex-col items-end justify-between gap-4">
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-3">
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() =>
-                          changeQty(it.cartId, it.qty - 1, it.stock)
-                        }
-                        disabled={isLoading}
+                        onClick={() => changeQty(item.cartId, item.qty - 1, item.stock)}
+                        disabled={isLoading || item.qty <= 1}
                       >
                         <Minus className="w-4 h-4" />
                       </Button>
 
-                      <span className="w-10 text-center">{it.qty}</span>
+                      <span className="w-12 text-center font-medium">{item.qty}</span>
 
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() =>
-                          changeQty(it.cartId, it.qty + 1, it.stock)
-                        }
-                        disabled={
-                          isLoading ||
-                          (it.stock !== null && it.qty >= it.stock)
-                        }
+                        onClick={() => changeQty(item.cartId, item.qty + 1, item.stock)}
+                        disabled={isLoading || isOutOfStock}
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
-                  </div>
 
-                  <div className="flex flex-col items-end justify-between">
-                    <p className="font-semibold">
-                      ₹{it.price * it.qty}
-                    </p>
-
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeItem(it.cartId)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="w-4 h-4 text-rose-600" />
-                    </Button>
+                    {/* Item Total + Remove */}
+                    <div className="text-right">
+                      <p className="text-lg font-bold">₹{item.price * item.qty}</p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItem(item.cartId)}
+                        disabled={isLoading}
+                        className="mt-2 text-rose-600 hover:text-rose-700"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -213,45 +221,47 @@ export default function CartPage() {
           })}
         </div>
 
-        {/* SUMMARY */}
-        <Card className="p-6 h-fit">
-          <div className="flex justify-between mb-4">
-            <h2 className="text-xl font-semibold">Order Summary</h2>
-
+        {/* Order Summary */}
+        <Card className="p-6 h-fit shadow-md">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Order Summary</h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAll}
               disabled={loadingClear}
-              className="text-rose-600"
+              className="text-rose-600 hover:bg-rose-50"
             >
-              <Trash className="w-4 h-4 mr-1" />
-              Clear
+              <Trash className="w-4 h-4 mr-2" />
+              Clear Cart
             </Button>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Sub-total</span>
-              <span>₹{subTotal}</span>
+          <div className="space-y-4">
+            <div className="flex justify-between text-lg">
+              <span>Subtotal</span>
+              <span className="font-semibold">₹{subTotal}</span>
             </div>
 
-            <div className="flex justify-between text-sm">
-              <span>Shipping</span>
-              <span>Free</span>
-            </div>
+         
 
-            <Separator />
+            <Separator className="my-4" />
 
-            <div className="flex justify-between font-semibold text-lg">
+            <div className="flex justify-between text-2xl font-bold">
               <span>Total</span>
               <span>₹{total}</span>
             </div>
           </div>
 
-          <Button className="w-full mt-6" asChild>
+          <Button size="lg" className="w-full mt-8" asChild>
             <Link href="/checkout">Proceed to Checkout</Link>
           </Button>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            <Link href="/" className="underline hover:text-foreground">
+              Continue Shopping
+            </Link>
+          </p>
         </Card>
       </div>
     </div>

@@ -110,7 +110,7 @@ React.useEffect(() => {
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <Building2 className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">OPS Admin</span>
+              <span className="text-xl font-bold text-gray-900">Admin</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}

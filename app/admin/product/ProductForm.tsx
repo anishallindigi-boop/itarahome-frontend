@@ -54,6 +54,9 @@ export default function ProductCreateForm() {
       const { Productcategories } = useAppSelector(
     (state: RootState) => state.productcategory
   );
+ const { products, loading, error, success, message } = useAppSelector(
+    (state: RootState) => state.product
+  );
 
   const [form, setForm] = useState<ProductFormState>({
     name: '',
@@ -161,7 +164,25 @@ const handleChange = (
 
   useEffect(() => {
     dispatch(GetProductCategory());
-  }, []);
+    if(success){
+      setForm({
+         name: '',
+    description: '',
+    content: '',
+    price: '',
+    categoryid:[],
+    discountPrice: '',
+    stock: '',
+     slug: '',
+    status: 'draft',
+    mainImage: '',
+    gallery: [],
+    attributes: [],
+    variations: [],
+      })
+    }
+  }, [success]);
+
 
 
   return (
