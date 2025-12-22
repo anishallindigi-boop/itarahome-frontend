@@ -74,7 +74,7 @@ export default function OrdersPage() {
                         ? "bg-yellow-100 text-yellow-700"
                         : order.status === "shipped"
                         ? "bg-blue-100 text-blue-700"
-                        : order.status === "delivered"
+                        : order.status === "order success"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                   }`}>
@@ -120,7 +120,7 @@ export default function OrdersPage() {
                         <div key={item._id} className="flex items-center gap-4">
                           <div className="relative w-20 h-20 rounded-lg overflow-hidden border">
                             <img
-                              src={`${API_URL}/uploads/${item.productId.mainImage}`}
+                              src={`${API_URL}${item.productId.mainImage}`}
                               alt={item.productId.name}
                               // fill
                               className="object-cover"

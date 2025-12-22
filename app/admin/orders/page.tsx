@@ -92,6 +92,7 @@ export default function OrdersPage() {
                         ? "bg-blue-100 text-blue-700"
                         : order.status === "delivered"
                         ? "bg-green-100 text-green-700"
+                        : order.status === "order success" ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
@@ -146,7 +147,7 @@ export default function OrdersPage() {
                           className="flex items-center gap-4"
                         >
                           <img
-                            src={`${API_URL}/uploads/${item.productId.mainImage}`}
+                            src={`${API_URL}${item.productId.mainImage}`}
                             alt={item.productId.name}
                             className="w-20 h-20 object-cover rounded border"
                           />

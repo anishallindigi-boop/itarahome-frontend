@@ -133,7 +133,7 @@ export default function CheckoutPage() {
     const res: any = await dispatch(createOrder(payload));
 
     if (createOrder.fulfilled.match(res)) {
-      const orderId = res.payload?.order?._id || res.payload?._id;
+      const orderId = res.payload?.order?._id;
       await dispatch(clearCart());
       router.push(`/orders?from=checkout&id=${orderId}`);
     } else {
