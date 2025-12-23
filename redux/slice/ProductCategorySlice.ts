@@ -16,6 +16,7 @@ export interface CategoryInput {
   metakeywords?: string;
   isActive: boolean;
   status: 'draft' | 'published';
+  
 }
 
 export interface Category {

@@ -24,6 +24,7 @@ interface CategoryFormState {
   metadescription: string;
   metakeywords: string;
   image: string;
+  isActive: boolean;
   status: 'draft' | 'published';
 }
 
@@ -62,6 +63,7 @@ export default function CategoryUpdateForm() {
     metakeywords: '',
     image: '',
     status: 'draft',
+    isActive: true,
   });
 
   /* ---------------- CHANGE ---------------- */
@@ -105,6 +107,7 @@ export default function CategoryUpdateForm() {
         metakeywords: singleCategory.metakeywords || '',
         image: singleCategory.image || '',
         status: singleCategory.status || 'draft',
+        isActive: singleCategory.isActive ?? true,
       });
     }
   }, [singleCategory]);
