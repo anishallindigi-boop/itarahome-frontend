@@ -51,7 +51,7 @@ export default function ProductCreateForm() {
     useState<number | null>(null);
 
 
-      const { Productcategories } = useAppSelector(
+      const { categories } = useAppSelector(
     (state: RootState) => state.productcategory
   );
  const { products, loading, error, success, message } = useAppSelector(
@@ -410,7 +410,7 @@ const handleChange = (
 <div className="space-y-2 bg-white">
   <p className="font-semibold">Select Categories</p>
   <div className="">
-    {Productcategories?.map((cat: any) => (
+    {categories?.map((cat: any) => (
       <label key={cat._id} className="flex items-center gap-2 border p-2 rounded cursor-pointer">
         <input
           type="checkbox"

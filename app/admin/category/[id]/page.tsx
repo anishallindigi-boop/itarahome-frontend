@@ -1,26 +1,29 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ImageIcon, Save } from 'lucide-react';
-import ImageUploadModal from '../../elements/ImageUploadModal';
+import { ImageIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
+
+import ImageUploadModal from '../../../elements/ImageUploadModal';
+import {
+  GetSingleProductCategory,
+  UpdateProductCategory,
+} from '@/redux/slice/ProductCategorySlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { RootState } from '@/redux/store';
-import {
-  CreateProductCategory,
-  resetState,
-} from '@/redux/slice/ProductCategorySlice';
+import { useRouter } from 'next/navigation';
 
 /* ---------------- TYPES ---------------- */
 
 interface CategoryFormState {
   name: string;
-  slug: string;
   description: string;
-  image: string;
+  slug: string;
   metatitle: string;
   metadescription: string;
   metakeywords: string;
-  isActive: boolean;
+  image: string;
   status: 'draft' | 'published';
 }
 
@@ -37,68 +40,84 @@ function generateSlug(text: string): string {
 
 /* ---------------- COMPONENT ---------------- */
 
-export default function CategoryCreateForm() {
+export default function CategoryUpdateForm() {
   const dispatch = useAppDispatch();
-  const { loading, success } = useAppSelector(
-    (state: RootState) => state.productcategory
-  );
+  const params = useParams();
+  const categoryId = params?.id as string;
+  const route=useRouter();
+
+  const { singleCategory, loading, error, message,isupdated } =
+    useAppSelector((state: RootState) => state.productcategory);
+
+  
 
   const [openImage, setOpenImage] = useState(false);
 
   const [form, setForm] = useState<CategoryFormState>({
     name: '',
-    slug: '',
     description: '',
-    image: '',
+    slug: '',
     metatitle: '',
     metadescription: '',
     metakeywords: '',
-    isActive: true,
+    image: '',
     status: 'draft',
   });
 
-  /* ---------------- HANDLERS ---------------- */
+  /* ---------------- CHANGE ---------------- */
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    setForm((prev) => {
+    setForm((p) => {
       if (name === 'name') {
-        return {
-          ...prev,
-          name: value,
-          slug: generateSlug(value),
-        };
+        return { ...p, name: value, slug: generateSlug(value) };
       }
-      return { ...prev, [name]: value };
+      return { ...p, [name]: value };
     });
   };
 
+  /* ---------------- SUBMIT ---------------- */
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(CreateProductCategory(form));
+    dispatch(UpdateProductCategory({ id: categoryId, form: form }));
   };
 
-  /* ---------------- EFFECTS ---------------- */
+  /* ---------------- FETCH CATEGORY ---------------- */
 
   useEffect(() => {
-    if (success) {
-      setForm({
-        name: '',
-        slug: '',
-        description: '',
-        image: '',
-        metatitle: '',
-        metadescription: '',
-        metakeywords: '',
-        isActive: true,
-        status: 'draft',
-      });
-      dispatch(resetState());
+    if (categoryId) {
+      dispatch(GetSingleProductCategory(categoryId));
     }
-  }, [success, dispatch]);
+  }, [categoryId, dispatch]);
+
+  useEffect(() => {
+    if (singleCategory) {
+      setForm({
+        name: singleCategory.name || '',
+        description: singleCategory.description || '',
+        slug: singleCategory.slug || '',
+        metatitle: singleCategory.metatitle || '',
+        metadescription: singleCategory.metadescription || '',
+        metakeywords: singleCategory.metakeywords || '',
+        image: singleCategory.image || '',
+        status: singleCategory.status || 'draft',
+      });
+    }
+  }, [singleCategory]);
+
+  /* ---------------- TOAST ---------------- */
+
+  useEffect(() => {
+    if (message) toast.success(message);
+    if (error) toast.error(error);
+    if(isupdated){
+        route.push('/admin/category')
+    }
+  }, [message, error,isupdated]);
 
   /* ---------------- UI ---------------- */
 
@@ -124,8 +143,8 @@ export default function CategoryCreateForm() {
           <textarea
             name="description"
             placeholder="Category Description"
-            className="border p-2 w-full rounded"
             rows={3}
+            className="border p-2 w-full rounded"
             value={form.description}
             onChange={handleChange}
           />
@@ -146,15 +165,15 @@ export default function CategoryCreateForm() {
           <textarea
             name="metadescription"
             placeholder="Meta Description"
-            className="border p-2 w-full rounded"
             rows={2}
+            className="border p-2 w-full rounded"
             value={form.metadescription}
             onChange={handleChange}
           />
 
           <input
             name="metakeywords"
-            placeholder="Meta Keywords (comma separated)"
+            placeholder="Meta Keywords"
             className="border p-2 w-full rounded"
             value={form.metakeywords}
             onChange={handleChange}
@@ -165,7 +184,7 @@ export default function CategoryCreateForm() {
       {/* ================= RIGHT ================= */}
       <div className="col-span-4 space-y-6 sticky top-6">
         {/* PUBLISH */}
-        <div className="bg-white border rounded p-5 space-y-4">
+        <div className="bg-white border rounded p-5 space-y-3">
           <h3 className="font-semibold text-lg">Publish</h3>
 
           <select
@@ -178,30 +197,18 @@ export default function CategoryCreateForm() {
             <option value="published">Published</option>
           </select>
 
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.isActive}
-              onChange={() =>
-                setForm((p) => ({ ...p, isActive: !p.isActive }))
-              }
-            />
-            Active
-          </label>
-
           <button
             type="submit"
             disabled={loading}
-            className="bg-black text-white w-full py-2 rounded flex items-center justify-center gap-2"
+            className="bg-black text-white w-full py-2 rounded"
           >
-            <Save size={16} />
-            Save Category
+            Update Category
           </button>
         </div>
 
         {/* SLUG */}
         <div className="border p-3 rounded bg-gray-100 text-sm">
-          <label className="font-medium">Slug (auto generated)</label>
+          <label className="font-medium">Slug</label>
           <p className="break-all">{form.slug}</p>
         </div>
 

@@ -58,7 +58,7 @@ const productId = params?.id as string;
   const [openGallery, setOpenGallery] = useState(false);
   const [variationImageIndex, setVariationImageIndex] = useState<number | null>(null);
 
-  const { Productcategories } = useAppSelector((state: RootState) => state.productcategory);
+  const { categories } = useAppSelector((state: RootState) => state.productcategory);
   const { singleProduct, loading, error, message } = useAppSelector((state: RootState) => state.product);
 
   const [form, setForm] = useState<ProductFormState>({
@@ -395,7 +395,7 @@ const addAttributeValue = (i: number, value: string) => {
         {/* CATEGORIES */}
         <div className="space-y-2 bg-white">
           <p className="font-semibold">Select Categories</p>
-          {Productcategories?.map((cat: any) => (
+          {categories?.map((cat: any) => (
             <label key={cat._id} className="flex items-center gap-2 border p-2 rounded cursor-pointer">
               <input
                 type="checkbox"

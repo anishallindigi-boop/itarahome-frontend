@@ -1,91 +1,176 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+'use client';
+
+import React, { useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+
 import {
-  Plus, Edit, Trash2, Search, MapPin, X, Save
-} from 'lucide-react';
+  GetProductCategory,
+  DeleteProductCategory,
+  UpdateCategoryStatus,
+  resetState,
+} from '@/redux/slice/ProductCategorySlice';
+
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { RootState } from '@/redux/store';
+  const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL
+
+const CategoryTablePage = () => {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  const {
+    categories,
+    loading,
+    error,
+    isdeleted,
+  } = useAppSelector((state: RootState) => state.productcategory);
+
+  // Fetch categories
+  useEffect(() => {
+    dispatch(GetProductCategory());
+  }, [dispatch]);
+
+  // Refetch after delete
+  useEffect(() => {
+    if (isdeleted) {
+      dispatch(GetProductCategory());
+      dispatch(resetState());
+    }
+  }, [isdeleted, dispatch]);
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this category?')) {
+      dispatch(DeleteProductCategory(id));
+    }
+  };
 
 
-interface ProjectTableProps {
-    filtered: any[];
-    openEdit: (id: string) => void;
-    handleDelete: (id: string) => void;
-  }
+    const handleToggleStatus = (id: string, status: 'draft' | 'published') => {
+      dispatch(
+        UpdateCategoryStatus({
+          id,
+          status: status === 'published' ? 'draft' : 'published',
+        })
+      );
+    };
 
-const ProjectTable: React.FC<ProjectTableProps>  = ({filtered,openEdit,handleDelete}) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-gray-50 border-b border-gray-200">
-          <tr>
-            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">category Name</th>
-            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">category Description</th>
-          
-            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-          
-            <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {filtered.map((p:any, idx:any) => (
-            <motion.tr
-              key={p._id || idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="hover:bg-gray-50"
-            >
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                 
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">{p.name}</div>
-                    {/* <div className="text-sm text-gray-500">{p.}</div> */}
-                  </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <div className="flex items-center">
-                  
-                  {p.name}
-                </div>
-              </td>
-              
-           
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${p.isActive === true
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                    }`}
-                >
-                  {p.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </td>
-             
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => openEdit(p._id)}
-                    className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p._id)}
-                    className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </td>
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  )
-}
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold">Product Categories</h1>
 
-export default ProjectTable
+        
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-100 text-red-700 p-3 rounded">
+          {error}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="overflow-x-auto border rounded-lg">
+        <table className="min-w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-3 text-left">Image</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">Description</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-center">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="text-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto" />
+                </td>
+              </tr>
+            ) : categories.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="text-center py-10 text-gray-500">
+                  No categories found
+                </td>
+              </tr>
+            ) : (
+              categories.map((cat) => (
+                <tr
+                  key={cat._id}
+                  className="border-t hover:bg-gray-50"
+                >
+                  {/* Image */}
+                  <td className="px-4 py-3">
+                    {cat.image ? (
+                      <img
+                        src={`${IMAGE_URL}${cat.image}`}
+                        alt={cat.name}
+                        width={50}
+                        height={50}
+                        className="rounded"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 rounded" />
+                    )}
+                  </td>
+
+                  {/* Name */}
+                  <td className="px-4 py-3 font-medium">
+                    {cat.name}
+                  </td>
+
+                  {/* Description */}
+                  <td className="px-4 py-3 text-gray-600 line-clamp-2">
+                    {cat.description}
+                  </td>
+
+                  {/* Status */}
+                   <td className="px-6 py-4">
+                  <button
+                    onClick={() => handleToggleStatus(cat._id, cat.status)}
+                    className={`px-3 py-1 rounded-full text-xs text-white ${
+                      cat.status === 'published'
+                        ? 'bg-green-500'
+                        : 'bg-gray-400'
+                    }`}
+                  >
+                    {cat.status === 'published' ? 'Published' : 'Draft'}
+                  </button>
+                </td>
+
+                  {/* Actions */}
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex justify-center gap-3">
+                      <button
+                        onClick={() =>
+                          router.push(`/admin/category/${cat._id}`)
+                        }
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(cat._id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default CategoryTablePage;

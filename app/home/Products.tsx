@@ -55,7 +55,7 @@ export default function Products() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {(products || []).slice(0, 9).map((product: any) => (
-          <div key={product._id} className="group relative bg-white border rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden">
+          <div key={product._id} className="group relative bg-white border rounded-2xl hover:shadow-xl transition overflow-hidden">
             <Link href={`/products/${product.slug}`}>
               {/* Image */}
               <div className="relative overflow-hidden aspect-w-1 aspect-h-1">
@@ -96,11 +96,11 @@ export default function Products() {
                   {product.name}
                 </h3>
 
-                <div className="flex items-center mt-2.5 space-x-0.5">
+                {/* <div className="flex items-center mt-2.5 space-x-0.5">
                   <p>{product.description}</p>
-                </div>
+                </div> */}
 
-                <div className="flex items-center justify-between mt-3">
+                {/* <div className="flex items-center justify-between mt-3">
                   <div>
                     {product.discountPrice ? (
                       <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export default function Products() {
                       </span>
                     )}
                   </div>
-                </div>
+                </div> */}
               </div>
             </Link>
           </div>
