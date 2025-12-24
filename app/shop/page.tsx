@@ -11,7 +11,7 @@ import {
 } from '@/redux/slice/ProductSlice';
 
 
-const page = () => {
+const Page = () => {
 
  const dispatch = useAppDispatch();
 
@@ -33,5 +33,5 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
 
