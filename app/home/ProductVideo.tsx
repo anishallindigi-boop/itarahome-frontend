@@ -18,9 +18,6 @@ export default function ProductVideo() {
         video.playsInline = true;   // required for iOS
         video
           .play()
-          .then(() => {
-            // autoplay started
-          })
           .catch((err) => {
             console.log('Autoplay failed:', err);
           });
@@ -29,24 +26,21 @@ export default function ProductVideo() {
   }, []);
 
   return (
-    <section className="bg-gray-50">
-      {/* <h2 className="text-3xl font-bold text-center mb-12">Watch Our Videos</h2> */}
-
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 px-4">
+    <section className="bg-gray-50 py-12">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 px-4">
         {videos.map((video, idx) => (
-          <div
-            key={video.id}
-            className="relative overflow-hidden shadow-lg"
-          >
+          <div key={video.id} className="relative overflow-hidden shadow-lg rounded-xl">
             <video
-              ref={(el) => el && (videoRefs.current[idx] = el)}
+              ref={(el) => {
+                if (el) videoRefs.current[idx] = el;
+              }}
               src={video.src}
-              className="w-full sm:h-80 object-cover"
+              className="w-full sm:h-80 object-cover rounded-xl"
               muted
               loop
               playsInline
             />
-            <p className="absolute bottom-3 left-3 text-white font-semibold bg-black/20 bg-opacity-10 px-3 py-1 rounded">
+            <p className="absolute bottom-3 left-3 text-white font-semibold bg-black/30 px-3 py-1 rounded">
               {video.title}
             </p>
           </div>
