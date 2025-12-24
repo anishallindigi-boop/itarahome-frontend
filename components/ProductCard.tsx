@@ -12,10 +12,10 @@ export default function ProductCard({ product }: any) {
       className="group border rounded-2xl overflow-hidden hover:shadow-lg transition"
     >
       <div className="relative h-60 bg-gray-100">
-        <Image
+        <img
           src={`${process.env.NEXT_PUBLIC_API_URL}${product.mainImage}`}
           alt={product.name}
-          fill
+    
           className="object-cover group-hover:scale-105 transition"
         />
       </div>
