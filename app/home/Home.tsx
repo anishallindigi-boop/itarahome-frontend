@@ -7,6 +7,7 @@ import Workshop from './Workshop'
 import Contact from './Contact'
 import Popup from './PopUp'
 import ServicesSection from './ServicesSection'
+import ProductVideo from './ProductVideo'
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
     <Popup/>
     <AboutSection/>
     <Products/>
+    <ProductVideo/>
     <ServicesSection/>
     <Testimonials/>
     <Workshop/>

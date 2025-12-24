@@ -170,6 +170,25 @@ export const getProductBySlug = createAsyncThunk(
 );
 
 
+
+//------------------get product by category slug---------------
+
+
+export const getProductsByCategorySlug =  createAsyncThunk(
+  'product/getByCategorySlug',
+  async (slug: string, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/product/category/${slug}`, {
+        headers: { 'x-api-key': API_KEY! },
+      });
+      return data.products;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch products by category slug');
+    }
+  }
+);
+
+
 // -----------------------update product status--------------s
 
 export const UpdateProductStatus = createAsyncThunk<
@@ -310,6 +329,21 @@ export const ProductSlice = createSlice({
         state.error = action.payload;
       })
 
+
+//get product by category slug
+
+  .addCase(getProductsByCategorySlug.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProductsByCategorySlug.fulfilled, (state, action: PayloadAction<Product[]>) => {
+        state.loading = false;
+        state.products = action.payload;
+      })
+      .addCase(getProductsByCategorySlug.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
  // UPDATE STATUS
     .addCase(UpdateProductStatus.pending, (state) => {

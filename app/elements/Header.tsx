@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown, User, Search, LogOut, Package, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { CartPopover } from './CartPopover';
 import { logoutuser ,resetState} from '@/redux/slice/AuthSlice';
 import LoginPopup from './LoginPopup';
 import { useRouter } from 'next/navigation';
+import { getProducts} from '@/redux/slice/ProductSlice';
 
 import { toast } from "sonner"
 import WishlistDrawer from './WishlistDrawer';
@@ -39,6 +40,11 @@ export default function HeaderImproved() {
    const [openWishlist, setOpenWishlist] = React.useState(false);
 
   const dispatch = useAppDispatch();
+
+  const { products} = useAppSelector(
+    (state: RootState) => state.product
+  );
+
 
   const { isAuthenticated, user,message ,error} = useAppSelector(
     (state: RootState) => state.auth);
@@ -90,16 +96,36 @@ React.useEffect(() => {
 }, [message]);
 
 
+  /* ================= FETCH PRODUCTS ================= */
+  useEffect(() => {
+    dispatch(getProducts());
+  }, [dispatch]);
+
+
+
+  const product = React.useMemo(() => {
+  const map = new Map();
+
+  products?.forEach((product: any) => {
+   
+      map.set(product.slug, product.name);
+  
+  });
+
+  return Array.from(map.entries()).map(([slug, name]) => ({
+    label: name,
+    href: `/products/${slug}`, // slug based route
+  }));
+}, [products]);
+
     
   const menu = [
     { label: 'Home', href: '/' },
-    {
-      label: 'Products',
-      children: [
-        { label: 'Tray', href: '/#' },
-        { label: 'Table', href: '/#' },
-      ],
-    },
+     {
+    label: 'Products',
+    children: product,
+  },
+    { label: 'Shop', href: '/shop' },
     { label: 'About Us', href: '/about-us' },
     { label: 'Contact', href: '/contact-us' },
      { label: 'Bulk Enquiry', href: '/enquiry-form ' },
