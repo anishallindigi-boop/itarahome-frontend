@@ -27,15 +27,15 @@ export default function ProductVideo() {
 
   return (
     <section className="bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 px-4">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 px-4">
         {videos.map((video, idx) => (
-          <div key={video.id} className="relative overflow-hidden shadow-lg rounded-xl">
+          <div key={video.id} className="relative overflow-hidden shadow-lg ">
             <video
               ref={(el) => {
                 if (el) videoRefs.current[idx] = el;
               }}
               src={video.src}
-              className="w-full sm:h-80 object-cover rounded-xl"
+              className="w-full sm:h-80 object-cover "
               muted
               loop
               playsInline
