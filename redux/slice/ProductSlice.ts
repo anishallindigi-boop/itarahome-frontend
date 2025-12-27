@@ -12,6 +12,7 @@ export interface CreateProductPayload {
   content: string;
   slug: string;
   categoryid: string[];
+  subcategoryid: string[]; 
   price: string;
   discountPrice: string;
   stock: string;

@@ -9,6 +9,9 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { createProduct } from "@/redux/slice/ProductSlice";
 
+import {
+  GetSubCategories,
+} from '@/redux/slice/SubCategorySlice';
 /* ---------------- TYPES ---------------- */
 
 interface Attribute {
@@ -30,6 +33,7 @@ interface ProductFormState {
   content: string;
    slug: string;
   categoryid:string[];
+    subcategoryid: string[],   // ✅
   price: string;
   discountPrice: string;
   stock: string;
@@ -54,6 +58,12 @@ export default function ProductCreateForm() {
       const { categories } = useAppSelector(
     (state: RootState) => state.productcategory
   );
+
+  const {
+    subCategories,
+  } = useAppSelector((state: RootState) => state.subcategory);
+
+
  const { products, loading, error, success, message } = useAppSelector(
     (state: RootState) => state.product
   );
@@ -64,6 +74,7 @@ export default function ProductCreateForm() {
     content: '',
     price: '',
     categoryid:[],
+      subcategoryid: [],   // ✅
     discountPrice: '',
     stock: '',
      slug: '',
@@ -158,12 +169,13 @@ const handleChange = (
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('FINAL PRODUCT DATA:', form);
+
     dispatch(createProduct(form));
   };
 
   useEffect(() => {
-    dispatch(GetProductCategory());
+ 
+        dispatch(GetSubCategories());
     if(success){
       setForm({
          name: '',
@@ -171,6 +183,7 @@ const handleChange = (
     content: '',
     price: '',
     categoryid:[],
+      subcategoryid: [],   // ✅
     discountPrice: '',
     stock: '',
      slug: '',
@@ -182,6 +195,33 @@ const handleChange = (
       })
     }
   }, [success]);
+
+
+
+
+
+const groupedCategories = subCategories?.reduce((acc: any, sub: any) => {
+  const cat = sub.category;
+  if (!cat) return acc;
+
+  if (!acc[cat._id]) {
+    acc[cat._id] = {
+      _id: cat._id,
+      name: cat.name,
+      subcategories: [],
+    };
+  }
+
+  acc[cat._id].subcategories.push({
+    _id: sub._id,
+    name: sub.name,
+  });
+
+  return acc;
+}, {});
+
+const categoryTree = Object.values(groupedCategories || {});
+
 
 
 
@@ -407,7 +447,7 @@ const handleChange = (
 
 
 {/* CATEGORIES */}
-<div className="space-y-2 bg-white">
+{/* <div className="space-y-2 bg-white">
   <p className="font-semibold">Select Categories</p>
   <div className="">
     {categories?.map((cat: any) => (
@@ -439,7 +479,81 @@ const handleChange = (
       </label>
     ))}
   </div>
+</div> */}
+
+
+
+
+{/* CATEGORY + SUBCATEGORY TREE */}
+<div className="bg-white border rounded p-5">
+  <h3 className="font-semibold text-lg mb-3">Categories</h3>
+
+  <div className="space-y-4">
+    {categoryTree.map((cat: any) => (
+      <div key={cat._id} className="relative pl-4 border-l-2 border-gray-300">
+
+        {/* CATEGORY */}
+        <label className="flex items-center gap-2 font-medium">
+          <input
+            type="checkbox"
+            checked={form.categoryid.includes(cat._id)}
+            onChange={() => {
+              setForm((prev) => {
+                const selected = prev.categoryid.includes(cat._id);
+                return {
+                  ...prev,
+                  categoryid: selected
+                    ? prev.categoryid.filter((id) => id !== cat._id)
+                    : [...prev.categoryid, cat._id],
+                  subcategoryid: selected
+                    ? prev.subcategoryid.filter(
+                        (sid) =>
+                          !cat.subcategories.some(
+                            (s: any) => s._id === sid
+                          )
+                      )
+                    : prev.subcategoryid,
+                };
+              });
+            }}
+          />
+          {cat.name}
+        </label>
+
+        {/* SUBCATEGORIES */}
+        {form.categoryid.includes(cat._id) && (
+          <div className="ml-6 mt-2 space-y-2">
+            {cat.subcategories.map((sub: any) => (
+              <label
+                key={sub._id}
+                className="flex items-center gap-2 text-sm relative"
+              >
+                <span className="absolute -left-4 top-3 w-3 border-t border-gray-300" />
+                <input
+                  type="checkbox"
+                  checked={form.subcategoryid.includes(sub._id)}
+                  onChange={() => {
+                    setForm((prev) => ({
+                      ...prev,
+                      subcategoryid: prev.subcategoryid.includes(sub._id)
+                        ? prev.subcategoryid.filter(
+                            (id) => id !== sub._id
+                          )
+                        : [...prev.subcategoryid, sub._id],
+                    }));
+                  }}
+                />
+                {sub.name}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
 </div>
+
+
 
 
 

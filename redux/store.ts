@@ -9,7 +9,8 @@ import  BlogCategorySlice  from './slice/BlogCategorySlice';
 import BlogSlice from './slice/BlogSlice';
 import  WishlistSlice  from './slice/WishlistSlice';
 import VariationSlice from './slice/VariationSlice';
-import ImageSlice from './slice/ImageSlice'
+import ImageSlice from './slice/ImageSlice';
+import SubCategorySlice from './slice/SubCategorySlice';
 
 const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ const store = configureStore({
     blog:BlogSlice,
     wishlist:WishlistSlice,
     image: ImageSlice,
+    subcategory: SubCategorySlice
   },
 
 })

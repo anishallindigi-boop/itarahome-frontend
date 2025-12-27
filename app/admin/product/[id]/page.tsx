@@ -9,7 +9,11 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { getProductById, updateProduct } from "@/redux/slice/ProductSlice";
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import {
+  GetSubCategories,
+} from '@/redux/slice/SubCategorySlice';
 
 /* ---------------- TYPES ---------------- */
 
@@ -32,6 +36,7 @@ interface ProductFormState {
   content: string;
   slug: string;
   categoryid: string[];
+      subcategoryid: string[],   // ✅
   price: string;
   discountPrice: string;
   stock: string;
@@ -52,14 +57,17 @@ export default function ProductUpdateForm() {
   const dispatch = useAppDispatch();
 const params=useParams();
 const productId = params?.id as string;
-
+  const route=useRouter();
 
   const [openMain, setOpenMain] = useState(false);
   const [openGallery, setOpenGallery] = useState(false);
   const [variationImageIndex, setVariationImageIndex] = useState<number | null>(null);
 
   const { categories } = useAppSelector((state: RootState) => state.productcategory);
-  const { singleProduct, loading, error, message } = useAppSelector((state: RootState) => state.product);
+    const {
+    subCategories,
+  } = useAppSelector((state: RootState) => state.subcategory);
+  const { singleProduct, loading, error, message ,isUpdated} = useAppSelector((state: RootState) => state.product);
 
   const [form, setForm] = useState<ProductFormState>({
     name: '',
@@ -67,6 +75,7 @@ const productId = params?.id as string;
     content: '',
     price: '',
     categoryid: [],
+        subcategoryid: [],
     discountPrice: '',
     stock: '',
     slug: '',
@@ -139,28 +148,51 @@ const addAttributeValue = (i: number, value: string) => {
 
   /* ---------------- VARIATIONS ---------------- */
 
-  const generateVariations = () => {
-    const validAttrs = form.attributes.filter((a) => a.name && a.values.length);
-    if (!validAttrs.length) return;
+const generateVariations = () => {
+  const validAttrs = form.attributes.filter(
+    (a) => a.name && a.values.length
+  );
 
-    const combos = cartesian(validAttrs.map((a) => a.values));
+  if (!validAttrs.length) return;
 
-    const variations: Variation[] = combos.map((combo) => {
-      const attrs: Record<string, string> = {};
-      combo.forEach((val, i) => {
-        attrs[validAttrs[i].name] = val;
-      });
+  const combos = cartesian(validAttrs.map((a) => a.values));
 
-      return {
+  // helper to compare attribute objects
+  const sameAttributes = (
+    a: Record<string, string>,
+    b: Record<string, string>
+  ) =>
+    JSON.stringify(a) === JSON.stringify(b);
+
+  const newVariations: Variation[] = [];
+
+  combos.forEach((combo) => {
+    const attrs: Record<string, string> = {};
+
+    combo.forEach((val, i) => {
+      attrs[validAttrs[i].name] = val;
+    });
+
+    // check if variation already exists
+    const exists = form.variations.some((v) =>
+      sameAttributes(v.attributes, attrs)
+    );
+
+    if (!exists) {
+      newVariations.push({
         attributes: attrs,
         price: '',
         discountPrice: '',
         stock: '',
-      };
-    });
+      });
+    }
+  });
 
-    setForm((p) => ({ ...p, variations }));
-  };
+  setForm((prev) => ({
+    ...prev,
+    variations: [...prev.variations, ...newVariations],
+  }));
+};
 
   /* ---------------- SUBMIT ---------------- */
 
@@ -172,7 +204,7 @@ const addAttributeValue = (i: number, value: string) => {
   /* ---------------- FETCH PRODUCT ---------------- */
 
   useEffect(() => {
-    dispatch(GetProductCategory());
+     dispatch(GetSubCategories());
     dispatch(getProductById(productId));
   }, [productId]);
 
@@ -185,6 +217,7 @@ const addAttributeValue = (i: number, value: string) => {
         content: p.content || '',
         slug: p.slug || '',
         categoryid: Array.isArray(p.categoryid) ? p.categoryid : [p.categoryid || ''],
+            subcategoryid: Array.isArray(p.subcategoryid) ? p.subcategoryid : [p.subcategoryid || ''],
         price: p.price || '',
         discountPrice: p.discountPrice || '',
         stock: p.stock || '',
@@ -192,11 +225,12 @@ const addAttributeValue = (i: number, value: string) => {
         mainImage: p.mainImage || p.image || '',
         gallery: p.gallery || [],
        // ✅ FIXED ATTRIBUTES
-  attributes:
-    p.attributes?.map((attr: any) => ({
-      name: attr.name,
-      values: attr.values.map((v: any) => v.value),
-    })) || [],
+attributes:
+  p.attributes?.map((attr: any) => ({
+    name: attr.name,
+    values: Array.isArray(attr.values) ? attr.values : [],
+  })) || [],
+
 
   // ✅ Variations can stay same if already flat
   variations:
@@ -216,7 +250,59 @@ const addAttributeValue = (i: number, value: string) => {
   useEffect(() => {
     if (message) toast.success(message);
     if (error) toast.error(error);
-  }, [message, error]);
+       if(isUpdated){
+        route.push('/admin/product')
+    }
+  }, [message, error,isUpdated]);
+
+
+
+
+const groupedCategories = subCategories?.reduce((acc: any, sub: any) => {
+  const cat = sub.category;
+  if (!cat) return acc;
+
+  if (!acc[cat._id]) {
+    acc[cat._id] = {
+      _id: cat._id,
+      name: cat.name,
+      subcategories: [],
+    };
+  }
+
+  acc[cat._id].subcategories.push({
+    _id: sub._id,
+    name: sub.name,
+  });
+
+  return acc;
+}, {});
+
+const categoryTree = Object.values(groupedCategories || {});
+
+useEffect(() => {
+  if (!categoryTree.length || !form.subcategoryid.length) return;
+
+  setForm((prev) => {
+    const autoCategoryIds = new Set(prev.categoryid);
+
+    categoryTree.forEach((cat: any) => {
+      const hasSelectedSub = cat.subcategories.some((sub: any) =>
+        prev.subcategoryid.includes(sub._id)
+      );
+
+      if (hasSelectedSub) {
+        autoCategoryIds.add(cat._id);
+      }
+    });
+
+    return {
+      ...prev,
+      categoryid: Array.from(autoCategoryIds),
+    };
+  });
+}, [categoryTree, form.subcategoryid]);
+
 
   return (
     <form onSubmit={handleSubmit} className="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
@@ -393,7 +479,7 @@ const addAttributeValue = (i: number, value: string) => {
         </div>
 
         {/* CATEGORIES */}
-        <div className="space-y-2 bg-white">
+        {/* <div className="space-y-2 bg-white">
           <p className="font-semibold">Select Categories</p>
           {categories?.map((cat: any) => (
             <label key={cat._id} className="flex items-center gap-2 border p-2 rounded cursor-pointer">
@@ -415,7 +501,86 @@ const addAttributeValue = (i: number, value: string) => {
               {cat.name}
             </label>
           ))}
-        </div>
+        </div> */}
+
+
+{/* CATEGORY + SUBCATEGORY TREE */}
+<div className="bg-white border rounded p-5">
+  <h3 className="font-semibold text-lg mb-3">Categories</h3>
+
+  <div className="space-y-4">
+    {categoryTree.map((cat: any) => (
+      <div
+        key={cat._id}
+        className="relative pl-4 border-l-2 border-gray-300"
+      >
+        {/* CATEGORY */}
+        <label className="flex items-center gap-2 font-medium">
+          <input
+            type="checkbox"
+            checked={form.categoryid.includes(cat._id)}
+            onChange={() => {
+              setForm((prev) => {
+                const selected = prev.categoryid.includes(cat._id);
+
+                return {
+                  ...prev,
+                  categoryid: selected
+                    ? prev.categoryid.filter((id) => id !== cat._id)
+                    : [...prev.categoryid, cat._id],
+
+                  // 🔥 remove its subcategories if category unchecked
+                  subcategoryid: selected
+                    ? prev.subcategoryid.filter(
+                        (sid) =>
+                          !cat.subcategories.some(
+                            (s: any) => s._id === sid
+                          )
+                      )
+                    : prev.subcategoryid,
+                };
+              });
+            }}
+          />
+          {cat.name}
+        </label>
+
+        {/* SUBCATEGORIES */}
+        {form.categoryid.includes(cat._id) && (
+          <div className="ml-6 mt-2 space-y-2">
+            {cat.subcategories.map((sub: any) => (
+              <label
+                key={sub._id}
+                className="flex items-center gap-2 text-sm relative"
+              >
+                {/* connector line */}
+                <span className="absolute -left-4 top-3 w-3 border-t border-gray-300" />
+
+                <input
+                  type="checkbox"
+                  checked={form.subcategoryid.includes(sub._id)}
+                  onChange={() => {
+                    setForm((prev) => ({
+                      ...prev,
+                      subcategoryid: prev.subcategoryid.includes(sub._id)
+                        ? prev.subcategoryid.filter(
+                            (id) => id !== sub._id
+                          )
+                        : [...prev.subcategoryid, sub._id],
+                    }));
+                  }}
+                />
+                {sub.name}
+              </label>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+
 
         {/* MAIN IMAGE */}
         <div className="bg-white border rounded p-5 space-y-3">

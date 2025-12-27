@@ -91,6 +91,7 @@ export default function ProductTable() {
               {[
                 'Product',
                 'Category',
+                'subcategory',
                 'Stock',
                 'Price',
                 'Status',
@@ -130,6 +131,12 @@ export default function ProductTable() {
                 <td className="px-6 py-4 text-sm">
                   {Array.isArray(p.categoryid) && p.categoryid.length > 0
                     ? p.categoryid.map((c: any) => c.name).join(', ')
+                    : '-'}
+                </td>
+
+                  <td className="px-6 py-4 text-sm">
+                  {Array.isArray(p.subcategoryid) && p.subcategoryid.length > 0
+                    ? p.subcategoryid.map((c: any) => c.name).join(', ')
                     : '-'}
                 </td>
 

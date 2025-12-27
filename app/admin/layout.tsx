@@ -73,6 +73,7 @@ React.useEffect(() => {
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Product Category', href: '/admin/category', icon: FolderOpen },
+    { name: 'Product Sub Category', href: '/admin/sub-category', icon: FolderOpen },
     { name: 'Product', href: '/admin/product', icon: Users },
     { name: 'Blog category', href: '/admin/blog-category', icon: Users },
     { name: 'Blogs', href: '/admin/blogs', icon: FileText },
