@@ -55,6 +55,7 @@ export interface Product {
   gallery?: string[];
   content?: string;
   categoryid?:string[];
+  subcategoryid?:string[];
   price?: string;
   discountPrice?: string;
   attributes?: Attribute[];
