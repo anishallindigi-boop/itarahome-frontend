@@ -141,7 +141,7 @@ export const GetSubCategoriesByCategory = createAsyncThunk(
           headers: { 'x-api-key': API_KEY },
         }
       );
-      return res.data;
+      return res.data;  
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch subcategories'

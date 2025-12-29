@@ -14,9 +14,9 @@ const Home = () => {
     <>
     <Hero/>
     <Popup/>
+    <ProductVideo/>
     <AboutSection/>
     <Products/>
-    <ProductVideo/>
     <ServicesSection/>
     <Testimonials/>
     <Workshop/>

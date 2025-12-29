@@ -2,26 +2,40 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, User, Search, LogOut, Package, Heart } from 'lucide-react';
+import {
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  Search,
+  LogOut,
+  Package,
+  Heart,
+  ExternalLink,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { getCartItems } from '@/redux/slice/CartItemSlice';
-import { RootState } from '@/redux/store';
-import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { CartPopover } from './CartPopover';
-import { logoutuser ,resetState} from '@/redux/slice/AuthSlice';
-import LoginPopup from './LoginPopup';
 import { useRouter } from 'next/navigation';
-import { getProducts} from '@/redux/slice/ProductSlice';
 
-import { toast } from "sonner"
+import { getCartItems } from '@/redux/slice/CartItemSlice';
+import { logoutuser, resetState } from '@/redux/slice/AuthSlice';
+import { GetSubCategories } from '@/redux/slice/SubCategorySlice';
+import { GetProductCategory } from '@/redux/slice/ProductCategorySlice';
+
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { RootState } from '@/redux/store';
+
+import { CartPopover } from './CartPopover';
+import LoginPopup from './LoginPopup';
 import WishlistDrawer from './WishlistDrawer';
+
+import { toast } from 'sonner';
 
 /* ---------- one-time helper ---------- */
 const useOnce = (fn: () => void) => {
   const ref = React.useRef(false);
-  React.useEffect(() => {
+  useEffect(() => {
     if (!ref.current) {
       ref.current = true;
       fn();
@@ -32,49 +46,46 @@ const useOnce = (fn: () => void) => {
 /* ---------- component ---------- */
 export default function HeaderImproved() {
   const router = useRouter();
-
-  const [open, setOpen] = React.useState(false);
-  const [active, setActive] = React.useState<string | null>(null);
-  const [showLogin, setShowLogin] = React.useState(false);
-  const [showProfile, setShowProfile] = React.useState(false);
-   const [openWishlist, setOpenWishlist] = React.useState(false);
-
   const dispatch = useAppDispatch();
 
-  const { products} = useAppSelector(
-    (state: RootState) => state.product
+  const [open, setOpen] = React.useState(false);
+  const [expandedCategory, setExpandedCategory] = React.useState<string | null>(null);
+  const [showLogin, setShowLogin] = React.useState(false);
+  const [showProfile, setShowProfile] = React.useState(false);
+  const [openWishlist, setOpenWishlist] = React.useState(false);
+
+  /* ---------- redux ---------- */
+  const { isAuthenticated, user, message } = useAppSelector(
+    (state: RootState) => state.auth
   );
+  const { wishlist } = useAppSelector((state: RootState) => state.wishlist);
+  const { cart } = useAppSelector((state: RootState) => state.usercart);
+  const { categories } = useAppSelector((state) => state.productcategory);
+  const { subCategories } = useAppSelector((state) => state.subcategory);
 
-
-  const { isAuthenticated, user,message ,error} = useAppSelector(
-    (state: RootState) => state.auth);
-    const { wishlist } = useAppSelector((state: RootState) => state.wishlist);
-
-
-  /* ---------- fetch cart once ---------- */
+  /* ---------- fetch once ---------- */
   useOnce(() => dispatch(getCartItems()));
 
-  
-  /* ---------- read & flatten cart ---------- */
+  /* ---------- fetch categories ---------- */
+  useEffect(() => {
+    dispatch(GetProductCategory());
+    dispatch(GetSubCategories());
+  }, [dispatch]);
 
-    const {cart} = useAppSelector((state: RootState) => state.usercart)
+  /* ---------- cart items ---------- */
+  const cartitems = React.useMemo(
+    () =>
+      (cart || []).map((c: any) => ({
+        _id: c._id,
+        name: c.productId?.name ?? 'Unknown',
+        image: c.productId?.mainImage ?? '',
+        qty: c.quantity ?? 1,
+        price: Number(c.productId?.discountPrice || c.productId?.price || 0),
+      })),
+    [cart]
+  );
 
-
-const cartitems = React.useMemo(
-  () =>
-    (cart || []).map((c: any) => ({
-      _id: c._id,
-      name: c.productId?.name ?? 'Unknown',
-      image: c.productId?.mainImage ?? '',
-      qty: c.quantity ?? 1,
-      price: Number(c.productId?.discountPrice || c.productId?.price || 0),
-    })),
-  [cart]
-);
-
-
-
-  /* ---------- handlers ---------- */
+  /* ---------- auth handlers ---------- */
   const handleUserClick = () => {
     if (!isAuthenticated) {
       setShowLogin(true);
@@ -83,168 +94,103 @@ const cartitems = React.useMemo(
     setShowProfile((p) => !p);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isAuthenticated) setShowLogin(false);
   }, [isAuthenticated]);
 
-
-React.useEffect(() => {
-  if (message) {
-    toast.success(message);
-    dispatch(resetState());
-  }
-}, [message]);
-
-
-  /* ================= FETCH PRODUCTS ================= */
   useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
+    if (message) {
+      toast.success(message);
+      dispatch(resetState());
+    }
+  }, [message]);
 
-
-
-  const product = React.useMemo(() => {
-  const map = new Map();
-
-  products?.forEach((product: any) => {
-   
-      map.set(product.slug, product.name);
-  
-  });
-
-  return Array.from(map.entries()).map(([slug, name]) => ({
-    label: name,
-    href: `/products/${slug}`, // slug based route
+  /* ---------- product menu ---------- */
+  const productMenu = categories.map((cat: any) => ({
+    label: cat.name,
+    _id: cat._id,
+    onClick: () => {
+      const params = new URLSearchParams();
+      params.set('categories', cat._id);
+      router.push(`/shop?${params.toString()}`);
+      setOpen(false);
+    },
+    children: subCategories
+      .filter((sub: any) => sub.category?._id === cat._id)
+      .map((sub: any) => ({
+        label: sub.name,
+        _id: sub._id,
+        onClick: () => {
+          const params = new URLSearchParams();
+          params.set('categories', cat._id);
+          params.set('subcategories', sub._id);
+          router.push(`/shop?${params.toString()}`);
+          setOpen(false);
+        },
+      })),
   }));
-}, [products]);
 
-    
   const menu = [
     { label: 'Home', href: '/' },
-     {
-    label: 'Products',
-    children: product,
-  },
+    { label: 'Products', children: productMenu },
     { label: 'Shop', href: '/shop' },
     { label: 'About Us', href: '/about-us' },
     { label: 'Contact', href: '/contact-us' },
-     { label: 'Bulk Enquiry', href: '/enquiry-form ' },
-     { label: 'Book Consultation', href: '/styling-consultation-form' },
+    { label: 'Bulk Enquiry', href: '/enquiry-form' },
+    { label: 'Book Consultation', href: '/styling-consultation-form' },
   ];
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-[9999] bg-white backdrop-blur-md border-b h-20 px-8 flex items-center justify-between">
+      {/* ================= HEADER ================= */}
+      <header className="fixed top-0 left-0 w-full z-[9999] bg-white border-b h-20 px-8 flex items-center justify-between">
         {/* LEFT */}
         <div className="flex items-center gap-5 w-1/3">
           <button onClick={() => setOpen(true)}>
-            <Menu strokeWidth={1} size={25} />
+            <Menu size={24} />
           </button>
+
           <div className="relative w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search size={20} className="text-gray-400" />
-            </div>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="search"
               placeholder="Search..."
-              className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full pl-9 pr-3 py-2 border rounded-md text-sm"
             />
           </div>
         </div>
 
-        {/* CENTER LOGO */}
+        {/* LOGO */}
         <div className="w-1/3 flex justify-center">
           <Link href="/">
-            <img src="/logo.png" alt="logo" className="h-18" />
+            <img src="/logo.png" alt="logo" className="h-14" />
           </Link>
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-3 justify-end w-1/3">
-        <div className="relative">
-         <Button variant="ghost" size="icon" onClick={handleUserClick}>
-              <User className="w-5 h-5" />
-            </Button>
+        <div className="flex items-center gap-4 justify-end w-1/3">
+          <Button variant="ghost" size="icon" onClick={handleUserClick}>
+            <User size={20} />
+          </Button>
 
-            {/* PROFILE DROPDOWN */}
-            <AnimatePresence>
-              {isAuthenticated && showProfile && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-[10001]"
-                >
-                  <div className="px-4 py-3 border-b">
-                    <p className="text-sm font-semibold">
-                      {user?.name || 'My Account'}
-                    </p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </div>
+          <button onClick={() => setOpenWishlist(true)} className="relative">
+            <Heart size={18} />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] rounded-full px-1">
+                {wishlist.length}
+              </span>
+            )}
+          </button>
 
-                  <Link
-                    href="/dashboard/profile"
-                    onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                  >
-                    <User size={16} /> Profile
-                  </Link>
-
-                  <Link
-                    href="/dashboard/orders"
-                    onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                  >
-                    <Package size={16} /> Orders
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      dispatch(logoutuser());
-                      setShowProfile(false);
-                      router.refresh();
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut size={16} /> Logout
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-           <button
-        onClick={() => setOpenWishlist(true)}
-        className="relative"
-      >
-      <Heart size={16}/>
-
-  {wishlist.length > 0 && (
-    <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1
-      flex items-center justify-center rounded-full
-      bg-red-600 text-white text-[10px] font-semibold">
-      {wishlist.length}
-    </span>
-  )}
-      </button>
-
-   
           <CartPopover items={cartitems} />
         </div>
       </header>
 
-
-
-         {/* ================= LOGIN POPUP ================= */}
+      {/* ================= LOGIN ================= */}
       {showLogin && <LoginPopup />}
+      <WishlistDrawer isOpen={openWishlist} onClose={() => setOpenWishlist(false)} />
 
-         <WishlistDrawer
-        isOpen={openWishlist}
-        onClose={() => setOpenWishlist(false)}
-      />
-
-      {/* Drawer remains identical */}
-
+      {/* ================= DRAWER ================= */}
       <AnimatePresence>
         {open && (
           <>
@@ -252,90 +198,89 @@ React.useEffect(() => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-[9998]"
+              className="fixed inset-0 bg-black z-[9998]"
               onClick={() => setOpen(false)}
             />
+
             <motion.aside
               initial={{ x: '-100%' }}
-              animate={{ x: '0%' }}
+              animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', stiffness: 220, damping: 26 }}
-              className="fixed inset-0 z-[10000] bg-white shadow-xl flex flex-col h-screen w-full sm:w-[350px]"
+              className="fixed z-[10000] bg-white h-full w-[320px] shadow-xl"
             >
               <div className="h-16 flex items-center justify-between px-4 border-b">
                 <h3 className="font-semibold text-lg">Menu</h3>
                 <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-                  <X className="w-6 h-6" />
+                  <X />
                 </Button>
               </div>
-              <div className="overflow-y-auto p-4">
-                <nav className="space-y-1">
-                  {menu.map((item) => {
-                    const hasChildren = !!item.children;
-                    const isActive = active === item.label;
+
+              <nav className="p-4 space-y-1 overflow-y-auto">
+                {menu.map((item) => {
+                  if (item.label === 'Products') {
                     return (
-                      <div key={item.label}>
-                        <button
-                          onClick={() => hasChildren && setActive(isActive ? null : item.label)}
-                          className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 transition"
-                        >
-                          <span className="font-medium text-base">
-                      {item.href ? (
-  <Link href={item.href}>{item.label}</Link>
-) : (
-  <span>{item.label}</span>
-)}
-                          </span>
-                          {hasChildren && (
-                            <ChevronDown
-                              className={cn('w-4 h-4 transition-transform', isActive && 'rotate-180')}
-                            />
-                          )}
-                        </button>
-                        {hasChildren && (
-                          <AnimatePresence>
-                            {isActive && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="ml-2 mt-2 border-l pl-4 space-y-1 overflow-hidden"
+                      <div key={item.label} className="space-y-1">
+                        {item.children!.map((cat: any) => {
+                          const isOpen = expandedCategory === cat.label;
+
+                          return (
+                            <div key={cat.label} className="rounded-lg">
+                              <button
+                                onClick={() =>
+                                  setExpandedCategory(isOpen ? null : cat.label)
+                                }
+                                className="w-full flex justify-between items-center p-3 hover:bg-gray-100 rounded-lg"
                               >
-                                {item.children!.map((sub) => (
-                                  <Link
-                                    key={sub.label}
-                                    href={sub.href}
-                                    className="block py-2 text-sm rounded-md hover:bg-gray-100 transition"
+                                <span className="font-medium">{cat.label}</span>
+                                <ChevronDown
+                                  className={cn(
+                                    'w-4 h-4 transition-transform',
+                                    isOpen && 'rotate-180'
+                                  )}
+                                />
+                              </button>
+
+                              <AnimatePresence>
+                                {isOpen && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="pl-4 bg-gray-50"
                                   >
-                                    {sub.label}
-                                  </Link>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        )}
+                                    {cat.children.map((sub: any) => (
+                                      <button
+                                        key={sub.label}
+                                        onClick={sub.onClick}
+                                        className="w-full flex justify-between items-center p-2 text-sm hover:bg-gray-100 rounded-md"
+                                      >
+                                        {sub.label}
+                                        <ExternalLink size={14} />
+                                      </button>
+                                    ))}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
-                  })}
-                </nav>
-                <div className="mt-8 border-t pt-4 space-y-2">
-                  <h4 className="text-sm font-semibold mb-2">Quick Links</h4>
-                  {[
-                    { label: 'Profile', href: '/profile' },
-                    { label: 'Orders', href: '/orders' },
-                    { label: 'Help Center', href: '/#' },
-                   
-                  ].map((link) => (
+                  }
+
+                  return (
                     <Link
-                      key={link.label}
-                      href={link.href}
-                      className="block py-2 px-3 rounded-md hover:bg-gray-100 text-sm font-medium"
+                      key={item.label}
+                      href={item.href!}
+                      className="block p-3 rounded-lg hover:bg-gray-100 font-medium"
+                      onClick={() => setOpen(false)}
                     >
-                      {link.label}
+                      {item.label}
                     </Link>
-                  ))}
-                </div>
-              </div>
+                  );
+                })}
+              </nav>
             </motion.aside>
           </>
         )}

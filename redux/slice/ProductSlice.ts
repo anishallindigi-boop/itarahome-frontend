@@ -33,6 +33,21 @@ export interface CreateProductPayload {
 }
 
 
+//-------------------product types-------------------
+
+
+// -------------------- FILTER TYPES --------------------
+
+export interface ProductFilterPayload {
+  categories?: string[];
+  subcategories?: string[];
+  minPrice?: number | string;
+  maxPrice?: number | string;
+  attributes?: {
+    [key: string]: string[]; // eg: { color: ['red','blue'], size: ['M'] }
+  };
+}
+
 
 
 export type AttributeValue = { value: string };
@@ -255,6 +270,44 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+
+
+//-------------------------------filter products----------------------
+
+
+// -------------------- FILTER PRODUCTS --------------------
+
+export const filterProducts = createAsyncThunk<
+  Product[],                    // response type
+  ProductFilterPayload,          // request payload
+  { rejectValue: string }
+>(
+  'product/filter',
+  async (filters, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.post(
+        `${API_URL}/api/product/filter`,
+        filters,
+        {
+          headers: {
+            'x-api-key': API_KEY!,
+          },
+        }
+      );
+
+      return data.products;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Failed to filter products'
+      );
+    }
+  }
+);
+
+
+
+
+
 // -------------------- SLICE --------------------
 export const ProductSlice = createSlice({
   name: 'product',
@@ -393,7 +446,26 @@ export const ProductSlice = createSlice({
       .addCase(deleteProduct.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+
+//-----------------filter prodcts------------
+
+// -------------------- FILTER PRODUCTS --------------------
+.addCase(filterProducts.pending, (state) => {
+  state.loading = true;
+  state.error = null;
+})
+.addCase(filterProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
+  state.loading = false;
+  state.products = action.payload; // replace list with filtered result
+})
+.addCase(filterProducts.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload as string;
+});
+
+
+
   },
 });
 
