@@ -78,7 +78,7 @@ React.useEffect(() => {
     { name: 'Blog category', href: '/admin/blog-category', icon: Users },
     { name: 'Blogs', href: '/admin/blogs', icon: FileText },
     { name: 'Orders', href: '/admin/orders', icon: FileText },
-    { name: 'Careerform', href: '/admin/careerform-data', icon: FileText },
+    { name: 'Enquiryform', href: '/admin/enquiry-form-data', icon: FileText },
     { name: 'Contactform', href: '/admin/contactform-data', icon: FileText },
     { name: 'Contactpageform', href: '/admin/conratpageform-data', icon: FileText },
     { name: 'Projectform', href: '/admin/projectform-data', icon: FileText },

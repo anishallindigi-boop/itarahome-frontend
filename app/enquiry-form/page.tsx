@@ -1,8 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { RootState } from "@/redux/store";
+import {createEnquiry,resetState} from'@/redux/slice/EnquirySlice'
+import { useRouter } from 'next/navigation';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Page() {
+
+const router=useRouter()
+  const dispatch = useAppDispatch();
+    const { loading, error, success,message } = useAppSelector(
+      (state: RootState) => state.enquiry
+    );
+ const [countdown, setCountdown] = useState(10);
+
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -26,10 +40,29 @@ export default function Page() {
     e.preventDefault();
     console.log('Enquiry Data:', formData);
 
-    // 👉 API call can be added here
-    // fetch('/api/enquiry', { method: 'POST', body: JSON.stringify(formData) })
+dispatch(createEnquiry(formData));
   };
 
+ /* ================= COUNTDOWN ================= */
+  useEffect(() => {
+    if (!success) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    if (countdown === 0) {
+      clearInterval(timer);
+      dispatch(resetState());
+      router.push('/');
+    }
+
+    return () => clearInterval(timer);
+  }, [success, countdown, router, dispatch]);
+
+
+
+  
   return (
     <section className="max-w-4xl mx-auto px-4 py-25">
       <h2 className="text-3xl font-semibold mb-8 text-center">
@@ -187,6 +220,47 @@ export default function Page() {
           quantity and customisation.
         </div>
       </form>
+      {success?(
+          <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur"
+      >
+        <motion.div
+          initial={{ scale: 0.7 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-2xl"
+        >
+          <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-5" />
+
+          <h2 className="text-2xl font-bold mb-3">
+            Thank you! 🎉
+          </h2>
+
+          <p className="text-gray-600 mb-5">
+            {message || 'Your enquiry has been submitted successfully.'}
+          </p>
+
+          <div className="bg-green-50 text-green-700 py-3 rounded-lg font-medium">
+            Redirecting in {countdown} seconds...
+          </div>
+
+          <button
+            onClick={() => {
+              dispatch(resetState());
+              router.push('/');
+            }}
+            className="mt-6 text-sm text-gray-500 underline"
+          >
+            Go now
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+      ):""}
     </section>
+
   );
 }
