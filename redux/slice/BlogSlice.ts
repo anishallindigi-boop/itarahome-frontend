@@ -30,13 +30,13 @@ interface Blog {
   title: string;
   content: string;
   category: {
-    _id: string;
-    name: string;
+    _id?: string;
+    name?: string;
   }[];
 
   author?: {
-    _id: string;
-    name: string;
+    _id?: string;
+    name?: string;
   };
   image: string;
   message?: string;
@@ -72,7 +72,7 @@ const initialState: BlogState = {
 
 export const Createblog = createAsyncThunk(
   'blog/createblog',
-  async (form: Blog, { rejectWithValue }) => {
+  async (form: BlogInput, { rejectWithValue }) => {
     try {
 
       const res = await axios.post(`${API_URL}/api/blog/create-blog`, form, {
