@@ -6,17 +6,31 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 type CreateBlogCategoryInput = {
-  categoryname: string;
-  categorydescription: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  metatitle?: string;
+  metadescription?: string;
+  metakeywords?: string;
+  isActive: boolean;
+  status: 'draft' | 'published';
 };
 
 interface BlogCategory {
   _id: string;
-  categoryname: string;
-  categorydescription: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  metatitle?: string;
+  metadescription?: string;
+  metakeywords?: string;
+  isActive: boolean;
+  status: 'draft' | 'published';
+  createdAt?: string;
   message?: string;
-  // slug: string;
-  status: 'active' | 'inactive';
+  updatedAt?:string
   
 }
 
@@ -72,7 +86,7 @@ export const GetblogCategory = createAsyncThunk(
         }
       });
 // console.log(response.data)
-      return response.data.categories      ;
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Something went wrong');
     }
@@ -93,7 +107,7 @@ export const GetSingleblogCategory = createAsyncThunk(
         }
       });
   // console.log(response.data,"response.data")
-      return response.data.category;
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Something went wrong');
     }
@@ -101,14 +115,44 @@ export const GetSingleblogCategory = createAsyncThunk(
 );
 
 
+//---------------------update category status
+
+export const UpdateCategoryStatus = createAsyncThunk<
+  any, // returned type (updated product)
+  { id: string; status: 'draft' | 'published' },
+  { rejectValue: string }
+>(
+  'category/updateStatus',
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/blog-category/update-status/${id}`,
+        { status },
+        {
+          headers: {
+            'x-api-key': API_KEY,
+          },
+          withCredentials: true,
+        }
+      );
+      return res.data; // { success, message, product }
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Something went wrong');
+    }
+  }
+);
+
+
+
+
 //-----------------------------update product category------------
 
 export const UpdateblogCategory = createAsyncThunk(
   'blogcategory/update',
-  async ({id, data}: {id:string, data:CreateBlogCategoryInput}, { rejectWithValue }) => {
+  async ({id, form}: {id:string, form:CreateBlogCategoryInput}, { rejectWithValue }) => {
     try {
-      // console.log(formData,id,"slice")
-      const response = await axios.patch(`${API_URL}/api/blog-category/update-category/${id}`, data, {
+      // console.log(formform,id,"slice")
+      const response = await axios.patch(`${API_URL}/api/blog-category/update-category/${id}`, form, {
       withCredentials:true,
       headers:{
         'x-api-key':API_KEY
@@ -202,6 +246,39 @@ export const BlogCategorySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+
+
+
+ // UPDATE STATUS
+    .addCase(UpdateCategoryStatus.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+ .addCase(UpdateCategoryStatus.fulfilled, (state, action) => {
+  state.loading = false;
+  state.message = action.payload?.message ?? null;
+
+  const updated = action.payload?.blogCategory;
+  if (!updated?._id) return; // 🛡️ safety guard
+
+  const index = state.blogcategories.findIndex(
+    (c) => c._id === updated._id
+  );
+
+  if (index !== -1) {
+    // ✅ update only changed fields
+    state.blogcategories[index].status = updated.status;
+    state.blogcategories[index].updatedAt = updated.updatedAt;
+  }
+})
+
+    .addCase(UpdateCategoryStatus.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    })
+    
+
 //-----------------------------update blog category------------
 
 .addCase(UpdateblogCategory.pending, (state) => {

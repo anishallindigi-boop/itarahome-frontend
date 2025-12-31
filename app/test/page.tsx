@@ -1,329 +1,141 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { ImageIcon, Save } from 'lucide-react';
-import ImageUploadModal from '../elements/ImageUploadModal';
+import { Heart, MapPin } from 'lucide-react';
+import { useState } from 'react';
 
-const API = 'http://localhost:5000/api/categories';
-
-/* ---------------- TYPES ---------------- */
-
-interface CategoryFormState {
-  name: string;
-  slug: string;
-  description: string;
-  image: string;
-  metatitle: string;
-  metadescription: string;
-  metakeywords: string;
-  isActive: boolean;
+interface MultiImageProperty {
+  id: number;
+  title: string;
+  location: string;
+  price: string;
+  beds: number;
+  baths: number;
+  sqft: string;
+  images: string[];
+  tag?: string;
 }
 
-interface SubCategoryFormState {
-  name: string;
-  slug: string;
-  image: string;
-  isActive: boolean;
-  categoryId: string;
-}
-
-/* ---------------- UTILS ---------------- */
-
-function generateSlug(text: string): string {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
-/* ---------------- COMPONENT ---------------- */
-
-export default function CategoryCreatePage() {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [openCategoryImage, setOpenCategoryImage] = useState(false);
-  const [openSubImage, setOpenSubImage] = useState(false);
-
-  const [form, setForm] = useState<CategoryFormState>({
-    name: '',
-    slug: '',
-    description: '',
-    image: '',
-    metatitle: '',
-    metadescription: '',
-    metakeywords: '',
-    isActive: true,
-  });
-
-  const [subForm, setSubForm] = useState<SubCategoryFormState>({
-    name: '',
-    slug: '',
-    image: '',
-    isActive: true,
-    categoryId: '',
-  });
-
-  /* ---------------- FETCH CATEGORIES ---------------- */
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    const res = await axios.get(`${API}/get`);
-    setCategories(res.data.data);
-  };
-
-  /* ---------------- HANDLERS ---------------- */
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm((prev) => {
-      if (name === 'name') {
-        return { ...prev, name: value, slug: generateSlug(value) };
-      }
-      return { ...prev, [name]: value };
-    });
-  };
-
-  const handleSubChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setSubForm((prev) => {
-      if (name === 'name') {
-        return { ...prev, name: value, slug: generateSlug(value) };
-      }
-      return { ...prev, [name]: value };
-    });
-  };
-
-  /* ---------------- API CALLS ---------------- */
-
-  const createCategory = async () => {
-    if (!form.name) return alert('Category name required');
-
-    await axios.post(`${API}/create`, form);
-    alert('Category created');
-    setForm({
-      name: '',
-      slug: '',
-      description: '',
-      image: '',
-      metatitle: '',
-      metadescription: '',
-      metakeywords: '',
-      isActive: true,
-    });
-    fetchCategories();
-  };
-
-  const addSubCategory = async () => {
-    if (!subForm.categoryId || !subForm.name) return alert('All fields required');
-
-    await axios.post(`${API}/create/${subForm.categoryId}/subcategory`, {
-      name: subForm.name,
-      slug: subForm.slug,
-      image: subForm.image,
-      isActive: subForm.isActive,
-    });
-
-    alert('Subcategory added');
-    setSubForm({ name: '', slug: '', image: '', isActive: true, categoryId: '' });
-  };
-
-  /* ---------------- UI ---------------- */
+/* ================= PROPERTY CARD ================= */
+const PropertyCard = ({ property }: { property: MultiImageProperty }) => {
+  const [mainImage, setMainImage] = useState(0);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
-      {/* ================= LEFT ================= */}
-      <div className="col-span-8 space-y-6">
-        {/* CATEGORY FORM */}
-        <div className="bg-white border rounded p-5 space-y-4">
-          <h3 className="font-semibold text-lg">Category Information</h3>
-
-          <input
-            name="name"
-            placeholder="Category Name"
-            className="border p-2 w-full rounded"
-            value={form.name}
-            onChange={handleChange}
-          />
-
-          <textarea
-            name="description"
-            placeholder="Category Description"
-            className="border p-2 w-full rounded"
-            rows={3}
-            value={form.description}
-            onChange={handleChange}
-          />
-
-          <h3 className="font-semibold text-lg mt-4">SEO Settings</h3>
-
-          <input
-            name="metatitle"
-            placeholder="Meta Title"
-            className="border p-2 w-full rounded"
-            value={form.metatitle}
-            onChange={handleChange}
-          />
-
-          <textarea
-            name="metadescription"
-            placeholder="Meta Description"
-            className="border p-2 w-full rounded"
-            rows={2}
-            value={form.metadescription}
-            onChange={handleChange}
-          />
-
-          <input
-            name="metakeywords"
-            placeholder="Meta Keywords (comma separated)"
-            className="border p-2 w-full rounded"
-            value={form.metakeywords}
-            onChange={handleChange}
+    <div className="group bg-white  rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 overflow-hidden">
+      <div className="relative">
+        {/* MAIN IMAGE */}
+        <div className="h-56 overflow-hidden">
+          <img
+            src={property.images[mainImage]}
+            alt={property.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           />
         </div>
 
-        {/* SUBCATEGORY FORM */}
-        <div className="bg-white border rounded p-5 space-y-4">
-          <h3 className="font-semibold text-lg">Add Subcategory</h3>
-
-          <select
-            name="categoryId"
-            value={subForm.categoryId}
-            onChange={handleSubChange}
-            className="border p-2 w-full rounded"
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
+        {/* THUMBNAILS */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+          <div className="flex gap-2">
+            {property.images.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setMainImage(idx)}
+                className={`w-14 h-10 rounded-lg overflow-hidden ring-2 transition-all ${
+                  idx === mainImage
+                    ? 'ring-yellow-400 scale-105'
+                    : 'ring-transparent opacity-70 hover:opacity-100'
+                }`}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </button>
             ))}
-          </select>
-
-          <input
-            name="name"
-            placeholder="Subcategory Name"
-            className="border p-2 w-full rounded"
-            value={subForm.name}
-            onChange={handleSubChange}
-          />
-
-          {/* Subcategory SEO / Slug */}
-          <div className="border p-3 rounded bg-gray-100 text-sm">
-            <label className="font-medium">Slug (auto generated)</label>
-            <p className="break-all">{subForm.slug}</p>
           </div>
-
-          {/* Subcategory Image */}
-          <div className="space-y-2">
-            <button
-              type="button"
-              className="flex items-center gap-2 border px-4 py-2 rounded"
-              onClick={() => setOpenSubImage(true)}
-            >
-              <ImageIcon size={18} /> Select Image
-            </button>
-
-            {subForm.image && (
-              <img
-                src={`${process.env.NEXT_PUBLIC_API_URL}${subForm.image}`}
-                className="w-full h-40 object-cover rounded border"
-              />
-            )}
-
-            <ImageUploadModal
-              open={openSubImage}
-              multiple={false}
-              onClose={() => setOpenSubImage(false)}
-              onSelect={(urls) => setSubForm((p) => ({ ...p, image: urls[0] }))}
-            />
-          </div>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={subForm.isActive}
-              onChange={() => setSubForm((p) => ({ ...p, isActive: !p.isActive }))}
-            />
-            Active
-          </label>
-
-          <button
-            type="button"
-            onClick={addSubCategory}
-            className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2"
-          >
-            Add Subcategory
-          </button>
         </div>
+
+        {/* TAG */}
+        {property.tag && (
+          <span className="absolute top-4 left-4 px-3 py-1 bg-yellow-400 text-black text-xs font-semibold rounded-full">
+            {property.tag}
+          </span>
+        )}
+
+        {/* WISHLIST */}
+        <button className="absolute top-4 right-4 w-10 h-10 bg-white/80 backdrop-blur rounded-full flex items-center justify-center hover:bg-yellow-400 hover:text-black transition">
+          <Heart className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* ================= RIGHT ================= */}
-      <div className="col-span-4 space-y-6 sticky top-6">
-        {/* CATEGORY IMAGE */}
-        <div className="bg-white border rounded p-5 space-y-3">
-          <h3 className="font-semibold text-lg">Category Image</h3>
-
-          <button
-            type="button"
-            className="flex items-center gap-2 border px-4 py-2 rounded"
-            onClick={() => setOpenCategoryImage(true)}
-          >
-            <ImageIcon size={18} /> Select Image
-          </button>
-
-          {form.image && (
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${form.image}`}
-              className="w-full h-40 object-cover rounded border"
-            />
-          )}
-
-          <ImageUploadModal
-            open={openCategoryImage}
-            multiple={false}
-            onClose={() => setOpenCategoryImage(false)}
-            onSelect={(urls) => setForm((p) => ({ ...p, image: urls[0] }))}
-          />
-        </div>
-
-        {/* CATEGORY SLUG */}
-        <div className="border p-3 rounded bg-gray-100 text-sm">
-          <label className="font-medium">Slug (auto generated)</label>
-          <p className="break-all">{form.slug}</p>
-        </div>
-
-        {/* CATEGORY PUBLISH */}
-        <div className="bg-white border rounded p-5 space-y-4">
-          <h3 className="font-semibold text-lg">Publish</h3>
-
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.isActive}
-              onChange={() => setForm((p) => ({ ...p, isActive: !p.isActive }))}
-            />
-            Active
-          </label>
-
-          <button
-            type="button"
-            onClick={createCategory}
-            className="bg-black text-white w-full py-2 rounded flex items-center justify-center gap-2"
-          >
-            <Save size={16} /> Save Category
-          </button>
-        </div>
+      {/* CONTENT */}
+      <div className="p-6">
+        <p className="text-2xl font-bold text-yellow-500 mb-1">
+          {property.price}
+        </p>
+        <h3 className="text-lg font-semibold mb-2 group-hover:text-yellow-500 transition">
+          {property.title}
+        </h3>
+        <p className="text-sm text-gray-600 flex items-center gap-1">
+          <MapPin className="w-4 h-4 text-yellow-500" />
+          {property.location}
+        </p>
       </div>
     </div>
   );
-}
+};
+
+/* ================= MAIN LIST ================= */
+const MultiImageCards = () => {
+  const properties: MultiImageProperty[] = [
+    {
+      id: 1,
+      title: 'Skyline Penthouse Suite',
+      location: 'Manhattan, New York',
+      price: '$4,850,000',
+      beds: 4,
+      baths: 3,
+      sqft: '3,200 sqft',
+      images: ['/about-hero.jpg', '/about-sec.jpg', '/second-right.jpg'],
+      tag: 'Featured',
+    },
+    {
+      id: 2,
+      title: 'Oceanfront Paradise Villa',
+      location: 'Malibu, California',
+      price: '$12,500,000',
+      beds: 6,
+      baths: 7,
+      sqft: '8,500 sqft',
+      images: ['/about-hero.jpg', '/about-sec.jpg', '/second-right.jpg'],
+      tag: 'Exclusive',
+    },
+    {
+      id: 3,
+      title: 'Cliffside Modern Estate',
+      location: 'Santorini, Greece',
+      price: '$8,200,000',
+      beds: 5,
+      baths: 4,
+      sqft: '5,800 sqft',
+      images: ['/about-hero.jpg', '/about-sec.jpg', '/second-right.jpg'],
+      tag: 'New',
+    },
+    {
+      id: 4,
+      title: 'Mediterranean Courtyard Estate',
+      location: 'Beverly Hills, CA',
+      price: '$15,900,000',
+      beds: 7,
+      baths: 8,
+      sqft: '12,000 sqft',
+      images: ['/about-hero.jpg', '/about-sec.jpg', '/second-right.jpg'],
+      tag: 'Luxury',
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {properties.map((property) => (
+        <PropertyCard key={property.id} property={property} />
+      ))}
+    </div>
+  );
+};
+
+export default MultiImageCards;

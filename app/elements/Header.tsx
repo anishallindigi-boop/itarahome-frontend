@@ -169,11 +169,60 @@ export default function HeaderImproved() {
 
         {/* RIGHT */}
         <div className="flex items-center gap-4 justify-end w-1/3">
-          <Button variant="ghost" size="icon" onClick={handleUserClick}>
-            <User size={20} />
-          </Button>
 
-          <button onClick={() => setOpenWishlist(true)} className="relative">
+           <div className="relative">
+         <Button variant="ghost" size="icon" onClick={handleUserClick}>
+              <User className="w-5 h-5" />
+            </Button>
+
+            {/* PROFILE DROPDOWN */}
+            <AnimatePresence>
+                    {isAuthenticated && showProfile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-[10001]"
+                >
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm font-semibold">
+                      {user?.name || 'My Account'}
+                    </p>
+                    <p className="text-xs text-gray-500">{user?.email}</p>
+                  </div>
+
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setShowProfile(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <User size={16} /> Profile
+                  </Link>
+
+                  <Link
+                    href="/dashboard/orders"
+                    onClick={() => setShowProfile(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <Package size={16} /> Orders
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      dispatch(logoutuser());
+                      setShowProfile(false);
+                      router.refresh();
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut size={16} /> Logout
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+         
+</div>
+          <button onClick={() => setOpenWishlist(true)} className="relative cursor-pointer">
             <Heart size={18} />
             {wishlist.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] rounded-full px-1">

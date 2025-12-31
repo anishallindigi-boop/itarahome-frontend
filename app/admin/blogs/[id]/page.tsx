@@ -2,21 +2,31 @@
 
 import { useEffect, useState } from 'react';
 import { ImageIcon, Save } from 'lucide-react';
-import ImageUploadModal from '../../elements/ImageUploadModal';
+import { useParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
+import ImageUploadModal from '../../../elements/ImageUploadModal';
+import Editor from '@/lib/Editor';
+
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { RootState } from '@/redux/store';
+
 import {
-  CreateblogCategory,
+  getSingleBlog,
+  updateBlog,
   resetState,
-} from '@/redux/slice/BlogCategorySlice';
+} from '@/redux/slice/BlogSlice';
+
+import { GetblogCategory } from '@/redux/slice/BlogCategorySlice';
 
 /* ---------------- TYPES ---------------- */
 
-interface CategoryFormState {
-  name: string;
+interface BlogFormState {
+  title: string;
   slug: string;
-  description: string;
+  content: string;
   image: string;
+  category: string[]; // ✅ IDs only
   metatitle: string;
   metadescription: string;
   metakeywords: string;
@@ -24,7 +34,7 @@ interface CategoryFormState {
   status: 'draft' | 'published';
 }
 
-/* ---------------- UTILS ---------------- */
+/* ---------------- SLUG ---------------- */
 
 function generateSlug(text: string): string {
   return text
@@ -37,19 +47,28 @@ function generateSlug(text: string): string {
 
 /* ---------------- COMPONENT ---------------- */
 
-export default function CategoryCreateForm() {
+export default function BlogUpdateForm() {
   const dispatch = useAppDispatch();
-  const { loading, success } = useAppSelector(
-    (state: RootState) => state.productcategory
+  const router = useRouter();
+  const params = useParams();
+
+  const blogId = params?.id as string;
+
+  const { singleblog, loading, error, message, isupdate } =
+    useAppSelector((state: RootState) => state.blog);
+
+  const { blogcategories } = useAppSelector(
+    (state: RootState) => state.blogcategory
   );
 
   const [openImage, setOpenImage] = useState(false);
 
-  const [form, setForm] = useState<CategoryFormState>({
-    name: '',
+  const [form, setForm] = useState<BlogFormState>({
+    title: '',
     slug: '',
-    description: '',
+    content: '',
     image: '',
+    category: [],
     metatitle: '',
     metadescription: '',
     metakeywords: '',
@@ -60,45 +79,89 @@ export default function CategoryCreateForm() {
   /* ---------------- HANDLERS ---------------- */
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
     setForm((prev) => {
-      if (name === 'name') {
+      if (name === 'title') {
         return {
           ...prev,
-          name: value,
+          title: value,
           slug: generateSlug(value),
         };
       }
+
+      if (type === 'checkbox') {
+        return {
+          ...prev,
+          [name]: (e.target as HTMLInputElement).checked,
+        };
+      }
+
       return { ...prev, [name]: value };
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(CreateblogCategory(form));
+  const toggleCategory = (id: string) => {
+    setForm((prev) => ({
+      ...prev,
+      category: prev.category.includes(id)
+        ? prev.category.filter((cid) => cid !== id)
+        : [...prev.category, id],
+    }));
   };
 
-  /* ---------------- EFFECTS ---------------- */
+  /* ---------------- SUBMIT ---------------- */
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(updateBlog({ id: blogId, form }));
+  };
+
+  /* ---------------- FETCH DATA ---------------- */
 
   useEffect(() => {
-    if (success) {
+    dispatch(GetblogCategory());
+    dispatch(getSingleBlog(blogId));
+  }, [blogId, dispatch]);
+
+  /**
+   * 🔥 VERY IMPORTANT FIX
+   * Convert category OBJECTS → IDS
+   */
+  useEffect(() => {
+    if (singleblog) {
       setForm({
-        name: '',
-        slug: '',
-        description: '',
-        image: '',
-        metatitle: '',
-        metadescription: '',
-        metakeywords: '',
-        isActive: true,
-        status: 'draft',
+        title: singleblog.title || '',
+        slug: singleblog.slug || '',
+        content: singleblog.content || '',
+        image: singleblog.image || '',
+        category: Array.isArray(singleblog.category)
+          ? singleblog.category.map((c: any) => c._id) // ✅ FIX
+          : [],
+        metatitle: singleblog.metatitle || '',
+        metadescription: singleblog.metadescription || '',
+        metakeywords: singleblog.metakeywords || '',
+        isActive: singleblog.isActive ?? true,
+        status: singleblog.status || 'draft',
       });
-      dispatch(resetState());
     }
-  }, [success, dispatch]);
+  }, [singleblog]);
+
+  /* ---------------- TOAST + REDIRECT ---------------- */
+
+  useEffect(() => {
+    if (message) toast.success(message);
+    if (error) toast.error(error);
+
+    if (isupdate) {
+      dispatch(resetState());
+      router.push('/admin/blogs');
+    }
+  }, [message, error, isupdate, dispatch, router]);
 
   /* ---------------- UI ---------------- */
 
@@ -109,26 +172,23 @@ export default function CategoryCreateForm() {
     >
       {/* ================= LEFT ================= */}
       <div className="col-span-8 space-y-6">
-        {/* BASIC INFO */}
+        {/* BLOG INFO */}
         <div className="bg-white border rounded p-5 space-y-4">
-          <h3 className="font-semibold text-lg">Category Information</h3>
+          <h3 className="font-semibold text-lg">Blog Information</h3>
 
           <input
-            name="name"
-            placeholder="Category Name"
+            name="title"
+            placeholder="Blog Title"
             className="border p-2 w-full rounded"
-            value={form.name}
+            value={form.title}
             onChange={handleChange}
+            required
           />
 
-          <textarea
-            name="description"
-            placeholder="Category Description"
-            className="border p-2 w-full rounded"
-            rows={3}
-            value={form.description}
-            onChange={handleChange}
-          />
+          <div className="bg-white border rounded p-5">
+            <h3 className="font-semibold text-lg mb-3">Blog Content</h3>
+            <Editor formData={form} setFormData={setForm} />
+          </div>
         </div>
 
         {/* SEO */}
@@ -146,15 +206,15 @@ export default function CategoryCreateForm() {
           <textarea
             name="metadescription"
             placeholder="Meta Description"
-            className="border p-2 w-full rounded"
             rows={2}
+            className="border p-2 w-full rounded"
             value={form.metadescription}
             onChange={handleChange}
           />
 
           <input
             name="metakeywords"
-            placeholder="Meta Keywords (comma separated)"
+            placeholder="Meta Keywords"
             className="border p-2 w-full rounded"
             value={form.metakeywords}
             onChange={handleChange}
@@ -181,10 +241,9 @@ export default function CategoryCreateForm() {
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
+              name="isActive"
               checked={form.isActive}
-              onChange={() =>
-                setForm((p) => ({ ...p, isActive: !p.isActive }))
-              }
+              onChange={handleChange}
             />
             Active
           </label>
@@ -195,19 +254,40 @@ export default function CategoryCreateForm() {
             className="bg-black text-white w-full py-2 rounded flex items-center justify-center gap-2"
           >
             <Save size={16} />
-            Save Category
+            {loading ? 'Updating...' : 'Update Blog'}
           </button>
         </div>
 
         {/* SLUG */}
         <div className="border p-3 rounded bg-gray-100 text-sm">
-          <label className="font-medium">Slug (auto generated)</label>
+          <label className="font-medium">Slug</label>
           <p className="break-all">{form.slug}</p>
+        </div>
+
+        {/* CATEGORIES */}
+        <div className="bg-white border rounded p-5 space-y-3">
+          <h3 className="font-semibold text-lg">Blog Categories</h3>
+
+          <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+            {blogcategories.map((c: any) => (
+              <label
+                key={c._id}
+                className="flex items-center gap-2 text-sm cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={form.category.includes(c._id)}
+                  onChange={() => toggleCategory(c._id)}
+                />
+                {c.name}
+              </label>
+            ))}
+          </div>
         </div>
 
         {/* IMAGE */}
         <div className="bg-white border rounded p-5 space-y-3">
-          <h3 className="font-semibold text-lg">Category Image</h3>
+          <h3 className="font-semibold text-lg">Featured Image</h3>
 
           <button
             type="button"

@@ -9,7 +9,7 @@ const services = [
     description:
       'Style your space effortlessly with our curated selection of decor, bedding, and cushions. Rent, style, and return with ease.',
     image: '/Rental.avif',
-    href: '/pages/our-services',
+    href: '/enquiry-form',
     cta: 'LEARN MORE',
   },
   {
@@ -17,14 +17,14 @@ const services = [
     description:
       'From house to home - our signature service that includes arranging decor and soft furnishings to give the space some personality.',
     image: '/Styling.avif',
-    href: '',
+    href: '/styling-consultation-form',
     cta: 'LEARN MORE',
-    disabled: true,
+    disabled: false,
   },
   {
-    title: 'Celebrating something special?',
+    title: 'Curated Set',
     description:
-      'Our timeless stone pieces make refined gifts for weddings, gatherings, and corporate events. Bulk orders and customization available.',
+      'Our signature curated sets bring together thoughtfully paired stone objects to add character and balance to your space.',
     image: '/Gifting.avif',
     href: '/products/e-gift-card',
     cta: 'SHOP NOW',
