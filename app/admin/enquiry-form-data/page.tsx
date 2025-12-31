@@ -44,11 +44,16 @@ const Page = () => {
   }, [dispatch]);
 
   /* ================= EVENT TYPES ================= */
-  const eventTypes = useMemo(() => {
-    return Array.from(
-      new Set(enquiries.map((e) => e.eventType).filter(Boolean))
-    );
-  }, [enquiries]);
+const eventTypes = useMemo<string[]>(() => {
+  return Array.from(
+    new Set(
+      enquiries
+        .map((e) => e.eventType)
+        .filter((type): type is string => Boolean(type))
+    )
+  );
+}, [enquiries]);
+
 
   /* ================= FILTER LOGIC ================= */
   const filteredEnquiries = useMemo(() => {
