@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import LoginPopup from '@/app/elements/LoginPopup';
+import { addToWishlist } from "@/redux/slice/WishlistSlice";
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
@@ -167,6 +168,16 @@ const Page = () => {
     }
   };
 
+  const handleAddToWishlist = (
+    e: React.MouseEvent,
+    productId: string
+  ) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    dispatch(addToWishlist({ productId }));
+  };
+
+
   // Auto add after login + redirect
   useEffect(() => {
     if (isAuthenticated && showLogin && product) {
@@ -199,7 +210,7 @@ const Page = () => {
   const { name, description, content, attributes } = product;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-rose-50 py-[100px]">
+    <div className="min-h-screen py-[100px]">
       <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-10">
         {/* Gallery */}
         <div className="space-y-4">
@@ -277,7 +288,7 @@ const Page = () => {
                     <button
                       key={value}
                       onClick={() => setSelectedAttr(prev => ({ ...prev, [attr.name]: value }))}
-                      className={`relative px-4 py-2 rounded-xl border-2 transition-all ${
+                      className={`relative px-4 cursor-pointer py-2 rounded-xl border-2 transition-all ${
                         active
                           ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
                           : 'border-stone-200 bg-white hover:border-indigo-300'
@@ -295,14 +306,14 @@ const Page = () => {
           {/* Quantity + Add to Cart */}
           <div className="flex items-center gap-4">
             <div className="flex items-center border rounded-xl bg-white">
-              <button className="px-4 py-2" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
+              <button className="px-4 py-2 cursor-pointer" onClick={() => setQuantity(q => Math.max(1, q - 1))}>-</button>
               <span className="px-5 font-semibold">{quantity}</span>
-              <button className="px-4 py-2" onClick={() => setQuantity(q => q + 1)}>+</button>
+              <button className="px-4 py-2 cursor-pointer" onClick={() => setQuantity(q => q + 1)}>+</button>
             </div>
 
             <Button
               size="lg"
-              className="flex-1 shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white"
+              className="flex-1 shadow-lg cursor-pointer text-white"
               disabled={attributes.length > 0 && !selectedVariation}
               onClick={handleAddToCart}
             >
@@ -311,15 +322,16 @@ const Page = () => {
             </Button>
 
             <button
-              onClick={() => setLiked(p => !p)}
-              className="p-3 rounded-xl border-2 border-stone-200 bg-white hover:border-rose-300 transition"
+          onClick={(e) => {
+  setLiked(p => !p);
+  handleAddToWishlist(e, product._id);
+}}
+              className="p-3 rounded-xl border-2 cursor-pointer border-stone-200 bg-white hover:border-rose-300 transition"
             >
               <Heart className={`w-5 h-5 ${liked ? 'fill-rose-500 text-rose-500' : 'text-stone-400'}`} />
             </button>
 
-            <button className="p-3 rounded-xl border-2 border-stone-200 bg-white hover:border-indigo-300 transition">
-              <Share2 className="w-5 h-5 text-stone-600" />
-            </button>
+       
           </div>
 
           {/* Perks */}
@@ -340,13 +352,14 @@ const Page = () => {
             Stock: <span className="font-semibold">{currentStock > 0 ? 'In stock' : 'Out of stock'}</span>
           </p>
 
-          {showLogin && <LoginPopup />}
+          {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
         </div>
       </div>
 
       {/* Full Description */}
       <div className="max-w-7xl mx-auto px-4 mt-10">
         <Card className="p-8 bg-white shadow-sm">
+        <h2 className="text-3xl text-center font-bold text-stone-800">Product Description</h2>
           <div
             className="prose prose-sm max-w-none"
             dangerouslySetInnerHTML={{ __html: content }}

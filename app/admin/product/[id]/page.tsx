@@ -296,9 +296,19 @@ useEffect(() => {
       }
     });
 
+    const nextCategoryIds = Array.from(autoCategoryIds);
+
+    // 🛑 CRITICAL GUARD (prevents infinite loop)
+    if (
+      nextCategoryIds.length === prev.categoryid.length &&
+      nextCategoryIds.every((id) => prev.categoryid.includes(id))
+    ) {
+      return prev; // ⛔ no state change → no re-render
+    }
+
     return {
       ...prev,
-      categoryid: Array.from(autoCategoryIds),
+      categoryid: nextCategoryIds,
     };
   });
 }, [categoryTree, form.subcategoryid]);

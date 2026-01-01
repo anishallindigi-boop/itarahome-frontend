@@ -95,7 +95,7 @@ export default function ImageUploadModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl">
+    <DialogContent className="!max-w-[960px] w-full h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5" />
@@ -117,7 +117,7 @@ export default function ImageUploadModal({
         </div>
 
         {/* Gallery */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-h-[400px] overflow-y-auto mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-h-[700px] overflow-y-auto mt-4">
           {images.map((img) => {
             const isSelected = selected.includes(img.url);
 
@@ -131,7 +131,7 @@ export default function ImageUploadModal({
                 <img
                   src={`${process.env.NEXT_PUBLIC_API_URL}${img.url}`}
                   alt=""
-                  className="h-32 w-full object-cover"
+                  className="w-full h-full object-cover"
                 />
 
                 {/* Selected overlay */}

@@ -37,7 +37,7 @@ export function CartPopover({ items }: { items: CartItem[] }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative cursor-pointer">
           <ShoppingCart className="w-6 h-6 text-gray-700" />
           {itemCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
@@ -70,7 +70,7 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                 >
                   <div className="flex-shrink-0 w-16 h-16 relative">
                     <img
-                      src={`${process.env.NEXT_PUBLIC_IMAGE_URL}/${item.image}`}
+                      src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${item.image}`}
                       alt={item.name}
                       className="object-cover rounded-lg border"
                     />

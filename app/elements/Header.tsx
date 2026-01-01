@@ -146,7 +146,7 @@ export default function HeaderImproved() {
       <header className="fixed top-0 left-0 w-full z-[9999] bg-white border-b h-20 px-8 flex items-center justify-between">
         {/* LEFT */}
         <div className="flex items-center gap-5 w-1/3">
-          <button onClick={() => setOpen(true)}>
+          <button onClick={() => setOpen(true)} className='cursor-pointer'>
             <Menu size={24} />
           </button>
 
@@ -171,7 +171,7 @@ export default function HeaderImproved() {
         <div className="flex items-center gap-4 justify-end w-1/3">
 
            <div className="relative">
-         <Button variant="ghost" size="icon" onClick={handleUserClick}>
+         <Button variant="ghost" size="icon" className='cursor-pointer' onClick={handleUserClick}>
               <User className="w-5 h-5" />
             </Button>
 
@@ -236,7 +236,9 @@ export default function HeaderImproved() {
       </header>
 
       {/* ================= LOGIN ================= */}
-      {showLogin && <LoginPopup />}
+      {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
+
+        
       <WishlistDrawer isOpen={openWishlist} onClose={() => setOpenWishlist(false)} />
 
       {/* ================= DRAWER ================= */}
@@ -279,7 +281,7 @@ export default function HeaderImproved() {
                                 onClick={() =>
                                   setExpandedCategory(isOpen ? null : cat.label)
                                 }
-                                className="w-full flex justify-between items-center p-3 hover:bg-gray-100 rounded-lg"
+                                className="w-full flex justify-between cursor-pointer items-center p-3 hover:bg-gray-100 rounded-lg"
                               >
                                 <span className="font-medium">{cat.label}</span>
                                 <ChevronDown
@@ -302,7 +304,7 @@ export default function HeaderImproved() {
                                       <button
                                         key={sub.label}
                                         onClick={sub.onClick}
-                                        className="w-full flex justify-between items-center p-2 text-sm hover:bg-gray-100 rounded-md"
+                                        className="w-full flex justify-between cursor-pointer items-center p-2 text-sm hover:bg-gray-100 rounded-md"
                                       >
                                         {sub.label}
                                         <ExternalLink size={14} />

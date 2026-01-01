@@ -114,7 +114,7 @@ const WishlistDrawer = ({ isOpen, onClose }: Props) => {
                     onClick={onClose}
                   >
                     <img
-                      src={`${IMAGE_URL}/${item.product.mainImage}`}
+                      src={`${IMAGE_URL}${item.product.mainImage}`}
                       alt={item.product.name}
                       className="w-[80px] h-[80px] rounded-xl object-cover"
                     />
@@ -160,7 +160,7 @@ const WishlistDrawer = ({ isOpen, onClose }: Props) => {
         </div>
 
         {/* Login Popup */}
-        {showLogin && <LoginPopup />}
+        {showLogin && <LoginPopup onClose={() => setShowLogin(false)}/>}
       </div>
     </>
   );

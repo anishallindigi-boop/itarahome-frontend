@@ -16,7 +16,7 @@ import {
 
 type Step = "login" | "signup" | "otp";
 
-export default function LoginPopup() {
+export default function LoginPopup({ onClose }: { onClose: () => void }) {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -28,7 +28,7 @@ export default function LoginPopup() {
     isOTPVerified,
   } = useAppSelector((state: RootState) => state.auth);
 
-  console.log(isOTPSent,"otpsent","isotpverified",isOTPVerified,message,error)
+
 
   const [step, setStep] = useState<Step>("login");
   const [phone, setPhone] = useState("");
@@ -91,7 +91,10 @@ useEffect(() => {
       <div className="relative bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in">
         {/* CLOSE */}
         <button
-          onClick={() => router.refresh()}
+          onClick={() => {
+    dispatch(resetState());
+    onClose();
+  }}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
         >
           <X size={20} />
