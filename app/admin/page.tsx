@@ -458,7 +458,7 @@ const AdminDashboard = () => {
                         <TableCell>{formatOrderDate(order.createdAt)}</TableCell>
                         <TableCell>
                           <Badge 
-                            variant={getStatusVariant(order.status).variant}
+                            variant={getStatusVariant(order.status).variant as any}
                             className={getStatusVariant(order.status).className}
                           >
                             {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
