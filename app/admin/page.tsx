@@ -17,6 +17,8 @@ import {
   Settings,
   LogOut,
   Menu,
+  ChartCandlestick,
+  Wallet,
   X,
   Search,
   Bell,
@@ -190,14 +192,14 @@ const AdminDashboard = () => {
     { 
       title: 'Revenue', 
       value: formatCurrency(totalRevenue), 
-      icon: DollarSign, 
+      icon: Wallet, 
       change: '0%', // You can calculate this based on previous period
       trend: 'up' 
     },
     { 
       title: 'Out of Stock', 
       value: outOfStockProducts.toString(), 
-      icon: DollarSign, 
+      icon: ChartCandlestick, 
       change: '0%', 
       trend: outOfStockProducts > 0 ? 'up' : 'down' 
     },
