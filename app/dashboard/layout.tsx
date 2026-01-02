@@ -10,6 +10,7 @@ import {
   User,
   Package,
   Heart,
+  LayoutDashboard,
   Settings,
   HelpCircle,
 } from "lucide-react";
@@ -22,10 +23,11 @@ interface DashboardLayoutProps {
 }
 
 const menu = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Profile", href: "/dashboard/profile", icon: User },
   { name: "Orders", href: "/dashboard/orders", icon: Package },
-  { name: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+    // { name: "Wishlist", href: "/dashboard/wishlist", icon: Heart },
+    // { name: "Settings", href: "/dashboard/settings", icon: Settings },
   { name: "Help Center", href: "/dashboard/help", icon: HelpCircle },
 ];
 

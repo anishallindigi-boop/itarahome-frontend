@@ -4,7 +4,7 @@ export default function AboutSection() {
   return (
     <section className="py-20 px-6">
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
-        <div className="bg-white border border-gray-200 p-12 flex flex-col justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
+        <div className="bg-white border border-gray-200 p-5 lg:p-12 flex flex-col justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
           <div className="absolute top-0 right-0 w-full h-full">
             <img
               src="/second-left.jpg"
@@ -12,7 +12,8 @@ export default function AboutSection() {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="relative bg-white p-20">
+      <div className="relative bg-white p-6 sm:p-10 lg:p-20">
+
             <h2 className="text-4xl font-light mb-6">About Us</h2>
             <p className="text-gray-600 leading-relaxed mb-8">
              Itara Home is a design-led home décor brand focused on creating modern, minimal and thoughtfully crafted stone products. We believe your space should feel calm, beautiful and intentional.
@@ -23,7 +24,7 @@ export default function AboutSection() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 p-12 flex flex-col justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
+        <div className="bg-white border border-gray-200 p-5 lg:p-12 flex flex-col justify-center relative overflow-hidden group hover:shadow-lg transition-shadow">
           <div className="absolute top-0 right-0 w-full h-full ">
             <img
             src="/second-right.jpg"
@@ -31,7 +32,7 @@ export default function AboutSection() {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="relative bg-white p-20">
+          <div className="relative bg-white p-6 sm:p-10 lg:p-20">
             <h2 className="text-4xl font-light mb-6">Our process</h2>
             <div className="space-y-3 mb-8">
               <div className="flex items-center text-gray-700">
