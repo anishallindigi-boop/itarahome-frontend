@@ -130,6 +130,24 @@ export default function HeaderImproved() {
       })),
   }));
 
+
+
+const handleDashboardClick = () => {
+
+
+  // role based redirect
+  if (user?.role === 'admin') {
+    router.push('/admin');
+  } else {
+    router.push('/dashboard');
+  }
+
+  setShowProfile(false);
+  setOpen(false);
+};
+
+
+
   const menu = [
     { label: 'Home', href: '/' },
     { label: 'Products', children: productMenu },
@@ -199,13 +217,14 @@ export default function HeaderImproved() {
                     <User size={16} /> Profile
                   </Link>
 
-                  <Link
-                    href="/dashboard/orders"
-                    onClick={() => setShowProfile(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                  >
-                    <Package size={16} /> Orders
-                  </Link>
+                <button
+  onClick={handleDashboardClick}
+  className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+>
+  <Package size={16} />
+  Dashboard
+</button>
+
 
                   <button
                     onClick={() => {

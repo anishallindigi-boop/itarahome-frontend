@@ -8,26 +8,30 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 export interface EnquiryInput {
   fullName: string;
-  phone: string;
   email: string;
-  eventType?: string;
-  quantity?: number | string;
-  requiredBy?: string;
-  products?: string;
-  customisation?: string;
+  phone: string;
+  spaceType?: string;
+  projectType?: string;
+  size?: string;
+  city?: string;
+  stylePreference?: string;
+  budget?: string;
+  includeProducts?: string;
   message?: string;
 }
 
 export interface Enquiry {
   _id?: string;
   fullName: string;
-  phone: string;
   email: string;
-  eventType?: string;
-  quantity?: number;
-  requiredBy?: string;
-  products?: string;
-  customisation?: string;
+  phone: string;
+  spaceType?: string;
+  projectType?: string;
+  size?: string;
+  city?: string;
+  stylePreference?: string;
+  budget?: string;
+  includeProducts?: string;
   message?: string;
   createdAt?: string;
 }
@@ -57,14 +61,14 @@ const initialState: EnquiryState = {
 /* ================= THUNKS ================= */
 
 /* CREATE ENQUIRY */
-export const createEnquiry = createAsyncThunk<
+export const createStylingEnquiry = createAsyncThunk<
   any,
   EnquiryInput,
   { rejectValue: string }
->('enquiry/create', async (form, { rejectWithValue }) => {
+>('stylingenquiry/create', async (form, { rejectWithValue }) => {
   try {
     const res = await axios.post(
-      `${API_URL}/api/enquiry/create`,
+      `${API_URL}/api/styling-enquiry/create`,
       form,
       {
         headers: {
@@ -81,14 +85,14 @@ export const createEnquiry = createAsyncThunk<
 });
 
 /* GET ALL ENQUIRIES (ADMIN) */
-export const getAllEnquiries = createAsyncThunk<
+export const getAllStylingEnquiries = createAsyncThunk<
   any,
   void,
   { rejectValue: string }
->('enquiry/getAll', async (_, { rejectWithValue }) => {
+>('stylingenquiry/getAll', async (_, { rejectWithValue }) => {
   try {
     const res = await axios.get(
-      `${API_URL}/api/enquiry/get-all`,
+      `${API_URL}/api/styling-enquiry/get-all`,
       {
         headers: {
           'x-api-key': API_KEY,
@@ -111,7 +115,7 @@ export const getSingleEnquiry = createAsyncThunk<
 >('enquiry/getSingle', async (id, { rejectWithValue }) => {
   try {
     const res = await axios.get(
-      `${API_URL}/api/styling-enquiry/get-one/${id}`,
+      `${API_URL}/api/styling-enquiry/${id}`,
       {
         headers: {
           'x-api-key': API_KEY,
@@ -151,7 +155,7 @@ export const deleteEnquiry = createAsyncThunk<
 
 /* ================= SLICE ================= */
 
-export const EnquirySlice = createSlice({
+export const StylingEnquirySlice = createSlice({
   name: 'enquiry',
   initialState,
   reducers: {
@@ -168,29 +172,29 @@ export const EnquirySlice = createSlice({
     builder
 
       /* CREATE */
-      .addCase(createEnquiry.pending, (state) => {
+      .addCase(createStylingEnquiry.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createEnquiry.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(createStylingEnquiry.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
       })
-      .addCase(createEnquiry.rejected, (state, action) => {
+      .addCase(createStylingEnquiry.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
 
       /* GET ALL */
-      .addCase(getAllEnquiries.pending, (state) => {
+      .addCase(getAllStylingEnquiries.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getAllEnquiries.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(getAllStylingEnquiries.fulfilled, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.enquiries = action.payload.enquiries;
       })
-      .addCase(getAllEnquiries.rejected, (state, action) => {
+      .addCase(getAllStylingEnquiries.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
@@ -224,5 +228,5 @@ export const EnquirySlice = createSlice({
   },
 });
 
-export const { resetState } = EnquirySlice.actions;
-export default EnquirySlice.reducer;
+export const { resetState } = StylingEnquirySlice.actions;
+export default StylingEnquirySlice.reducer;

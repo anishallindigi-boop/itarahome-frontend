@@ -38,7 +38,7 @@ const router=useRouter()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Enquiry Data:', formData);
+   
 
 dispatch(createEnquiry(formData));
   };

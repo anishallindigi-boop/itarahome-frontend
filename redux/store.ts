@@ -12,6 +12,7 @@ import VariationSlice from './slice/VariationSlice';
 import ImageSlice from './slice/ImageSlice';
 import SubCategorySlice from './slice/SubCategorySlice';
 import EnquirySlice from './slice/EnquirySlice';
+import StylingEnquirySlice from './slice/StylingEnquirySlice';
 
 const store = configureStore({
   reducer: {
@@ -27,7 +28,8 @@ const store = configureStore({
     wishlist:WishlistSlice,
     image: ImageSlice,
     subcategory: SubCategorySlice,
-    enquiry: EnquirySlice
+    enquiry: EnquirySlice,
+    stylingenquiry: StylingEnquirySlice
   },
 
 })
