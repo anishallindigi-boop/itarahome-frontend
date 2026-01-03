@@ -20,6 +20,7 @@ import { RootState, AppDispatch } from '@/redux/store';
 import { useAppDispatch,useAppSelector } from '@/redux/hooks';
 import ApiLoader from '../elements/ApiLoader';
 import { toast } from "sonner"; 
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 
 interface AdminLayoutProps {
@@ -90,6 +91,7 @@ React.useEffect(() => {
 
   return (
     <>
+    <ProtectedRoute requiredRole="admin" redirectTo="/auth/login">
     {
       (isChecking || loading) ? <ApiLoader /> : (
     
@@ -199,6 +201,7 @@ React.useEffect(() => {
       </div>
     </div>
   ) }
+  </ProtectedRoute>
   </>
   );
 };

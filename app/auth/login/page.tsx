@@ -84,7 +84,7 @@ export default function Page() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don’t have an account?{" "}
-          <a href="/signup" className="text-indigo-600 font-medium">
+          <a href="/auth/signup" className="text-indigo-600 font-medium">
             Sign Up
           </a>
         </p>

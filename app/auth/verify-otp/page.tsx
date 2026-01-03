@@ -1,3 +1,4 @@
+"use client";
 "use client"; // must be first line
 
 import React, { useState, useEffect } from "react";
@@ -28,7 +29,7 @@ export default function Page() {
   useEffect(() => {
     if (isOTPVerified) {
       dispatch(resetState());
-      router.push("/admin"); // redirect to dashboard
+      router.push("/"); // redirect to dashboard
     }
   }, [isOTPVerified, router, dispatch]);
 

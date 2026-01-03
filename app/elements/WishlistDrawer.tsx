@@ -23,7 +23,7 @@ const WishlistDrawer = ({ isOpen, onClose }: Props) => {
   const { isAuthenticated } = useAppSelector((state: any) => state.auth);
     const {message,success} = useAppSelector((state:any) => state.usercart)
 
-    console.log(success,"cart")
+    // console.log(success,"cart")
 
   const [showLogin, setShowLogin] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<string | null>(null);

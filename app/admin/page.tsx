@@ -66,6 +66,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
+import { useRouter } from 'next/navigation';
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -148,6 +149,8 @@ const generateCategoryData = (products: any[]) => {
   }));
 };
 const AdminDashboard = () => {
+
+  const router=useRouter();
   const dispatch = useAppDispatch();
   const { user, loading: authLoading } = useAppSelector((state: RootState) => state.auth);
   const { orders, loading: ordersLoading, error } = useAppSelector((state: RootState) => state.order);
@@ -356,7 +359,7 @@ const AdminDashboard = () => {
                   <CardTitle>Recent Products</CardTitle>
                   <CardDescription>Recently added products</CardDescription>
                 </div>
-                <Button variant="outline" size="sm">View All</Button>
+                <Button variant="outline" size="sm" onClick={() => router.push('/admin/product')}>View All</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -399,7 +402,7 @@ const AdminDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">View</Button>
+                        <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/product/${product._id}`)}>View</Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -416,7 +419,7 @@ const AdminDashboard = () => {
                   <CardTitle>Recent Orders</CardTitle>
                   <CardDescription>Latest transactions from your store</CardDescription>
                 </div>
-                <Button variant="outline" size="sm">View All</Button>
+                <Button variant="outline" size="sm" onClick={() => router.push(`/admin/orders`)} className='cursor-pointer'>View All</Button>
               </div>
             </CardHeader>
             <CardContent>
@@ -470,7 +473,7 @@ const AdminDashboard = () => {
                           {formatCurrency(order.total || 0)}
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">View</Button>
+                          <Button variant="ghost" size="sm" onClick={() => router.push(`/admin/orders/${order._id}`)} className='cursor-pointer'>View</Button>
                         </TableCell>
                       </TableRow>
                     ))
