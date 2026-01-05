@@ -125,7 +125,7 @@ useEffect(() => {
                 onClick={() => setStep(t as Step)}
                 className={`flex-1 py-2 font-semibold transition ${
                   step === t
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
@@ -150,7 +150,7 @@ useEffect(() => {
             </div>
             <button
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition disabled:opacity-60"
+              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-indigo-700 transition disabled:opacity-60"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -203,7 +203,7 @@ useEffect(() => {
 
             <button
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition"
+              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-indigo-700 transition"
             >
               {loading ? "Creating..." : "Create Account"}
             </button>
@@ -223,7 +223,7 @@ useEffect(() => {
 
             <button
               disabled={loading}
-              className="w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition"
+              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-green-700 transition"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>

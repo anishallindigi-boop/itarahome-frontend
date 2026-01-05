@@ -240,7 +240,7 @@ export const AuthSlice = createSlice({
       })
       .addCase(getuser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to get user";
+        // state.error = action.payload || "Failed to get user";
         state.user = null;
         state.isAuthenticated = false;
       })
