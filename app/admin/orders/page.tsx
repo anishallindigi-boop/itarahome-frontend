@@ -23,6 +23,7 @@ export default function OrdersPage() {
   const { orders, loading } = useAppSelector(
     (state: RootState) => state.order
   );
+  console.log(orders,"order")
 
   const [openOrder, setOpenOrder] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);

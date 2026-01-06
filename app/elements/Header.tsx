@@ -10,6 +10,7 @@ import {
   Search,
   LogOut,
   Package,
+  LayoutDashboard,
   Heart,
   ExternalLink,
 } from 'lucide-react';
@@ -132,19 +133,19 @@ export default function HeaderImproved() {
 
 
 
-const handleDashboardClick = () => {
+  const handleDashboardClick = () => {
 
 
-  // role based redirect
-  if (user?.role === 'admin') {
-    router.push('/admin');
-  } else {
-    router.push('/dashboard');
-  }
+    // role based redirect
+    if (user?.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/dashboard');
+    }
 
-  setShowProfile(false);
-  setOpen(false);
-};
+    setShowProfile(false);
+    setOpen(false);
+  };
 
 
 
@@ -188,14 +189,14 @@ const handleDashboardClick = () => {
         {/* RIGHT */}
         <div className="flex items-center gap-4 justify-end w-1/3">
 
-           <div className="relative">
-         <Button variant="ghost" size="icon" className='cursor-pointer' onClick={handleUserClick}>
+          <div className="relative">
+            <Button variant="ghost" size="icon" className='cursor-pointer' onClick={handleUserClick}>
               <User className="w-5 h-5" />
             </Button>
 
             {/* PROFILE DROPDOWN */}
             <AnimatePresence>
-                    {isAuthenticated && showProfile && (
+              {isAuthenticated && showProfile && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -208,8 +209,32 @@ const handleDashboardClick = () => {
                     </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
                   </div>
-
-                  <Link
+{user?.role === 'admin' ? (
+  <Link
+    href="/admin"
+    onClick={() => setShowProfile(false)}
+    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+  >
+    <LayoutDashboard size={16} /> Admin Panel
+  </Link>
+) : (<>
+  <Link
+    href="/dashboard/profile"
+    onClick={() => setShowProfile(false)}
+    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+  >
+    <User size={16} /> Profile
+  </Link>
+   <Link
+    href="/dashboard"
+    onClick={() => setShowProfile(false)}
+    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+  >
+    <LayoutDashboard size={16} /> Dashboard
+  </Link>
+  </>
+)}
+             {/* <Link
                     href="/dashboard/profile"
                     onClick={() => setShowProfile(false)}
                     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
@@ -217,13 +242,13 @@ const handleDashboardClick = () => {
                     <User size={16} /> Profile
                   </Link>
 
-                <button
-  onClick={handleDashboardClick}
-  className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
->
-  <Package size={16} />
-  Dashboard
-</button>
+                  <button
+                    onClick={handleDashboardClick}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                  >
+                    <Package size={16} />
+                    Dashboard
+                  </button> */}
 
 
                   <button
@@ -239,8 +264,8 @@ const handleDashboardClick = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-         
-</div>
+
+          </div>
           <button onClick={() => setOpenWishlist(true)} className="relative cursor-pointer">
             <Heart size={18} />
             {wishlist.length > 0 && (
@@ -257,7 +282,7 @@ const handleDashboardClick = () => {
       {/* ================= LOGIN ================= */}
       {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
 
-        
+
       <WishlistDrawer isOpen={openWishlist} onClose={() => setOpenWishlist(false)} />
 
       {/* ================= DRAWER ================= */}

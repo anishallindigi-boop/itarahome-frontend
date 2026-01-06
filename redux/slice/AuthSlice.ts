@@ -37,7 +37,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  loading: false,
+  loading: true,
   error: null,
   message: null,
   isAuthenticated: false,
@@ -267,6 +267,7 @@ export const AuthSlice = createSlice({
     builder.addCase(logoutuser.fulfilled, (state, action) => {
       state.user = null;
       state.isAuthenticated = false;
+        state.loading = false;
       state.message = action.payload.message;
     });
   },

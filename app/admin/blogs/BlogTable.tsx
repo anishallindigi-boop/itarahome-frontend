@@ -28,7 +28,7 @@ const BlogTable = () => {
     isdeleted,
 
   } = useAppSelector((state: RootState) => state.blog);
-  console.log(loading,"load")
+  // console.log(loading,"load")
 
   // Fetch blogs
   useEffect(() => {

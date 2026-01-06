@@ -70,6 +70,7 @@ export const getAllOrders = createAsyncThunk<
       withCredentials: true,
       headers: { "x-api-key": API_KEY },
     });
+    console.log(res.data,"ath")
     return res.data;
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.error || "Failed to fetch orders");
@@ -113,6 +114,7 @@ export const updateOrderStatus = createAsyncThunk<
     );
     return res.data;
   } catch (err: any) {
+    console.log(err)
     return rejectWithValue(err.response?.data?.error || "Update failed");
   }
 });

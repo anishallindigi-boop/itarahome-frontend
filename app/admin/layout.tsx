@@ -59,13 +59,13 @@ React.useEffect(() => {
 
 
 // 3) Protect admin routes: if not authenticated after loading -> login
-  React.useEffect(() => {
-    if (isChecking || loading) return;
+  // React.useEffect(() => {
+  //   if (isChecking || loading) return;
 
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isChecking, loading, isAuthenticated, router]);
+  //   if (!isAuthenticated) {
+  //     router.push('/');
+  //   }
+  // }, [isChecking, loading, isAuthenticated, router]);
 
  const handleLogout = () => {
     dispatch(logoutuser());
@@ -91,7 +91,7 @@ React.useEffect(() => {
 
   return (
     <>
-    <ProtectedRoute requiredRole="admin" redirectTo="/auth/login">
+    <ProtectedRoute requiredRole="admin" redirectTo="/">
     {
       (isChecking || loading) ? <ApiLoader /> : (
     

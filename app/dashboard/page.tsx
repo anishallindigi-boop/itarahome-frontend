@@ -1,14 +1,15 @@
 // app/dashboard/page.tsx
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAppSelector, useAppDispatch } from '@/redux/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Package, Heart, MapPin, Clock, ShoppingCart, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { getAllOrders } from '@/redux/slice/OrderSlice';
+import { getOrdersByCustomer } from '@/redux/slice/OrderSlice';
 import { Badge } from '@/components/ui/badge';
+import WishlistDrawer from '../elements/WishlistDrawer';
 
 // Helper function to format currency
 const formatCurrency = (amount: number) => {
@@ -38,12 +39,12 @@ const UserDashboard = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { orders, loading, error } = useAppSelector((state) => state.order);
-
+  const [openWishlist, setOpenWishlist] = React.useState(false);
   // Fetch orders on component mount
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        await dispatch(getAllOrders()).unwrap();
+        await dispatch(getOrdersByCustomer()).unwrap();
       } catch (err) {
         console.error('Failed to fetch orders:', err);
       }
@@ -82,14 +83,7 @@ const UserDashboard = () => {
       bg: 'bg-red-50',
       link: '/dashboard/wishlist'
     },
-    {
-      title: 'Addresses',
-      value: '2', // You'll need to implement address count
-      icon: MapPin,
-      color: 'text-green-500',
-      bg: 'bg-green-50',
-      link: '/dashboard/addresses'
-    }
+   
   ];
 
   if (loading && !orders.length) {
@@ -197,7 +191,7 @@ const UserDashboard = () => {
             <h3 className="mt-2 text-sm font-medium text-gray-900">Continue Shopping</h3>
             <p className="mt-1 text-sm text-gray-500">Discover our latest products</p>
             <Button variant="outline" className="mt-4" asChild>
-              <Link href="/products">Shop Now</Link>
+              <Link href="/shop">Shop Now</Link>
             </Button>
           </CardContent>
         </Card>
@@ -206,8 +200,8 @@ const UserDashboard = () => {
             <Heart className="mx-auto h-8 w-8 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Your Wishlist</h3>
             <p className="mt-1 text-sm text-gray-500">View your saved items</p>
-            <Button variant="outline" className="mt-4" asChild>
-              <Link href="/dashboard/wishlist">View Wishlist</Link>
+            <Button variant="outline" className="mt-4" asChild onClick={() => setOpenWishlist(true)}>
+       <Link href="#">View Wishlist</Link>
             </Button>
           </CardContent>
         </Card>
@@ -217,11 +211,12 @@ const UserDashboard = () => {
             <h3 className="mt-2 text-sm font-medium text-gray-900">Manage Addresses</h3>
             <p className="mt-1 text-sm text-gray-500">Update your delivery addresses</p>
             <Button variant="outline" className="mt-4" asChild>
-              <Link href="/dashboard/addresses">Manage</Link>
+              <Link href="/dashboard/profile">Manage</Link>
             </Button>
           </CardContent>
         </Card>
       </div>
+       <WishlistDrawer isOpen={openWishlist} onClose={() => setOpenWishlist(false)} />
     </div>
   );
 };

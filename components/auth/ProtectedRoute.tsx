@@ -1,47 +1,38 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/redux/hooks';
-
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requiredRole?: 'admin' | 'user';
-  redirectTo?: string;
-}
+import { RootState } from '@/redux/store';
 
 export default function ProtectedRoute({
   children,
-  requiredRole = 'user',
-  redirectTo = '/',
-}: ProtectedRouteProps) {
+  requiredRole,
+  redirectTo,
+}: {
+  children: React.ReactNode;
+  requiredRole?: string;
+  redirectTo: string;
+}) {
   const router = useRouter();
-  const { user, isAuthenticated, loading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, loading, user } = useAppSelector(
+    (state: RootState) => state.auth
+  );
 
   useEffect(() => {
-    if (!loading) {
-      // If not authenticated, redirect to login
-      if (!isAuthenticated) {
-        router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-        return;
-      }
+    if (loading) return;
 
-      // If role is required and user doesn't have it, redirect
-      if (requiredRole === 'admin' && user?.role !== 'admin') {
-        router.push(redirectTo);
-        return;
-      }
+    if (!isAuthenticated) {
+      router.replace(redirectTo);
+      return;
     }
-  }, [isAuthenticated, loading, requiredRole, user, router, redirectTo]);
 
-  // Show loading state while checking authentication
-  if (loading || !isAuthenticated || (requiredRole === 'admin' && user?.role !== 'admin')) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+    if (requiredRole && user?.role !== requiredRole) {
+      router.replace(redirectTo);
+    }
+  }, [loading, isAuthenticated, user, requiredRole, redirectTo, router]);
+
+  if (loading || !isAuthenticated) return null;
 
   return <>{children}</>;
 }

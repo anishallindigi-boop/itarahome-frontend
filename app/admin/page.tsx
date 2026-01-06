@@ -102,7 +102,7 @@ const getStatusVariant = (status: string) => {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 // Helper function to generate monthly sales data
-const generateMonthlySalesData = (orders: any[]) => {
+const generateMonthlySalesData = (orders: any[] = []) => {
   const now = new Date();
   const months = [];
   

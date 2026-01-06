@@ -6,6 +6,18 @@ import { ChevronDown, XCircle } from "lucide-react"; // added cancel icon
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { getOrdersByCustomer, updateOrderStatus } from "@/redux/slice/OrderSlice"; 
 import type { RootState } from "@/redux/store";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -16,23 +28,32 @@ export default function OrdersPage() {
   );
 
   const [openOrder, setOpenOrder] = useState<string | null>(null);
+  const [confirmOrderId, setConfirmOrderId] = useState<string | null>(null);
+
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(getOrdersByCustomer());
   }, [dispatch]);
 
-  const handleCancelOrder = async (orderId: string) => {
-    setUpdatingOrderId(orderId);
-    try {
-      await dispatch(updateOrderStatus({ id: orderId, status: "Order cancelled" })).unwrap();
-      alert("Order cancelled successfully");
-    } catch (error: any) {
-      alert(error || "Failed to cancel order");
-    } finally {
-      setUpdatingOrderId(null);
-    }
-  };
+ const handleCancelOrder = async () => {
+  if (!confirmOrderId) return;
+
+  setUpdatingOrderId(confirmOrderId);
+  try {
+    await dispatch(
+      updateOrderStatus({ id: confirmOrderId, status: "cancelled" })
+    ).unwrap();
+
+   dispatch(getOrdersByCustomer())
+    setConfirmOrderId(null);
+  } catch (error: any) {
+   
+  } finally {
+    setUpdatingOrderId(null);
+  }
+};
+
 
   if (loading) {
     return (
@@ -96,16 +117,46 @@ export default function OrdersPage() {
                   </button>
 
                   {/* CANCEL ORDER BUTTON */}
-                  {order.status !== "Order cancelled" && (
-                    <button
-                      disabled={updatingOrderId === order._id}
-                      onClick={() => handleCancelOrder(order._id)}
-                      className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      {updatingOrderId === order._id ? "Cancelling..." : "Cancel"}
-                    </button>
-                  )}
+                {order.status !== "Order cancelled" && (
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <button
+        onClick={() => setConfirmOrderId(order._id)}
+        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
+      >
+        <XCircle className="w-4 h-4" />
+        Cancel
+      </button>
+    </AlertDialogTrigger>
+
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          Cancel this order?
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          This action cannot be undone. Your order will be permanently cancelled.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      <AlertDialogFooter>
+        <AlertDialogCancel
+          onClick={() => setConfirmOrderId(null)}
+        >
+          No, keep order
+        </AlertDialogCancel>
+
+        <AlertDialogAction
+          onClick={handleCancelOrder}
+          className="bg-red-600 hover:bg-red-700"
+        >
+          {updatingOrderId === order._id ? "Cancelling..." : "Yes, cancel"}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+)}
+
                 </div>
               </div>
 
