@@ -76,6 +76,7 @@ export default async function Page({
 }) {
   const { id } = await params; // ✅ Await params
   const blog = await getSingleBlog(id);
+  console.log(blog)
 
   if (!blog) {
     return (
@@ -132,7 +133,7 @@ export default async function Page({
                         key={index}
                         className="bg-white text-blue-600 px-4 py-2 rounded-full text-sm font-bold"
                       >
-                        {cat.categoryname}
+                        {cat.name}
                       </span>
                     ))
                   : null}

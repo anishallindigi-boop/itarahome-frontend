@@ -3,7 +3,10 @@ import React from 'react'
 
 const page = () => {
   return (
-    <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 py-40 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-black-600 via-black-600 to-gray-700 py-40 overflow-hidden    bg-cover bg-center bg-no-repeat"    style={{
+          // change to your actual image path
+          backgroundImage: "url('/about-hero.png')",
+        }}>
     <div className="absolute inset-0">
         <div className="absolute top-10 right-10 w-64 h-64 bg-white/5 rounded-full morphing-blob animate-float"></div>
         <div className="absolute bottom-10 left-10 w-80 h-80 bg-white/5 rounded-full morphing-blob animate-float" style={{ animationDelay: '3s' }}></div>

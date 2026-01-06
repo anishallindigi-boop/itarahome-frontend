@@ -75,8 +75,8 @@ const Page = () => {
           {blogs.map((blog: any, index: number) => {
             const cardId = blog._id || blog.slug || `blog-${index}`;
             const imgSrc =
-              blog?.images && IMAGE_URL
-                ? `${IMAGE_URL}/${blog.images}`
+              blog?.image && IMAGE_URL
+                ? `${IMAGE_URL}${blog.image}`
                 : '/default.jpg';
 
             return (
@@ -113,7 +113,7 @@ const Page = () => {
                     <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded-full text-xs font-semibold">
                       {blog?.category?.length
                         ? blog.category
-                            .map((cat: any) => cat.categoryname)
+                            .map((cat: any) => cat.name)
                             .join(', ')
                         : 'Uncategorized'}
                     </span>
@@ -130,7 +130,7 @@ const Page = () => {
                   <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                     <div className="flex items-center space-x-2">
                       <span className="text-xs font-medium text-gray-700">
-                        {blog?.author?.username || 'Unknown Author'}
+                        {blog?.author?.name || 'Unknown Author'}
                       </span>
                     </div>
                     <div className="flex items-center space-x-3 text-xs text-gray-500">
