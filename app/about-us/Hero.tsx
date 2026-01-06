@@ -8,12 +8,12 @@ const Hero: React.FC = () => {
       <div
         className="
           w-full 
-          h-96 md:h-[400px] 
+          h-96 md:h-[600px] 
           bg-cover bg-center bg-no-repeat
         "
         style={{
           // change to your actual image path
-          backgroundImage: "url('/about-hero.jpg')",
+          backgroundImage: "url('/about-hero.png')",
         }}
       />
 

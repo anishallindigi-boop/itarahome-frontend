@@ -5,8 +5,8 @@ export default function SecondSection() {
         <div
           className="
             relative overflow-hidden
-            bg-[url('/clay.jpeg')]
-            bg-cover bg-center bg-no-repeat bg-fixed
+            bg-[url('/hero.jpeg')]
+            bg-contain bg-center bg-no-repeat bg-fixed
             min-h-[400px] md:min-h-[650px]
             flex items-center justify-center
           "

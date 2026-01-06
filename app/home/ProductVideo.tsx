@@ -8,19 +8,19 @@ const videos = [
     id: 1,
         src: '/coaster.mp4',
     title: 'Tabletop Objects',
-    href: '/shop?subcategories=694faed6906b74dc1fa22a8d',
+    href: '/shop?categories=694fadfa906b74dc1fa22a66',
   },
   {
     id: 2,
        src: '/square-table.mp4',
     title: 'Scluptural Furniture',
-    href: '/shop?subcategories=694faef0906b74dc1fa22a90',
+    href: '/shop?categories=694fae5b906b74dc1fa22a69',
   },
   {
     id: 3,
     src: '/bookend.mp4',
     title: 'Decorative Objects',
-    href: '/shop?subcategories=694fb0eb6ad657f46d9c7d54',
+    href: '/shop?categories=694fae9d906b74dc1fa22a6c',
   },
 ];
 

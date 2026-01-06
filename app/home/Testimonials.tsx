@@ -7,7 +7,7 @@ export default function Testimonials() {
         <div
           className="
             grid md:grid-cols-2 gap-12 items-center
-            bg-[url('/test.jpg')] bg-cover bg-center bg-no-repeat
+            bg-[url('/hero.jpeg')] bg-cover bg-center bg-no-repeat
             p-12 md:p-16 rounded-2xl
           "
         >
