@@ -26,9 +26,8 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
     message,
     isOTPSent,
     isOTPVerified,
+    isRegistered,
   } = useAppSelector((state: RootState) => state.auth);
-
-
 
   const [step, setStep] = useState<Step>("login");
   const [phone, setPhone] = useState("");
@@ -38,39 +37,48 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
     name: "",
     email: "",
     phone: "",
+    addresses: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+    },
   });
 
+  /* ---------- RESET ON OPEN ---------- */
+  useEffect(() => {
+    dispatch(resetState());
+  }, [dispatch]);
 
-  const didInit = React.useRef(false); useEffect(() => { if (didInit.current) return; didInit.current = true; dispatch(resetState()); }, []);
-  /* ---------- TOAST HANDLING ---------- */
+  /* ---------- TOASTS ---------- */
   useEffect(() => {
     if (message) toast.success(message);
     if (error) toast.error(error);
   }, [message, error]);
 
+  /* ---------- SIGNUP → SEND OTP ---------- */
   useEffect(() => {
-  dispatch(resetState());
-}, []);
+    if (isRegistered && signupForm.phone) {
+      dispatch(sendOTP({ phone: signupForm.phone }));
+    }
+  }, [isRegistered]);
 
-
-  /* ---------- STEP CONTROL ---------- */
+  /* ---------- OTP SENT → OTP SCREEN ---------- */
   useEffect(() => {
     if (isOTPSent) setStep("otp");
   }, [isOTPSent]);
 
-useEffect(() => {
-  if (isOTPVerified) {
-    if (didInit.current) return; // prevent duplicate in dev
-    didInit.current = true;
+  /* ---------- OTP VERIFIED → LOGIN ---------- */
+  useEffect(() => {
+    if (isOTPVerified) {
+      toast.success("Login successful");
+      router.refresh();
+      dispatch(resetState());
+      onClose();
+    }
+  }, [isOTPVerified]);
 
-    toast.success(message);
-    router.refresh(); // or close modal if you handle it
-    dispatch(resetState());
-  }
-}, [isOTPVerified]);
-
-
-  /* ---------- handlers ---------- */
+  /* ---------- HANDLERS ---------- */
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(sendOTP({ phone }));
@@ -86,15 +94,32 @@ useEffect(() => {
     dispatch(verifyotp({ phone, otp }));
   };
 
+  const handleSignupChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name.startsWith("addresses.")) {
+      const field = name.split(".")[1];
+      setSignupForm({
+        ...signupForm,
+        addresses: {
+          ...signupForm.addresses,
+          [field]: value,
+        },
+      });
+    } else {
+      setSignupForm({ ...signupForm, [name]: value });
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
-      <div className="relative bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in fade-in zoom-in">
+      <div className="relative bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl">
         {/* CLOSE */}
         <button
           onClick={() => {
-    dispatch(resetState());
-    onClose();
-  }}
+            dispatch(resetState());
+            onClose();
+          }}
           className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
         >
           <X size={20} />
@@ -150,7 +175,7 @@ useEffect(() => {
             </div>
             <button
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-indigo-700 transition disabled:opacity-60"
+              className="w-full bg-primary text-white py-3 rounded-xl disabled:opacity-60"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
@@ -163,11 +188,10 @@ useEffect(() => {
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                name="name"
                 placeholder="Name"
                 value={signupForm.name}
-                onChange={(e) =>
-                  setSignupForm({ ...signupForm, name: e.target.value })
-                }
+                onChange={handleSignupChange}
                 required
                 className="w-full pl-10 p-3 border rounded-xl"
               />
@@ -176,12 +200,11 @@ useEffect(() => {
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                placeholder="Email"
+                name="email"
                 type="email"
+                placeholder="Email"
                 value={signupForm.email}
-                onChange={(e) =>
-                  setSignupForm({ ...signupForm, email: e.target.value })
-                }
+                onChange={handleSignupChange}
                 required
                 className="w-full pl-10 p-3 border rounded-xl"
               />
@@ -190,10 +213,11 @@ useEffect(() => {
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
+                name="phone"
                 placeholder="Phone"
                 value={signupForm.phone}
                 onChange={(e) => {
-                  setSignupForm({ ...signupForm, phone: e.target.value });
+                  handleSignupChange(e);
                   setPhone(e.target.value);
                 }}
                 required
@@ -201,9 +225,46 @@ useEffect(() => {
               />
             </div>
 
+            <input
+              name="addresses.street"
+              placeholder="Street Address"
+              value={signupForm.addresses.street}
+              onChange={handleSignupChange}
+              required
+              className="w-full p-3 border rounded-xl"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                name="addresses.city"
+                placeholder="City"
+                value={signupForm.addresses.city}
+                onChange={handleSignupChange}
+                required
+                className="w-full p-3 border rounded-xl"
+              />
+              <input
+                name="addresses.state"
+                placeholder="State"
+                value={signupForm.addresses.state}
+                onChange={handleSignupChange}
+                required
+                className="w-full p-3 border rounded-xl"
+              />
+            </div>
+
+            <input
+              name="addresses.zipCode"
+              placeholder="Zip Code"
+              value={signupForm.addresses.zipCode}
+              onChange={handleSignupChange}
+              required
+              className="w-full p-3 border rounded-xl"
+            />
+
             <button
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-indigo-700 transition"
+              className="w-full bg-primary text-white py-3 rounded-xl"
             >
               {loading ? "Creating..." : "Create Account"}
             </button>
@@ -223,7 +284,7 @@ useEffect(() => {
 
             <button
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-xl hover:bg-green-700 transition"
+              className="w-full bg-primary text-white py-3 rounded-xl"
             >
               {loading ? "Verifying..." : "Verify OTP"}
             </button>

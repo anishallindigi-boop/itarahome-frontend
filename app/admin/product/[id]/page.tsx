@@ -31,6 +31,9 @@ interface Variation {
 }
 
 interface ProductFormState {
+    metatitle?:string;
+  metadescription?:string,
+  metakeywords?:string;
   name: string;
   description: string;
   content: string;
@@ -70,6 +73,9 @@ const productId = params?.id as string;
   const { singleProduct, loading, error, message ,isUpdated} = useAppSelector((state: RootState) => state.product);
 
   const [form, setForm] = useState<ProductFormState>({
+       metatitle:'',
+    metadescription:'',
+    metakeywords:'',
     name: '',
     description: '',
     content: '',
@@ -212,6 +218,9 @@ const generateVariations = () => {
     if (singleProduct?.product) {
       const p = singleProduct.product;
       setForm({
+        metatitle:p.metatitle || '',
+        metadescription:p.metadescription || '',
+        metakeywords:p.metakeywords || '',
         name: p.name || '',
         description: p.description || '',
         content: p.content || '',
@@ -320,6 +329,37 @@ useEffect(() => {
       <div className="col-span-8 space-y-6">
         {/* BASIC INFO */}
         <div className="bg-white border rounded p-5 space-y-4">
+<div className="bg-white border rounded p-5 space-y-4">
+          <h3 className="font-semibold text-lg">SEO Settings</h3>
+
+          <input
+            name="metatitle"
+            placeholder="Meta Title"
+            className="border p-2 w-full rounded"
+            value={form.metatitle}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="metadescription"
+            placeholder="Meta Description"
+            className="border p-2 w-full rounded"
+            rows={2}
+            value={form.metadescription}
+            onChange={handleChange}
+          />
+
+          <input
+            name="metakeywords"
+            placeholder="Meta Keywords (comma separated)"
+            className="border p-2 w-full rounded"
+            value={form.metakeywords}
+            onChange={handleChange}
+          />
+        </div>
+
+
+
           <h3 className="font-semibold text-lg">Product Information</h3>
 
           <input

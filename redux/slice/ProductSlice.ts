@@ -7,6 +7,9 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 // -------------------- TYPES --------------------
 
 export interface CreateProductPayload {
+    metatitle?:string;
+  metadescription?:string;
+  metakeywords?:string;
   name: string;
   description: string;
   content: string;
@@ -62,6 +65,9 @@ export type Variation = {
 };
 
 export interface Product {
+    metatitle?:string;
+  metadescription?:string,
+  metakeywords?:string;
   _id?: string;
   name?: string;
   description?: string;

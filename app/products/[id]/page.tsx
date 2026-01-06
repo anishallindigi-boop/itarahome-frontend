@@ -229,7 +229,7 @@ const Page = () => {
                   key={idx}
                   onClick={() => setManualImgIndex(idx)}
                   className={`relative w-24 h-24 shrink-0 rounded-xl overflow-hidden ring-4 transition ${
-                    currentImage === img ? 'ring-indigo-500' : 'ring-transparent hover:ring-indigo-300'
+                    currentImage === img ? 'ring-white' : 'ring-transparent hover:ring-white'
                   }`}
                 >
                   <img
@@ -250,7 +250,7 @@ const Page = () => {
         {/* Details */}
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm font-medium text-indigo-600 mb-1">itarahome</p>
+            <p className="text-sm font-medium  mb-1">itarahome</p>
             <h1 className="text-4xl font-bold text-stone-800">{name}</h1>
             <div className="flex items-center gap-2 mt-2">
               {[...Array(5)].map((_, i) => (
@@ -261,7 +261,7 @@ const Page = () => {
           </div>
 
           <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-bold text-indigo-600">₹{finalPrice}</span>
+            <span className="text-4xl font-bold ">₹{finalPrice}</span>
             {discountPercent > 0 && (
               <>
                 <span className="text-xl text-stone-400 line-through">₹{originalPrice}</span>
@@ -337,13 +337,13 @@ const Page = () => {
           {/* Perks */}
           <div className="grid grid-cols-3 gap-3 text-xs text-stone-600">
             <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
-              <Truck className="w-4 h-4 text-indigo-500" />Free shipping
+              <Truck className="w-4 h-4 " />Free shipping
             </Card>
             <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
-              <Shield className="w-4 h-4 text-indigo-500" />Secure checkout
+              <Shield className="w-4 h-4 " />Secure checkout
             </Card>
             <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
-              <CalendarClock className="w-4 h-4 text-indigo-500" />Easy returns
+              <CalendarClock className="w-4 h-4 " />Easy returns
             </Card>
           </div>
 

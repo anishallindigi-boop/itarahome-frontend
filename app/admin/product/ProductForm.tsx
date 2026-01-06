@@ -28,6 +28,9 @@ interface Variation {
 }
 
 interface ProductFormState {
+  metatitle?:string;
+  metadescription?:string,
+  metakeywords?:string;
   name: string;
   description: string;
   content: string;
@@ -69,6 +72,9 @@ export default function ProductCreateForm() {
   );
 
   const [form, setForm] = useState<ProductFormState>({
+    metatitle:'',
+    metadescription:'',
+    metakeywords:'',
     name: '',
     description: '',
     content: '',
@@ -178,6 +184,9 @@ const handleChange = (
         dispatch(GetSubCategories());
     if(success){
       setForm({
+            metatitle:'',
+    metadescription:'',
+    metakeywords:'',
          name: '',
     description: '',
     content: '',
@@ -232,6 +241,36 @@ const categoryTree = Object.values(groupedCategories || {});
     >
       {/* ================= LEFT COLUMN ================= */}
       <div className="col-span-8 space-y-6">
+
+       <div className="bg-white border rounded p-5 space-y-4">
+          <h3 className="font-semibold text-lg">SEO Settings</h3>
+
+          <input
+            name="metatitle"
+            placeholder="Meta Title"
+            className="border p-2 w-full rounded"
+            value={form.metatitle}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="metadescription"
+            placeholder="Meta Description"
+            className="border p-2 w-full rounded"
+            rows={2}
+            value={form.metadescription}
+            onChange={handleChange}
+          />
+
+          <input
+            name="metakeywords"
+            placeholder="Meta Keywords (comma separated)"
+            className="border p-2 w-full rounded"
+            value={form.metakeywords}
+            onChange={handleChange}
+          />
+        </div>
+
         {/* BASIC INFO */}
         <div className="bg-white border rounded p-5 space-y-4">
           <h3 className="font-semibold text-lg">Product Information</h3>

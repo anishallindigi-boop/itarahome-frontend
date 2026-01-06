@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
-  getOrdersByCustomer,
+  getAllOrders,
   updateOrderStatus,
 } from "@/redux/slice/OrderSlice";
 import type { RootState } from "@/redux/store";
@@ -28,7 +28,7 @@ export default function OrdersPage() {
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
   useEffect(() => {
-    dispatch(getOrdersByCustomer());
+    dispatch(getAllOrders());
   }, [dispatch]);
 
   const handleStatusChange = async (
@@ -40,6 +40,7 @@ export default function OrdersPage() {
       await dispatch(
         updateOrderStatus({ id: orderId, status })
       ).unwrap();
+      dispatch(getAllOrders())
     } catch (error) {
       alert("Failed to update order status");
     } finally {
@@ -177,13 +178,15 @@ export default function OrdersPage() {
                       </h3>
                       <div className="text-sm text-gray-600">
                         <p>{order.shippingAddress.name}</p>
+                        <p>{order.shippingAddress.email}</p>
+                          <p>{order.shippingAddress.phone}</p>
                         <p>{order.shippingAddress.address}</p>
                         <p>
                           {order.shippingAddress.city},{" "}
                           {order.shippingAddress.state}
                         </p>
                         <p>{order.shippingAddress.pincode}</p>
-                        <p>{order.shippingAddress.phone}</p>
+                      
                       </div>
                     </div>
 
