@@ -1,34 +1,23 @@
 'use client';
-import { Send, X } from 'lucide-react';
+import { Send, X, CheckCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-
-
+import axios from 'axios';
 
 const STORAGE_KEY = 'ops-enquiry-shown';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_KEY=process.env.NEXT_PUBLIC_API_KEY;
 
 export default function Page() {
-
-  /* --- state --- */
   const [showModal, setShowModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  /* --- form --- */
-  // const [formData, setFormData] = useState({ name: '', email: '', phone: '', location: '', message: '' });
-  // const [showOTP, setShowOTP] = useState(false);
-  // const [otp, setOTP] = useState('');
-
-  // const locations = [
-  //   'Mumbai, Maharashtra',
-  //   'Pune, Maharashtra',
-  //   'Bangalore, Karnataka',
-  //   'Chennai, Tamil Nadu',
-  //   'Ahmedabad, Gujarat',
-  //   'Other',
-  // ];
-
-  /* --- 10-second auto-show, once per session --- */
+  /* --- auto show once per session --- */
   useEffect(() => {
     const alreadyShown = sessionStorage.getItem(STORAGE_KEY);
-    if (alreadyShown) return; // user has seen it this session
+    if (alreadyShown) return;
 
     const timer = setTimeout(() => {
       setShowModal(true);
@@ -38,12 +27,40 @@ export default function Page() {
     return () => clearTimeout(timer);
   }, []);
 
-  /* --- body scroll-lock --- */
+  /* --- body scroll lock --- */
   useEffect(() => {
     document.body.style.overflow = showModal ? 'hidden' : 'auto';
   }, [showModal]);
 
+  /* --- submit handler --- */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
+    try {
+      await axios.post(`${API_URL}/api/newsletter/create`, {
+        email,
+      },{
+  headers: { "x-api-key": API_KEY }
+
+}
+      );
+
+      setSuccess(true);
+
+      // optional auto-close after 3s
+      setTimeout(() => {
+        setShowModal(false);
+      }, 3000);
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message || 'Something went wrong. Try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -53,9 +70,10 @@ export default function Page() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="rounded-xl  w-full max-w-[550px] max-h-[90vh] overflow-y-auto  relative animate-fade-in"
+            className="rounded-xl w-full max-w-[550px] relative animate-fade-in"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* CLOSE */}
             <button
               onClick={() => setShowModal(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
@@ -63,63 +81,65 @@ export default function Page() {
               <X size={24} />
             </button>
 
-
-            <div className=" inset-0 bg-white flex items-center justify-center p-4">
-              <div className=" w-full max-w-md bg-white text-white rounded-2xl  p-8">
-
-
-
-
-                {/* Logo */}
-                <div className="flex justify-center mb-4">
-                  
-                    {/* Simple stylized mark */}
-                    <img src='/logo.png' />
-                
-                </div>
-
-
-                {/* Title */}
-                <h2 className="text-center text-xl font-semibold mb-2">
-                  Join the Essentia Circle
-                </h2>
-
-
-                {/* Subtext */}
-                <p className="text-center text-sm text-gray-400 max-w-[24rem] mx-auto leading-relaxed mb-6">
-                  Become a Part of the Itara Community
-Unlock a 10% welcome benefit as you sign up.
-Stay ahead with early access to fresh arrivals, curated launches, and intimate styling previews.
-                </p>
-
-
-                {/* Email input + button */}
-                <form
-                  className="space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    alert("Joined!");
-                  }}
-                >
-                  <input
-                    type="email"
-                    placeholder="Email address"
-                    required
-                    className="w-full rounded-lg py-3 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/30"
-                  />
-
-
-                  <button
-                    type="submit"
-                    className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-black/80 transition"
-                  >
-                    Join Now
-                  </button>
-                </form>
+            <div className="bg-white p-8 rounded-2xl text-center">
+              {/* LOGO */}
+              <div className="flex justify-center mb-4">
+                <img src="/logo.png" alt="logo" className="h-[90px]" />
               </div>
+
+              {/* SUCCESS STATE */}
+              {success ? (
+                <div className="space-y-4">
+                  <CheckCircle className="mx-auto text-green-600" size={48} />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Thank You for Joining!
+                  </h2>
+                  <p className="text-gray-600 text-sm">
+                    You’re now part of the Essentia Circle.  
+                    Watch your inbox for exclusive updates & offers.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* TITLE */}
+                  <h2 className="text-xl font-semibold mb-2 text-gray-900">
+                    Join the Essentia Circle
+                  </h2>
+
+                  {/* SUBTEXT */}
+                  <p className="text-sm text-gray-500 max-w-[24rem] mx-auto mb-6">
+                    Become a part of the Itara community.  
+                    Unlock a <strong>10% welcome benefit</strong> and get early
+                    access to curated launches, and intimate styling previews.
+                  </p>
+
+                  {/* FORM */}
+                  <form className="space-y-4" onSubmit={handleSubmit}>
+                    <input
+                      type="email"
+                      placeholder="Email address"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full rounded-lg py-3 px-4 border text-gray-900 focus:outline-none focus:ring-2 focus:ring-black/30"
+                    />
+
+                    {error && (
+                      <p className="text-sm text-red-600">{error}</p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-black/80 transition flex items-center justify-center gap-2 disabled:opacity-60"
+                    >
+                      {loading ? 'Joining...' : 'Join Now'}
+                      {!loading && <Send size={16} />}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
-
-
           </div>
         </div>
       )}
