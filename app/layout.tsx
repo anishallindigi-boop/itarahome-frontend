@@ -10,15 +10,6 @@ import LayoutWrapper from "./LayoutWrapper";
 import AuthProvider from "./providers/AuthProvider";
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -32,8 +23,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+   <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"></link>
+   </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       > <Provider store={store}>    
         <LayoutWrapper>
             <AuthProvider>

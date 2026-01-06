@@ -120,3 +120,47 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+
+
+.noto-serif {
+  font-family: "Noto Serif", serif;
+  font-optical-sizing: auto;
+  font-weight:500;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+
+h1,h3,h4,h5,h6{
+font-family: "Noto Serif", serif;
+  font-optical-sizing: auto;
+  font-weight:500;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+h2{
+  font-size: 35px;
+  font-family: "Noto Serif", serif;
+  font-optical-sizing: auto;
+  font-weight:300;
+  margin: 10px 0;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
+
+
+
+p{
+  font-family: "Noto Serif", serif;
+  font-optical-sizing: auto;
+  font-weight:300;
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}

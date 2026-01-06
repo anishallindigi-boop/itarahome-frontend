@@ -16,7 +16,7 @@ export default function Workshop() {
             <p className="text-sm tracking-widest text-gray-600 mb-4">
              Itara Home
             </p>
-            <h2 className="text-3xl md:text-5xl font-light mb-6">
+            <h2>
              Natural stone pieces
             </h2>
             <p className="text-gray-600 mb-8 leading-relaxed">

@@ -22,19 +22,19 @@ export default function Testimonials() {
 
           <div className="bg-white/80 p-6 rounded-2xl backdrop-blur">
             <Quote className="w-16 h-16 text-gray-300 mb-6" />
-            <h2 className="text-3xl font-light mb-6">Testimonials</h2>
+            <h2>Testimonials</h2>
             <p className="text-gray-700 leading-relaxed mb-8 italic">
-            The stone trays from Itara Home completely changed the way my coffee table looks. The quality feels premium and the natural stone texture is beautiful. Every guest asks where I got them from!
+           I absolutely love my purchase from Itara Home. The stone finish, the quality, and the attention to detail are beautiful. It instantly elevated my space
             </p>
             <div className="flex items-center">
               <img
-                src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=100"
+                src="https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg"
                 alt="Adam Martin"
                 className="w-12 h-12 rounded-full object-cover mr-4"
               />
               <div>
-                <p className="font-medium">Riya Shah</p>
-                <p className="text-sm text-gray-600">Ahmedabad</p>
+                <p className="font-medium">Yashika Jain</p>
+                <p className="text-sm text-gray-600">Karnal</p>
               </div>
             </div>
           </div>

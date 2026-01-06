@@ -111,7 +111,7 @@ export default function CheckoutPage() {
     }));
 
     const payload = {
-      status: "pending", // or "order success" as per your backend
+      status: "processing", // or "order success" as per your backend
       customerName: address.name,
       customerEmail: address.email,
       customerPhone: address.phone,

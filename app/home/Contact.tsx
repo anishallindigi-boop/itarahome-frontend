@@ -7,7 +7,7 @@ export default function Contact() {
         <div className="grid md:grid-cols-2 gap-16">
           <div>
             <p className="text-sm tracking-widest text-gray-600 mb-4">CONTACT</p>
-            <h2 className="text-5xl font-light mb-6">Get In Touch</h2>
+            <h2>Get In Touch</h2>
             <p className="text-gray-600 mb-8 leading-relaxed">
             Have a question about our Stone Collection or need help choosing the right pieces for your space?
 We’re happy to assist with product details, styling suggestions, design consultancy and bulk enquiries.

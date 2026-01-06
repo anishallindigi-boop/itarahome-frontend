@@ -14,7 +14,7 @@ export default function AboutSection() {
           </div>
       <div className="relative bg-white p-6 sm:p-10 lg:p-20">
 
-            <h2 className="text-4xl font-light mb-6">About Us</h2>
+            <h2>About Us</h2>
             <p className="text-gray-600 leading-relaxed mb-8">
              Itara Home is a design-led home décor brand focused on creating modern, minimal and thoughtfully crafted stone products. We believe your space should feel calm, beautiful and intentional.
             </p>
@@ -33,7 +33,7 @@ export default function AboutSection() {
             />
           </div>
           <div className="relative bg-white p-6 sm:p-10 lg:p-20">
-            <h2 className="text-4xl font-light mb-6">Our process</h2>
+            <h2>Our policy</h2>
             <div className="space-y-3 mb-8">
               <div className="flex items-center text-gray-700">
                 <ArrowRight className="w-4 h-4 mr-3 text-gray-400" />

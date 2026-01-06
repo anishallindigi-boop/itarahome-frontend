@@ -181,7 +181,7 @@ const handleDashboardClick = () => {
         {/* LOGO */}
         <div className="w-1/3 flex justify-center">
           <Link href="/">
-            <img src="/logo.png" alt="logo" className="h-14" />
+            <img src="/logo.png" alt="logo" className="sm:h-19 h-16" />
           </Link>
         </div>
 
