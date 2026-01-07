@@ -11,6 +11,14 @@ export default function ShopFilters() {
   const { categories } = useAppSelector((state) => state.productcategory);
   const activeCategory = searchParams.get('categories');
 
+  const hasFilters =
+    searchParams.get('categories') ||
+    searchParams.get('subcategories') ||
+    searchParams.get('minPrice') ||
+    searchParams.get('maxPrice') ||
+    searchParams.get('sort');
+
+  /* ---------------- UPDATE CATEGORY ---------------- */
   const updateCategory = (id?: string) => {
     const params = new URLSearchParams(searchParams.toString());
 
@@ -25,37 +33,53 @@ export default function ShopFilters() {
     router.push(`/shop?${params.toString()}`, { scroll: false });
   };
 
+  /* ---------------- CLEAR FILTERS ---------------- */
+  const clearFilters = () => {
+    router.push('/shop', { scroll: false });
+  };
+
   return (
     <div className="border-b mb-6">
-      <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar">
-        {/* VIEW ALL */}
-        <button
-          onClick={() => updateCategory()}
-          className={cn(
-            'px-4 py-2 text-sm border whitespace-nowrap',
-            !activeCategory
-              ? 'bg-black text-white'
-              : 'bg-white text-black hover:bg-gray-100'
-          )}
-        >
-          VIEW ALL
-        </button>
-
+      <div className="flex items-center justify-between gap-4 pb-3">
         {/* CATEGORY TABS */}
-        {categories.map((cat) => (
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
           <button
-            key={cat._id}
-            onClick={() => updateCategory(cat._id)}
+            onClick={() => updateCategory()}
             className={cn(
-              'px-4 py-2 text-sm border whitespace-nowrap',
-              activeCategory === cat._id
+              'px-4 py-2 text-sm border whitespace-nowrap cursor-pointer',
+              !activeCategory
                 ? 'bg-black text-white'
-                : 'bg-white hover:bg-gray-100'
+                : 'bg-white text-black hover:bg-gray-100'
             )}
           >
-            {cat.name.toUpperCase()}
+            VIEW ALL
           </button>
-        ))}
+
+          {categories.map((cat) => (
+            <button
+              key={cat._id}
+              onClick={() => updateCategory(cat._id)}
+              className={cn(
+                'px-4 py-2 text-sm border whitespace-nowrap cursor-pointer',
+                activeCategory === cat._id
+                  ? 'bg-black text-white'
+                  : 'bg-white hover:bg-gray-100'
+              )}
+            >
+              {cat.name.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
+        {/* CLEAR FILTER */}
+        {hasFilters && (
+          <button
+            onClick={clearFilters}
+            className="px-4 py-2 text-sm border whitespace-nowrap cursor-pointer"
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
     </div>
   );

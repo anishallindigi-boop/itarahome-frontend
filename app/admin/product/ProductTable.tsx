@@ -94,6 +94,7 @@ export default function ProductTable() {
                 'subcategory',
                 'Stock',
                 'Price',
+                'Discount price',
                 'Status',
                 'Actions',
               ].map((h) => (
@@ -145,6 +146,7 @@ export default function ProductTable() {
 
                 {/* PRICE */}
                 <td className="px-6 py-4 text-sm">₹{p.price ?? '-'}</td>
+                <td className="px-6 py-4 text-sm">₹{p.discountPrice ?? '-'}</td>
 
                 {/* STATUS */}
                 <td className="px-6 py-4">

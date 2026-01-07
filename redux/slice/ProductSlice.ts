@@ -44,6 +44,7 @@ export interface CreateProductPayload {
 export interface ProductFilterPayload {
   categories?: string[];
   subcategories?: string[];
+  sort?: string;
   minPrice?: number | string;
   maxPrice?: number | string;
   attributes?: {
