@@ -167,7 +167,7 @@ export const getProductById = createAsyncThunk(
   'product/getById',
   async (id: string, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API_URL}/api/product/get/${id}`, null, {
+      const { data } = await axios.get(`${API_URL}/api/product/get/${id}`, {
         headers: { 'x-api-key': API_KEY },
         withCredentials: true,
       });
@@ -183,7 +183,7 @@ export const getProductBySlug = createAsyncThunk(
   'product/getBySlug',
   async (slug: string, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API_URL}/api/product/getBySlug/${slug}`, null, {
+      const { data } = await axios.get(`${API_URL}/api/product/getBySlug/${slug}`, {
         headers: { 'x-api-key': API_KEY! },
       });
       return data.product;
