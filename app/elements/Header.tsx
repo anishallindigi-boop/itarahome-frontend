@@ -50,6 +50,8 @@ export default function HeaderImproved() {
   const dispatch = useAppDispatch();
 
   const [open, setOpen] = React.useState(false);
+  const [openProducts, setOpenProducts] = React.useState(false);
+
   const [expandedCategory, setExpandedCategory] = React.useState<string | null>(null);
   const [showLogin, setShowLogin] = React.useState(false);
   const [showProfile, setShowProfile] = React.useState(false);
@@ -150,13 +152,13 @@ export default function HeaderImproved() {
 
 
   const menu = [
-    { label: 'Home', href: '/' },
-    { label: 'Products', children: productMenu },
-    { label: 'Shop', href: '/shop' },
-    { label: 'About Us', href: '/about-us' },
-    { label: 'Contact', href: '/contact-us' },
-    { label: 'Bulk Enquiry', href: '/enquiry-form' },
-    { label: 'Book Consultation', href: '/styling-consultation-form' },
+   { key: 'home', label: 'Home', href: '/' },
+  { key: 'shop', label: 'Shop', children: productMenu },
+  // { key: 'shop', label: 'Shop', href: '/shop' },
+  { key: 'about', label: 'About Us', href: '/about-us' },
+  { key: 'contact', label: 'Contact', href: '/contact-us' },
+  { key: 'bulk', label: 'Bulk Enquiry', href: '/enquiry-form' },
+  { key: 'consult', label: 'Book Styling Consultation', href: '/styling-consultation-form' },
   ];
 
   return (
@@ -255,7 +257,7 @@ export default function HeaderImproved() {
                     onClick={() => {
                       dispatch(logoutuser());
                       setShowProfile(false);
-                      router.refresh();
+                      router.push('/');
                     }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
@@ -312,69 +314,100 @@ export default function HeaderImproved() {
               </div>
 
               <nav className="p-4 space-y-1 overflow-y-auto">
-                {menu.map((item) => {
-                  if (item.label === 'Products') {
-                    return (
-                      <div key={item.label} className="space-y-1">
-                        {item.children!.map((cat: any) => {
-                          const isOpen = expandedCategory === cat.label;
+               {menu.map((item) => {
+  if (item.label === 'Shop') {
+    return (
+      <div key={item.label} className="space-y-1">
+        {/* PRODUCTS LABEL */}
+        <button
+          onClick={() => setOpenProducts((p) => !p)}
+          className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 font-medium cursor-pointer"
+        >
+          <span>{item.label}</span>
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 transition-transform',
+              openProducts && 'rotate-180'
+            )}
+          />
+        </button>
 
-                          return (
-                            <div key={cat.label} className="rounded-lg">
-                              <button
-                                onClick={() =>
-                                  setExpandedCategory(isOpen ? null : cat.label)
-                                }
-                                className="w-full flex justify-between cursor-pointer items-center p-3 hover:bg-gray-100 rounded-lg"
-                              >
-                                <span className="font-medium">{cat.label}</span>
-                                <ChevronDown
-                                  className={cn(
-                                    'w-4 h-4 transition-transform',
-                                    isOpen && 'rotate-180'
-                                  )}
-                                />
-                              </button>
+        {/* CATEGORY DROPDOWN */}
+        <AnimatePresence>
+          {openProducts && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="pl-2 space-y-1"
+            >
+              {item.children!.map((cat: any) => {
+                const isOpen = expandedCategory === cat.label;
 
-                              <AnimatePresence>
-                                {isOpen && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="pl-4 bg-gray-50"
-                                  >
-                                    {cat.children.map((sub: any) => (
-                                      <button
-                                        key={sub.label}
-                                        onClick={sub.onClick}
-                                        className="w-full flex justify-between cursor-pointer items-center p-2 text-sm hover:bg-gray-100 rounded-md"
-                                      >
-                                        {sub.label}
-                                        <ExternalLink size={14} />
-                                      </button>
-                                    ))}
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <Link
-                      key={item.label}
-                      href={item.href!}
-                      className="block p-3 rounded-lg hover:bg-gray-100 font-medium"
-                      onClick={() => setOpen(false)}
+                return (
+                  <div key={cat._id} className="rounded-lg">
+                    {/* CATEGORY */}
+                    <button
+                      onClick={() =>
+                        setExpandedCategory(isOpen ? null : cat.label)
+                      }
+                      className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                      <span className="text-sm font-medium">
+                        {cat.label}
+                      </span>
+                      <ChevronDown
+                        className={cn(
+                          'w-4 h-4 transition-transform',
+                          isOpen && 'rotate-180'
+                        )}
+                      />
+                    </button>
+
+                    {/* SUBCATEGORY */}
+                    <AnimatePresence>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="pl-4 bg-gray-50 rounded-md"
+                        >
+                          {cat.children.map((sub: any) => (
+                            <button
+                              key={sub._id}
+                              onClick={sub.onClick}
+                              className="w-full flex justify-between items-center p-2 text-sm rounded-md hover:bg-gray-100 cursor-pointer"
+                            >
+                              {sub.label}
+                              <ExternalLink size={14} />
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      key={item.label}
+      href={item.href!}
+      className="block p-3 rounded-lg hover:bg-gray-100 font-medium"
+      onClick={() => setOpen(false)}
+    >
+      {item.label}
+    </Link>
+  );
+})}
+
               </nav>
             </motion.aside>
           </>

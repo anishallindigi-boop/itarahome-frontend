@@ -103,9 +103,11 @@ export default async function Page({
     });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white ">
       {/* Header Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 py-40 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 py-40 overflow-hidden bg-no-repeat bg-cover bg-black"  style={{
+  backgroundImage: `url(${API_URL}${blog.image})`
+  }}>
         <div className="absolute inset-0">
           <div className="absolute top-10 right-10 w-64 h-64 bg-white/5 rounded-full animate-pulse"></div>
           <div
@@ -140,7 +142,7 @@ export default async function Page({
               </div>
             )}
 
-            <h1 className="text-4xl md:text-6xl text-yellow-300 font-black mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl font-black mb-6 leading-tight">
               {blog.title}
             </h1>
 

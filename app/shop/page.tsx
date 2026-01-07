@@ -6,6 +6,8 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { filterProducts } from '@/redux/slice/ProductSlice';
 import ShopFilters from './ShopFilters';
 import ProductGrid from './ProductGrid';
+import ShopSort from './ShopSort';
+import ShopFilterDrawer from './ShopFilterDrawer';
 
 export default function ShopPage() {
   const dispatch = useAppDispatch();
@@ -33,19 +35,29 @@ export default function ShopPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-3xl font-semibold mb-8">Shop</h1>
+      <h1 className="text-3xl font-semibold mb-6">Decorations</h1>
 
-      <div className="grid grid-cols-12 gap-8">
-        {/* Filters */}
-        <aside className="col-span-12 md:col-span-3">
-          <ShopFilters />
-        </aside>
+      {/* TOP FILTER BAR */}
+      <ShopFilters />
 
-        {/* Products */}
-        <section className="col-span-12 md:col-span-9">
-          {loading ? <p>Loading products...</p> : <ProductGrid products={products} />}
-        </section>
+      {/* SORT + FILTER ROW */}
+      <div className="flex justify-between items-center mb-6 text-sm">
+        <button className="flex items-center gap-1">
+          SORT BY <span className="text-lg">+</span>
+        </button>
+
+        <button className="flex items-center gap-1">
+          FILTER
+          <span className="text-lg">≡</span>
+        </button>
       </div>
+
+      {/* PRODUCT GRID */}
+      {loading ? (
+        <p>Loading products...</p>
+      ) : (
+        <ProductGrid products={products} />
+      )}
     </div>
   );
 }
