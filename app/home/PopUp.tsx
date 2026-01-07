@@ -103,7 +103,7 @@ export default function Page() {
                 <>
                   {/* TITLE */}
                   <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                    Join the Essential Circle
+                    Be A Part Of Itara
                   </h2>
 
                   {/* SUBTEXT */}
