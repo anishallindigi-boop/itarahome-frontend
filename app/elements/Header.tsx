@@ -389,6 +389,19 @@ export default function HeaderImproved() {
                   </div>
                 );
               })}
+
+               <Link href='/shop'
+          // onClick={() => setOpenProducts((p) => !p)}
+          className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 text-sm font-medium cursor-pointer"
+        >
+          <span>Shop All</span>
+          <ExternalLink
+            className={cn(
+              'w-4 h-4 transition-transform',
+            
+            )}
+          />
+        </Link>
             </motion.div>
           )}
         </AnimatePresence>

@@ -209,8 +209,8 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
 
   // Loading & Error
   if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-rose-50">
-      <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+    <div className="flex items-center justify-center min-h-screen to-rose-50">
+      <Loader2 className="w-10 h-10 animate-spin text-black" />
     </div>
   );
 
@@ -370,7 +370,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
       <Accordion type="single" collapsible className="w-full border px-4">
         <AccordionItem value="description" className="border-none">
           <AccordionTrigger className="text-2xl text-stone-800 hover:no-underline">
-            Product Description
+            Description
           </AccordionTrigger>
 
           <AccordionContent>
