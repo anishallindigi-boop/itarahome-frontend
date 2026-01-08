@@ -11,7 +11,7 @@ export default function Hero() {
             text-white font-extrabold
             text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
             drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]
-            tracking-wide
+            tracking-wide dancing-script
           "
         >
           The Art Of Stone
@@ -22,7 +22,7 @@ export default function Hero() {
             mt-3 text-white font-medium
             text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl
             drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]
-            tracking-wide
+            tracking-wide 
           "
         >
           Timeless Objects for Modern Homes

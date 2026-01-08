@@ -13,6 +13,14 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import LoginPopup from '@/app/elements/LoginPopup';
 import { addToWishlist } from "@/redux/slice/WishlistSlice";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import ProductsSlider from './ProductsSlider';
+
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
@@ -234,7 +242,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
                 <button
                   key={idx}
                   onClick={() => setManualImgIndex(idx)}
-                  className={`relative w-24 h-24 shrink-0 rounded-xl overflow-hidden ring-4 transition ${
+                  className={`relative w-24 h-24 shrink-0 rounded-xl overflow-hidden ring-4 cursor-pointer transition ${
                     currentImage === img ? 'ring-white' : 'ring-transparent hover:ring-white'
                   }`}
                 >
@@ -358,19 +366,50 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
             Stock: <span className="font-semibold">{currentStock > 0 ? 'In stock' : 'Out of stock'}</span>
           </p>
 
+
+      <Accordion type="single" collapsible className="w-full border px-4">
+        <AccordionItem value="description" className="border-none">
+          <AccordionTrigger className="text-2xl text-stone-800 hover:no-underline">
+            Product Description
+          </AccordionTrigger>
+
+          <AccordionContent>
+            <div
+              className="prose prose-sm max-w-none pt-4"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+ 
           {showLogin && <LoginPopup onClose={() => setShowLogin(false)} />}
         </div>
       </div>
 
       {/* Full Description */}
       <div className="max-w-7xl mx-auto px-4 mt-10">
-        <Card className="p-8 bg-white shadow-sm">
-        <h2 className="text-3xl text-center font-bold text-stone-800">Product Description</h2>
-          <div
-            className="prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
-        </Card>
+        <ProductsSlider/>
+       {/* <Card className="p-6">
+      <Accordion
+        type="single"
+        collapsible
+        defaultValue="description"
+        className="w-full"
+      >
+        <AccordionItem value="description" className="border-none">
+          <AccordionTrigger className="text-3xl font-bold text-stone-800 hover:no-underline">
+            Product Description
+          </AccordionTrigger>
+
+          <AccordionContent>
+            <div
+              className="prose prose-sm max-w-none pt-4"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card> */}
       </div>
     </div>
   );

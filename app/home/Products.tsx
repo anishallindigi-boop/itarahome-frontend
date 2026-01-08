@@ -46,7 +46,7 @@ export default function Products() {
 
         {/* 🔥 Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+          <h2>
             Recently Curated
           </h2>
           <p className="mt-4 text-gray-600 max-w-xl mx-auto">
