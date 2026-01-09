@@ -350,9 +350,9 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
 
           {/* Perks */}
           <div className="grid grid-cols-3 gap-3 text-xs text-stone-600">
-            <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
+            {/* <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
               <Truck className="w-4 h-4 " />Free shipping
-            </Card>
+            </Card> */}
             <Card className="p-3 flex items-center gap-2 bg-white shadow-sm">
               <Shield className="w-4 h-4 " />Secure checkout
             </Card>
