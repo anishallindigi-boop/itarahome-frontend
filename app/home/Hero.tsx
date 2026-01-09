@@ -11,7 +11,7 @@ export default function Hero() {
             text-white font-extrabold
             text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
             drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]
-            tracking-wide dancing-script
+            tracking-wide old-standard-tt-regular
           "
         >
           The Art Of Stone

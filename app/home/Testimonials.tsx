@@ -11,13 +11,13 @@ export default function Testimonials() {
             p-12 md:p-16 rounded-2xl
           "
         >
-          <div className="relative min-h-[400px] md:min-h-[570px]">
+          <div className="relative min-h-[400px] bg-[url('/testimonial-side.jpeg')] bg-cover bg-center bg-no-repeat md:min-h-[570px] rounded-2xl">
             {/* Video thumbnail or dark overlay if you want */}
-            <div className="absolute inset-0 bg-black/30 rounded-2xl" />
+            <div className="absolute inset-0  rounded-2xl" />
 
-            <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition">
+            {/* <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition">
               <Play className="w-6 h-6 ml-1" fill="currentColor" />
-            </button>
+            </button> */}
           </div>
 
           <div className="bg-white/80 p-6 rounded-2xl backdrop-blur">
@@ -28,7 +28,7 @@ export default function Testimonials() {
             </p>
             <div className="flex items-center">
               <img
-                src="https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg"
+                src="/yashika.jpeg"
                 alt="Adam Martin"
                 className="w-12 h-12 rounded-full object-cover mr-4"
               />

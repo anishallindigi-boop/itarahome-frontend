@@ -36,6 +36,10 @@ type Variation = {
   attributes: Record<string, string>;
 };
 
+type Category={
+  name:string
+}
+
 type ProductData = {
   _id: string;
   name: string;
@@ -50,6 +54,7 @@ type ProductData = {
   variations?: Variation[];
   slug: string;
   isActive: boolean;
+  categoryid:Category[];
 };
 
 type Payload = {
@@ -221,7 +226,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
     </div>
   );
 
-  const { name, description, content, attributes } = product;
+  const { name, description, content, attributes,categoryid } = product;
 
   return (
     <div className="min-h-screen py-[100px]">
@@ -264,7 +269,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
         {/* Details */}
         <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm font-medium  mb-1">itarahome</p>
+            <p className="text-sm font-medium  mb-1">Category:- {categoryid?.map(cat => cat.name).join(", ")}</p>
             <h1 className="text-4xl font-bold text-stone-800">{name}</h1>
             <div className="flex items-center gap-2 mt-2">
               {[...Array(5)].map((_, i) => (
@@ -279,20 +284,20 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
             {discountPercent > 0 && (
               <>
                 <span className="text-xl text-stone-400 line-through">₹{originalPrice}</span>
-                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-primary text-white px-3 py-1 rounded-full text-sm font-semibold">
                   {discountPercent}% off
                 </span>
               </>
             )}
           </div>
 
-          <p className="text-stone-700">{description}</p>
+          {/* <p className="text-stone-700">{description}</p> */}
 
           {/* Attributes (Variations) */}
           {attributes?.map(attr => (
             <div key={attr.name} className="grid gap-3">
               <label className="text-sm font-semibold text-stone-700 flex items-center gap-2">
-                <Package className="w-4 h-4 text-indigo-500" />
+                <Package className="w-4 h-4 text-primary" />
                 {attr.name.charAt(0).toUpperCase() + attr.name.slice(1)}
               </label>
               <div className="flex flex-wrap gap-3">
@@ -304,7 +309,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
                       onClick={() => setSelectedAttr(prev => ({ ...prev, [attr.name]: value }))}
                       className={`relative px-4 cursor-pointer py-2 rounded-xl border-2 transition-all ${
                         active
-                          ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                          ? 'border-primary bg-primary text-white'
                           : 'border-stone-200 bg-white hover:border-indigo-300'
                       }`}
                     >
@@ -340,9 +345,9 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
   setLiked(p => !p);
   handleAddToWishlist(e, product._id);
 }}
-              className="p-3 rounded-xl border-2 cursor-pointer border-stone-200 bg-white hover:border-rose-300 transition"
+              className="p-3 rounded-xl border-2 cursor-pointer border-stone-200 bg-white hover:border-primary transition"
             >
-              <Heart className={`w-5 h-5 ${liked ? 'fill-rose-500 text-rose-500' : 'text-stone-400'}`} />
+              <Heart className={`w-5 h-5 ${liked ? 'fill-primary text-primary' : 'text-stone-400'}`} />
             </button>
 
        
