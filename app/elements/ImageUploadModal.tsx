@@ -95,7 +95,7 @@ export default function ImageUploadModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-    <DialogContent className="!max-w-[960px] w-full h-[90vh]">
+      <DialogContent className="!max-w-[960px] w-full h-[90vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5" />
@@ -117,92 +117,95 @@ export default function ImageUploadModal({
         </div>
 
         {/* Gallery */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-h-[700px] overflow-y-auto mt-4">
-          {images.map((img) => {
-            const isSelected = selected.includes(img.url);
+        <div className="mt-4 h-[608px] overflow-y-auto border rounded-lg p-3">
+          <div className="grid grid-cols-4 gap-4">
 
-            return (
-              <div
-                key={img.filename}
-                onClick={() => toggleSelect(img.url)}
-                className={`relative border rounded-lg cursor-pointer overflow-hidden group
+            {images.map((img) => {
+              const isSelected = selected.includes(img.url);
+
+              return (
+                <div
+                  key={img.filename}
+                  onClick={() => toggleSelect(img.url)}
+                  className={`relative border rounded-lg cursor-pointer overflow-hidden group
                   ${isSelected ? 'ring-4 ring-black' : ''}`}
-              >
-                <img
-                  src={`${process.env.NEXT_PUBLIC_API_URL}${img.url}`}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-
-                {/* Selected overlay */}
-                {isSelected && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <Check className="text-white w-7 h-7" />
-                  </div>
-                )}
-
-                {/* Delete */}
-                <Button
-                  size="icon"
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirm({ open: true, filename: img.filename });
-                  }}
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100"
                 >
-                  <Trash2 className="w-4 h-4 text-red-600" />
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_API_URL}${img.url}`}
+                    alt=""
+                    className="w-full h-[300px] object-cover"
+                  />
+
+                  {/* Selected overlay */}
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Check className="text-white w-7 h-7" />
+                    </div>
+                  )}
+
+                  {/* Delete */}
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirm({ open: true, filename: img.filename });
+                    }}
+                    className="absolute top-1 right-1 opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 className="w-4 h-4 text-red-600" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          </div>
+
+          {/* Delete confirmation dialog */}
+          <Dialog open={deleteConfirm.open} onOpenChange={() => setDeleteConfirm({ open: false, filename: null })}>
+            <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Are you sure?</DialogTitle>
+              </DialogHeader>
+              <p className="py-4 text-sm text-muted-foreground">
+                This action cannot be undone.
+              </p>
+              <DialogFooter className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteConfirm({ open: false, filename: null })}
+                >
+                  Cancel
                 </Button>
-              </div>
-            );
-          })}
-        </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(deleteConfirm.filename!)}
+                >
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
-        {/* Delete confirmation dialog */}
-        <Dialog open={deleteConfirm.open} onOpenChange={() => setDeleteConfirm({ open: false, filename: null })}>
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>Are you sure?</DialogTitle>
-            </DialogHeader>
-            <p className="py-4 text-sm text-muted-foreground">
-              This action cannot be undone.
+          {/* Footer */}
+          <DialogFooter className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">
+              {selected.length} selected
             </p>
-            <DialogFooter className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setDeleteConfirm({ open: false, filename: null })}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => handleDelete(deleteConfirm.filename!)}
-              >
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        {/* Footer */}
-        <DialogFooter className="flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            {selected.length} selected
-          </p>
+            <Button
+              onClick={confirmSelection}
+              disabled={!selected.length}
+            >
+              Use Selected
+            </Button>
+          </DialogFooter>
 
-          <Button
-            onClick={confirmSelection}
-            disabled={!selected.length}
-          >
-            Use Selected
-          </Button>
-        </DialogFooter>
-
-        {loading && (
-          <p className="text-center text-sm text-muted-foreground">
-            Processing...
-          </p>
-        )}
+          {loading && (
+            <p className="text-center text-sm text-muted-foreground">
+              Processing...
+            </p>
+          )}
       </DialogContent>
     </Dialog>
   );

@@ -118,7 +118,7 @@ export default function ImageUpload({
             <img
               src={image.url || image}
               alt={`Product image ${index + 1}`}
-              className="w-full h-32 object-cover rounded-lg border"
+              className="w-full h-[300px] object-cover rounded-lg border"
             />
             <button
               type="button"
@@ -136,7 +136,7 @@ export default function ImageUpload({
             <img
               src={image.url}
               alt={`Uploaded image ${index + 1}`}
-              className="w-full h-32 object-cover rounded-lg border"
+              className="w-full h-[300px] object-cover rounded-lg border"
             />
             <button
               type="button"
@@ -154,7 +154,7 @@ export default function ImageUpload({
             <img
               src={image.preview}
               alt={`Preview ${image.name}`}
-              className="w-full h-32 object-cover rounded-lg border"
+              className="w-full h-[300px] object-cover rounded-lg border"
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
               <div className="text-white text-sm">Uploading...</div>
