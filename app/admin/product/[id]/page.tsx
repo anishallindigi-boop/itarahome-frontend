@@ -149,6 +149,38 @@ const addAttributeValue = (i: number, value: string) => {
 };
 
 
+//-----------------------------------------------remove------------------------------------
+
+
+// REMOVE ATTRIBUTE VALUE
+const removeAttributeValue = (attrIndex: number, valueIndex: number) => {
+  setForm((prev) => {
+    const attributes = [...prev.attributes];
+    attributes[attrIndex].values = attributes[attrIndex].values.filter(
+      (_, i) => i !== valueIndex
+    );
+    return { ...prev, attributes };
+  });
+};
+
+// REMOVE ENTIRE ATTRIBUTE
+const removeAttribute = (attrIndex: number) => {
+  setForm((prev) => ({
+    ...prev,
+    attributes: prev.attributes.filter((_, i) => i !== attrIndex),
+    variations: [], // reset variations (important)
+  }));
+};
+
+// REMOVE VARIATION
+const removeVariation = (index: number) => {
+  setForm((prev) => ({
+    ...prev,
+    variations: prev.variations.filter((_, i) => i !== index),
+  }));
+};
+
+
 
 
 
@@ -412,18 +444,37 @@ useEffect(() => {
         {/* ATTRIBUTES */}
         <div className="bg-white border rounded p-5 space-y-4">
           <h3 className="font-semibold text-lg">Attributes</h3>
-          {form.attributes.map((attr, i) => (
-            <div key={i} className="border p-3 rounded space-y-2">
-              <input
-                placeholder="Attribute Name (Size)"
-                className="border p-2 w-full rounded"
-                value={attr.name}
-                onChange={(e) => updateAttributeName(i, e.target.value)}
-              />
+       {form.attributes.map((attr, i) => (
+  <div
+    key={i}
+    className="border p-3 rounded space-y-2 relative"
+  >
+    {/* REMOVE ATTRIBUTE */}
+    <button
+      type="button"
+      onClick={() => removeAttribute(i)}
+      className="absolute top-2 right-2 text-red-600 text-sm"
+    >
+      ✕
+    </button>
 
-              <AttributeValues values={attr.values} onAdd={(v) => addAttributeValue(i, v)} />
-            </div>
-          ))}
+    <input
+      placeholder="Attribute Name (Size)"
+      className="border p-2 w-full rounded"
+      value={attr.name}
+      onChange={(e) => updateAttributeName(i, e.target.value)}
+    />
+
+    <AttributeValues
+      values={attr.values}
+      onAdd={(v) => addAttributeValue(i, v)}
+      onRemove={(valueIndex) =>
+        removeAttributeValue(i, valueIndex)
+      }
+    />
+  </div>
+))}
+
           <button type="button" onClick={addAttribute} className="border px-4 py-2 rounded">
             + Add Attribute
           </button>
@@ -434,7 +485,7 @@ useEffect(() => {
           <div className="bg-white border rounded p-5 space-y-4">
             <h3 className="font-semibold text-lg">Variations</h3>
             {form.variations.map((v, i) => (
-              <div key={i} className="grid grid-cols-6 gap-3 items-center border p-3 rounded">
+              <div key={i} className="grid grid-cols-7 gap-3 items-center border p-3 rounded">
                 <div className="col-span-2 text-sm">
                   {Object.entries(v.attributes).map(([k, val]) => (
                     <div key={k}>
@@ -496,7 +547,16 @@ useEffect(() => {
                     }}
                   />
                 )}
+                <button
+  type="button"
+  onClick={() => removeVariation(i)}
+  className="text-red-600 border px-2 py-1 rounded text-sm"
+>
+  ✕
+</button>
+
               </div>
+              
             ))}
           </div>
         )}
@@ -664,20 +724,54 @@ useEffect(() => {
 
 /* ---------------- ATTRIBUTE VALUES ---------------- */
 
-function AttributeValues({ values, onAdd }: { values: string[]; onAdd: (v: string) => void }) {
+function AttributeValues({
+  values,
+  onAdd,
+  onRemove,
+}: {
+  values: string[];
+  onAdd: (v: string) => void;
+  onRemove: (index: number) => void;
+}) {
   const [val, setVal] = useState('');
 
   return (
     <>
       <div className="flex gap-2">
-        <input className="border p-2 flex-1 rounded" placeholder="Value (Red)" value={val} onChange={(e) => setVal(e.target.value)} />
-        <button type="button" onClick={() => { onAdd(val); setVal(''); }} className="border px-3 rounded">
+        <input
+          className="border p-2 flex-1 rounded"
+          placeholder="Value (Red)"
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            if (!val.trim()) return;
+            onAdd(val);
+            setVal('');
+          }}
+          className="border px-3 rounded"
+        >
           Add
         </button>
       </div>
-      <div className="flex gap-2 flex-wrap">
+
+      <div className="flex gap-2 flex-wrap mt-2">
         {values.map((v, i) => (
-          <span key={i} className="border px-2 py-1 rounded text-xs">{v}</span>
+          <span
+            key={i}
+            className="border px-2 py-1 rounded text-xs flex items-center gap-1"
+          >
+            {v}
+            <button
+              type="button"
+              onClick={() => onRemove(i)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
+          </span>
         ))}
       </div>
     </>

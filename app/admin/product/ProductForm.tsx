@@ -15,6 +15,7 @@ import {
 /* ---------------- TYPES ---------------- */
 
 interface Attribute {
+   id: string;
   name: string;
   values: string[];
 }
@@ -124,52 +125,112 @@ const handleChange = (
 
   /* ---------------- ATTRIBUTES ---------------- */
 
-  const addAttribute = () => {
-    setForm((p) => ({
-      ...p,
-      attributes: [...p.attributes, { name: '', values: [] }],
-    }));
-  };
+const addAttribute = () => {
+  setForm((p) => ({
+    ...p,
+    attributes: [
+      ...p.attributes,
+      {
+        id: crypto.randomUUID(),
+        name: '',
+        values: [],
+      },
+    ],
+  }));
+};
 
-  const updateAttributeName = (i: number, value: string) => {
-    const copy = [...form.attributes];
-    copy[i].name = value;
-    setForm((p) => ({ ...p, attributes: copy }));
-  };
 
-  const addAttributeValue = (i: number, value: string) => {
-    if (!value) return;
-    const copy = [...form.attributes];
-    copy[i].values.push(value);
-    setForm((p) => ({ ...p, attributes: copy }));
-  };
+const updateAttributeName = (i: number, value: string) => {
+  setForm((prev) => {
+    const attributes = prev.attributes.map((attr, index) =>
+      index === i ? { ...attr, name: value } : attr
+    );
+
+    return { ...prev, attributes };
+  });
+};
+
+const addAttributeValue = (i: number, value: string) => {
+  if (!value.trim()) return;
+
+  setForm((prev) => {
+    const attributes = prev.attributes.map((attr, index) =>
+      index === i
+        ? { ...attr, values: [...attr.values, value] }
+        : attr
+    );
+
+    return { ...prev, attributes };
+  });
+};
+
+
+//-------------------------remove -----------------
+
+
+// REMOVE ATTRIBUTE VALUE
+const removeAttributeValue = (attrIndex: number, valueIndex: number) => {
+  setForm((prev) => {
+    const attributes = [...prev.attributes];
+    attributes[attrIndex].values = attributes[attrIndex].values.filter(
+      (_, i) => i !== valueIndex
+    );
+    return { ...prev, attributes };
+  });
+};
+
+// REMOVE ENTIRE ATTRIBUTE
+const removeAttribute = (attrIndex: number) => {
+  setForm((prev) => ({
+    ...prev,
+    attributes: prev.attributes.filter((_, i) => i !== attrIndex),
+    variations: [], // reset variations (important)
+  }));
+};
+
+// REMOVE VARIATION
+const removeVariation = (index: number) => {
+  setForm((prev) => ({
+    ...prev,
+    variations: prev.variations.filter((_, i) => i !== index),
+  }));
+};
+
+
+
 
   /* ---------------- VARIATIONS ---------------- */
 
-  const generateVariations = () => {
-    const validAttrs = form.attributes.filter(
-      (a) => a.name && a.values.length
-    );
-    if (!validAttrs.length) return;
+ const generateVariations = () => {
+  const validAttrs = form.attributes.filter(
+    (a) => a.name.trim() && a.values.length > 0
+  );
 
-    const combos = cartesian(validAttrs.map((a) => a.values));
+  if (validAttrs.length === 0) {
+    setForm((p) => ({ ...p, variations: [] }));
+    return;
+  }
 
-    const variations: Variation[] = combos.map((combo) => {
-      const attrs: Record<string, string> = {};
-      combo.forEach((val, i) => {
-        attrs[validAttrs[i].name] = val;
-      });
+  const combinations = cartesian(validAttrs.map((a) => a.values));
 
-      return {
-        attributes: attrs,
-        price: '',
-        discountPrice: '',
-        stock: '',
-      };
+  const variations: Variation[] = combinations.map((combo) => {
+    const attrs: Record<string, string> = {};
+
+    combo.forEach((val, idx) => {
+      attrs[validAttrs[idx].name] = val;
     });
 
-    setForm((p) => ({ ...p, variations }));
-  };
+    return {
+      attributes: attrs,
+      price: '',
+      discountPrice: '',
+      stock: '',
+    };
+  });
+
+  setForm((p) => ({ ...p, variations }));
+};
+
 
   /* ---------------- SUBMIT ---------------- */
 
@@ -329,22 +390,38 @@ const categoryTree = Object.values(groupedCategories || {});
           <h3 className="font-semibold text-lg">Attributes</h3>
 
           {form.attributes.map((attr, i) => (
-            <div key={i} className="border p-3 rounded space-y-2">
-              <input
-                placeholder="Attribute Name (Size)"
-                className="border p-2 w-full rounded"
-                value={attr.name}
-                onChange={(e) =>
-                  updateAttributeName(i, e.target.value)
-                }
-              />
+  <div
+    key={attr.id}
+    className="border p-3 rounded space-y-2 relative"
+  >
+    {/* REMOVE ATTRIBUTE */}
+    <button
+      type="button"
+      onClick={() => removeAttribute(i)}
+      className="absolute top-2 right-2 text-red-600 text-sm"
+    >
+      ✕
+    </button>
 
-              <AttributeValues
-                values={attr.values}
-                onAdd={(v) => addAttributeValue(i, v)}
-              />
-            </div>
-          ))}
+    <input
+      placeholder="Attribute Name"
+      className="border p-2 w-full rounded"
+      value={attr.name}
+      onChange={(e) =>
+        updateAttributeName(i, e.target.value)
+      }
+    />
+
+    <AttributeValues
+      values={attr.values}
+      onAdd={(v) => addAttributeValue(i, v)}
+      onRemove={(valueIndex) =>
+        removeAttributeValue(i, valueIndex)
+      }
+    />
+  </div>
+))}
+
 
           <button
             type="button"
@@ -363,7 +440,7 @@ const categoryTree = Object.values(groupedCategories || {});
             {form.variations.map((v, i) => (
               <div
                 key={i}
-                className="grid grid-cols-6 gap-3 items-center border p-3 rounded"
+                className="grid grid-cols-7 gap-3 items-center border p-3 rounded"
               >
                 <div className="col-span-2 text-sm">
                   {Object.entries(v.attributes).map(([k, val]) => (
@@ -437,9 +514,19 @@ const categoryTree = Object.values(groupedCategories || {});
                     }}
                   />
                 )}
+
+                <button
+  type="button"
+  onClick={() => removeVariation(i)}
+  className="text-red-600 border px-2 py-1 rounded text-sm"
+>
+  ✕
+</button>
+
               </div>
             ))}
           </div>
+            
         )}
 
         <button
@@ -668,9 +755,11 @@ const categoryTree = Object.values(groupedCategories || {});
 function AttributeValues({
   values,
   onAdd,
+  onRemove,
 }: {
   values: string[];
   onAdd: (v: string) => void;
+  onRemove: (index: number) => void;
 }) {
   const [val, setVal] = useState('');
 
@@ -686,6 +775,7 @@ function AttributeValues({
         <button
           type="button"
           onClick={() => {
+            if (!val.trim()) return;
             onAdd(val);
             setVal('');
           }}
@@ -695,10 +785,20 @@ function AttributeValues({
         </button>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap mt-2">
         {values.map((v, i) => (
-          <span key={i} className="border px-2 py-1 rounded text-xs">
+          <span
+            key={i}
+            className="border px-2 py-1 rounded text-xs flex items-center gap-1"
+          >
             {v}
+            <button
+              type="button"
+              onClick={() => onRemove(i)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ✕
+            </button>
           </span>
         ))}
       </div>
