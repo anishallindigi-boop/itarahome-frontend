@@ -63,7 +63,7 @@ export default function Products() {
 
         {/* 🔥 Product Grid – SAME AS VIDEO DESIGN */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-          {(products || []).slice(0, 9).map((product: any) => (
+          {(products || []).slice(0, 6).map((product: any) => (
             <Link
               key={product._id}
               href={`/products/${product.slug}`}

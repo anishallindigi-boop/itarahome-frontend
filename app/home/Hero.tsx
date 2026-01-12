@@ -9,7 +9,7 @@ export default function Hero() {
         <h1
           className="
             text-white font-extrabold
-            text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+            text-6xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
             drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]
             tracking-wide old-standard-tt-regular
           "
@@ -20,7 +20,7 @@ export default function Hero() {
         <h2
           className="
             mt-3 text-white font-medium
-            text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl
+         text-3xl md:text-4xl
             drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]
             tracking-wide 
           "

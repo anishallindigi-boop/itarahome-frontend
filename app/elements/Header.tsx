@@ -169,7 +169,7 @@ export default function HeaderImproved() {
       {/* ================= HEADER ================= */}
       <header className="fixed top-0 left-0 w-full z-[9999] bg-white border-b h-20 px-8 flex items-center justify-between">
         {/* LEFT */}
-        <div className="flex items-center gap-5 w-1/3">
+        <div className="flex items-center gap-5 md:w-1/3 w-auto">
           <button onClick={() => setOpen(true)} className='cursor-pointer'>
             <Menu size={24} />
           </button>
@@ -320,7 +320,7 @@ export default function HeaderImproved() {
         {/* LOGO */}
         <div className="w-1/3 flex justify-center">
           <Link href="/">
-            <img src="/logo.png" alt="logo" className="sm:h-19 h-16" />
+            <img src="/itara.png" alt="logo" className="w-full h-auto" />
           </Link>
         </div>
 

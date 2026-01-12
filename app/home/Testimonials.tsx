@@ -8,7 +8,7 @@ export default function Testimonials() {
           className="
             grid md:grid-cols-2 gap-12 items-center
             bg-[url('/hero.jpeg')] bg-cover bg-center bg-no-repeat
-            p-12 md:p-16 rounded-2xl
+            p-4 md:p-16 rounded-2xl
           "
         >
           <div className="relative min-h-[400px] bg-[url('/testimonial-side.jpeg')] bg-cover bg-center bg-no-repeat md:min-h-[570px] rounded-2xl">

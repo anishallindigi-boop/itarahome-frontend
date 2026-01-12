@@ -45,7 +45,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div>
-            <h3 className="text-2xl font-light mb-4"><img src='/logo.png' alt='logo' className="" /></h3>
+            <h3 className="text-2xl font-light mb-4"><img src='/itara.png' alt='logo' className="" /></h3>
             <p className="text-black text-sm leading-relaxed">
               Itara Home is Link design-led home décor brand focused on creating modern, minimal and thoughtfully crafted stone products.
             </p>

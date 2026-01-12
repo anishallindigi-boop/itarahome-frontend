@@ -153,14 +153,18 @@ const addAttributeValue = (i: number, value: string) => {
 
 
 // REMOVE ATTRIBUTE VALUE
-const removeAttributeValue = (attrIndex: number, valueIndex: number) => {
-  setForm((prev) => {
-    const attributes = [...prev.attributes];
-    attributes[attrIndex].values = attributes[attrIndex].values.filter(
-      (_, i) => i !== valueIndex
-    );
-    return { ...prev, attributes };
-  });
+const removeAttributeValue = (attrIndex: number, value: string) => {
+  setForm((prev) => ({
+    ...prev,
+    attributes: prev.attributes.map((attr, i) =>
+      i === attrIndex
+        ? {
+            ...attr,
+            values: attr.values.filter((v) => v !== value),
+          }
+        : attr
+    ),
+  }));
 };
 
 // REMOVE ENTIRE ATTRIBUTE
@@ -234,10 +238,23 @@ const generateVariations = () => {
 
   /* ---------------- SUBMIT ---------------- */
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    dispatch(updateProduct({ id: productId, form: form }));
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // ✅ Ensure only IDs are sent
+  const cleanedForm = {
+    ...form,
+    categoryid: form.categoryid.map(id => 
+      typeof id === 'string' ? id : id._id
+    ),
+    subcategoryid: form.subcategoryid.map(id => 
+      typeof id === 'string' ? id : id._id
+    )
   };
+  
+  console.log(cleanedForm, "cleaned form");
+  dispatch(updateProduct({ id: productId, form: cleanedForm }));
+};
 
   /* ---------------- FETCH PRODUCT ---------------- */
 
@@ -247,44 +264,55 @@ const generateVariations = () => {
   }, [productId]);
 
   useEffect(() => {
-    if (singleProduct?.product) {
-      const p = singleProduct.product;
-      setForm({
-        metatitle:p.metatitle || '',
-        metadescription:p.metadescription || '',
-        metakeywords:p.metakeywords || '',
-        name: p.name || '',
-        description: p.description || '',
-        content: p.content || '',
-        slug: p.slug || '',
-        categoryid: Array.isArray(p.categoryid) ? p.categoryid : [p.categoryid || ''],
-            subcategoryid: Array.isArray(p.subcategoryid) ? p.subcategoryid : [p.subcategoryid || ''],
-        price: p.price || '',
-        discountPrice: p.discountPrice || '',
-        stock: p.stock || '',
-        status: p.status || 'draft',
-        mainImage: p.mainImage || p.image || '',
-        gallery: p.gallery || [],
-       // ✅ FIXED ATTRIBUTES
-attributes:
-  p.attributes?.map((attr: any) => ({
-    name: attr.name,
-    values: Array.isArray(attr.values) ? attr.values : [],
-  })) || [],
+  if (singleProduct?.product) {
+    const p = singleProduct.product;
+    
+    // ✅ Extract only IDs from categoryid
+    const extractedCategoryIds = Array.isArray(p.categoryid)
+      ? p.categoryid.map((cat: any) => 
+          typeof cat === 'string' ? cat : cat._id
+        )
+      : [typeof p.categoryid === 'string' ? p.categoryid : p.categoryid?._id || ''];
 
+    // ✅ Extract only IDs from subcategoryid
+    const extractedSubcategoryIds = Array.isArray(p.subcategoryid)
+      ? p.subcategoryid.map((sub: any) => 
+          typeof sub === 'string' ? sub : sub._id
+        )
+      : [typeof p.subcategoryid === 'string' ? p.subcategoryid : p.subcategoryid?._id || ''];
 
-  // ✅ Variations can stay same if already flat
-  variations:
-    p.variations?.map((v: any) => ({
-      attributes: v.attributes,
-      price: v.price || '',
-      discountPrice: v.discountPrice || '',
-      stock: v.stock || '',
-      image: v.image || '',
-    })) || [],
-      });
-    }
-  }, [singleProduct]);
+    setForm({
+      metatitle: p.metatitle || '',
+      metadescription: p.metadescription || '',
+      metakeywords: p.metakeywords || '',
+      name: p.name || '',
+      description: p.description || '',
+      content: p.content || '',
+      slug: p.slug || '',
+      categoryid: extractedCategoryIds.filter(Boolean), // ✅ Only IDs
+      subcategoryid: extractedSubcategoryIds.filter(Boolean), // ✅ Only IDs
+      price: p.price || '',
+      discountPrice: p.discountPrice || '',
+      stock: p.stock || '',
+      status: p.status || 'draft',
+      mainImage: p.mainImage || p.image || '',
+      gallery: p.gallery || [],
+      attributes:
+        p.attributes?.map((attr: any) => ({
+          name: attr.name,
+          values: Array.isArray(attr.values) ? attr.values : [],
+        })) || [],
+      variations:
+        p.variations?.map((v: any) => ({
+          attributes: v.attributes,
+          price: v.price || '',
+          discountPrice: v.discountPrice || '',
+          stock: v.stock || '',
+          image: v.image || '',
+        })) || [],
+    });
+  }
+}, [singleProduct]);
 
   /* ---------------- TOAST MESSAGES ---------------- */
 
@@ -748,7 +776,7 @@ function AttributeValues({
           type="button"
           onClick={() => {
             if (!val.trim()) return;
-            onAdd(val);
+            onAdd(val.trim());
             setVal('');
           }}
           className="border px-3 rounded"
@@ -760,13 +788,13 @@ function AttributeValues({
       <div className="flex gap-2 flex-wrap mt-2">
         {values.map((v, i) => (
           <span
-            key={i}
+            key={v} // ✅ stable key
             className="border px-2 py-1 rounded text-xs flex items-center gap-1"
           >
             {v}
             <button
               type="button"
-              onClick={() => onRemove(i)}
+              onClick={() => onRemove(v)} // ✅ remove by value
               className="text-red-500 hover:text-red-700"
             >
               ✕
@@ -777,6 +805,7 @@ function AttributeValues({
     </>
   );
 }
+
 
 /* ---------------- UTILS ---------------- */
 
