@@ -65,6 +65,10 @@ export type Variation = {
   image: string;
 };
 
+type IdObject = {
+  _id: string;
+};
+
 export interface Product {
     metatitle?:string;
   metadescription?:string,
@@ -76,8 +80,8 @@ export interface Product {
   mainImage?: string;
   gallery?: string[];
   content?: string;
-  categoryid?:string[];
-  subcategoryid?:string[];
+  categoryid?: string | IdObject | (string | IdObject)[];
+  subcategoryid?: string | IdObject | (string | IdObject)[];
   price?: string;
   discountPrice?: string;
   attributes?: Attribute[];
@@ -449,6 +453,8 @@ export const ProductSlice = createSlice({
         state.loading = false;
         state.isDeleted = true;
         state.message = action.payload.message || 'Product deleted';
+        
+        
       })
       .addCase(deleteProduct.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;

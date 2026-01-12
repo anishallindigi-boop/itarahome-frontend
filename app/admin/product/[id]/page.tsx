@@ -30,6 +30,7 @@ interface Variation {
   image?: string;
 }
 
+
 interface ProductFormState {
     metatitle?:string;
   metadescription?:string,
@@ -253,6 +254,7 @@ const handleSubmit = (e: React.FormEvent) => {
   // };
   
   // console.log(form, "cleaned form");
+
   dispatch(updateProduct({ id: productId, form: form }));
 };
 
@@ -272,14 +274,14 @@ const handleSubmit = (e: React.FormEvent) => {
       ? p.categoryid.map((cat: any) => 
           typeof cat === 'string' ? cat : cat._id
         )
-      : [typeof p.categoryid === 'string' ? p.categoryid : p.categoryid?._id || ''];
+      : [typeof p.categoryid === 'string' ? p.categoryid : p.categoryid?._id as any  || ''];
 
     // ✅ Extract only IDs from subcategoryid
     const extractedSubcategoryIds = Array.isArray(p.subcategoryid)
       ? p.subcategoryid.map((sub: any) => 
           typeof sub === 'string' ? sub : sub._id
         )
-      : [typeof p.subcategoryid === 'string' ? p.subcategoryid : p.subcategoryid?._id || ''];
+      : [typeof p.subcategoryid === 'string' ? p.subcategoryid : p.subcategoryid?._id as any || ''];
 
     setForm({
       metatitle: p.metatitle || '',
@@ -497,7 +499,7 @@ useEffect(() => {
       values={attr.values}
       onAdd={(v) => addAttributeValue(i, v)}
       onRemove={(valueIndex) =>
-        removeAttributeValue(i, valueIndex)
+        removeAttributeValue(i, valueIndex as any)
       }
     />
   </div>
@@ -794,7 +796,7 @@ function AttributeValues({
             {v}
             <button
               type="button"
-              onClick={() => onRemove(v)} // ✅ remove by value
+              onClick={() => onRemove(v as any)} // ✅ remove by value
               className="text-red-500 hover:text-red-700"
             >
               ✕

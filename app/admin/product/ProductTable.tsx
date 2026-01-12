@@ -19,7 +19,7 @@ export default function ProductTable() {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const { products, loading, error, success, message } = useAppSelector(
+  const { products, isDeleted,loading, error, success, message } = useAppSelector(
     (state: RootState) => state.product
   );
 
@@ -41,12 +41,15 @@ export default function ProductTable() {
       toast.error(error);
       dispatch(resetState());
     }
-
+if(isDeleted){
+   dispatch(getProducts());
+      dispatch(resetState());
+}
     if (success) {
       dispatch(getProducts());
       dispatch(resetState());
     }
-  }, [message, error, success, dispatch]);
+  }, [message, error, success, dispatch,isDeleted]);
 
   /* ================= ACTION HANDLERS ================= */
   const handleDelete = (id: string) => {
