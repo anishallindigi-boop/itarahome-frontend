@@ -242,18 +242,18 @@ const handleSubmit = (e: React.FormEvent) => {
   e.preventDefault();
   
   // ✅ Ensure only IDs are sent
-  const cleanedForm = {
-    ...form,
-    categoryid: form.categoryid.map(id => 
-      typeof id === 'string' ? id : id._id
-    ),
-    subcategoryid: form.subcategoryid.map(id => 
-      typeof id === 'string' ? id : id._id
-    )
-  };
+  // const cleanedForm = {
+  //   ...form,
+  //   categoryid: form.categoryid.map(id => 
+  //     typeof id === 'string' ? id : id._id
+  //   ),
+  //   subcategoryid: form.subcategoryid.map(id => 
+  //     typeof id === 'string' ? id : id._id
+  //   )
+  // };
   
-  console.log(cleanedForm, "cleaned form");
-  dispatch(updateProduct({ id: productId, form: cleanedForm }));
+  // console.log(form, "cleaned form");
+  dispatch(updateProduct({ id: productId, form: form }));
 };
 
   /* ---------------- FETCH PRODUCT ---------------- */
