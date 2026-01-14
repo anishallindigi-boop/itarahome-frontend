@@ -320,7 +320,7 @@ export default function HeaderImproved() {
         {/* LOGO */}
         <div className="w-1/3 flex justify-center">
           <Link href="/">
-            <img src="/itara.png" alt="logo" className="w-full h-auto" />
+            <img src="/itara.png" alt="logo" className="w-full" />
           </Link>
         </div>
 

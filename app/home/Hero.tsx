@@ -9,12 +9,12 @@ export default function Hero() {
         <h1
           className="
             text-white font-extrabold
-            text-6xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl
+            text-[60px] sm:text-[36px] md:text-[48px] lg:text-[60px] xl:text-[120px]
             drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]
             tracking-wide old-standard-tt-regular
           "
         >
-          The Art Of Stone
+          The art of Stone
         </h1>
 
         <h2
@@ -37,7 +37,7 @@ export default function Hero() {
         loop
         muted
         playsInline
-        poster="/hero.jpeg"
+        // poster="/hero.jpeg"
       />
     </section>
   );

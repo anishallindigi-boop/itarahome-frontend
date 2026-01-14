@@ -158,6 +158,29 @@ export const getOrdersByCustomer = createAsyncThunk(
 );
 
 
+//------------------get order by order number-0------------
+
+
+export const getOrderByOrderNumber=createAsyncThunk<
+  Order,
+  string,
+  { rejectValue: string }
+>("order/getOrderByOrderNumber", async (id, { rejectWithValue }) => {
+  try {
+    const res = await axios.get(
+      `${API_URL}/api/order/order-by-order-number/${id}`,
+      {
+          withCredentials: true,
+        headers: { "x-api-key": API_KEY },
+      }
+    );
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(err.response?.data?.error || "Order not found");
+  }
+});
+
+
 
 /* ---------------- SLICE ---------------- */
 
@@ -237,6 +260,21 @@ export const OrderSlice = createSlice({
         state.loading = false;
      
       })
+
+
+        /* GET order by order number */
+      .addCase(getOrderByOrderNumber.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getOrderByOrderNumber.fulfilled, (state, action) => {
+        state.loading = false;
+        state.order = action.payload;
+      })
+      .addCase(getOrderByOrderNumber.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Order not found";
+      })
+
 
       /* DELETE */
       .addCase(deleteOrder.fulfilled, (state, action) => {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronDown, XCircle } from "lucide-react"; // added cancel icon
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { getOrdersByCustomer, updateOrderStatus } from "@/redux/slice/OrderSlice"; 
+import { getOrdersByCustomer, updateOrderStatus } from "@/redux/slice/OrderSlice";
 import type { RootState } from "@/redux/store";
 import {
   AlertDialog,
@@ -17,6 +17,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -36,23 +37,23 @@ export default function OrdersPage() {
     dispatch(getOrdersByCustomer());
   }, [dispatch]);
 
- const handleCancelOrder = async () => {
-  if (!confirmOrderId) return;
+  const handleCancelOrder = async () => {
+    if (!confirmOrderId) return;
 
-  setUpdatingOrderId(confirmOrderId);
-  try {
-    await dispatch(
-      updateOrderStatus({ id: confirmOrderId, status: "cancelled" })
-    ).unwrap();
+    setUpdatingOrderId(confirmOrderId);
+    try {
+      await dispatch(
+        updateOrderStatus({ id: confirmOrderId, status: "cancelled" })
+      ).unwrap();
 
-   dispatch(getOrdersByCustomer())
-    setConfirmOrderId(null);
-  } catch (error: any) {
-   
-  } finally {
-    setUpdatingOrderId(null);
-  }
-};
+      dispatch(getOrdersByCustomer())
+      setConfirmOrderId(null);
+    } catch (error: any) {
+
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
 
 
   if (loading) {
@@ -90,15 +91,14 @@ export default function OrdersPage() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-sm capitalize ${
-                    order.status === "processing"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : order.status === "shipped"
+                  <span className={`px-3 py-1 rounded-full text-sm capitalize ${order.status === "processing"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : order.status === "shipped"
                         ? "bg-blue-100 text-blue-700"
                         : order.status === "order success"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                  }`}>
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                    }`}>
                     {order.status}
                   </span>
 
@@ -117,45 +117,53 @@ export default function OrdersPage() {
                   </button>
 
                   {/* CANCEL ORDER BUTTON */}
-                {order.status !== "Order cancelled" && (
-  <AlertDialog>
-    <AlertDialogTrigger asChild>
-      <button
-        onClick={() => setConfirmOrderId(order._id)}
-        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
-      >
-        <XCircle className="w-4 h-4" />
-        Cancel
-      </button>
-    </AlertDialogTrigger>
+                  {order.status !== "Order cancelled" && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          onClick={() => setConfirmOrderId(order._id)}
+                          className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          Cancel
+                        </button>
+                      </AlertDialogTrigger>
 
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>
-          Cancel this order?
-        </AlertDialogTitle>
-        <AlertDialogDescription>
-          This action cannot be undone. Your order will be permanently cancelled.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
 
-      <AlertDialogFooter>
-        <AlertDialogCancel
-          onClick={() => setConfirmOrderId(null)}
-        >
-          No, keep order
-        </AlertDialogCancel>
+                      <Link href={`/dashboard/orders/${order.orderNumber}`}
 
-        <AlertDialogAction
-          onClick={handleCancelOrder}
-          className="bg-red-600 hover:bg-red-700"
-        >
-          {updatingOrderId === order._id ? "Cancelling..." : "Yes, cancel"}
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-)}
+                        className="border-1 p-2 bg-primary text-white cursor-pointer text-sm font-medium"
+                      >
+                        View
+
+                      </Link>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Cancel this order?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. Your order will be permanently cancelled.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        <AlertDialogFooter>
+                          <AlertDialogCancel
+                            onClick={() => setConfirmOrderId(null)}
+                          >
+                            No, keep order
+                          </AlertDialogCancel>
+
+                          <AlertDialogAction
+                            onClick={handleCancelOrder}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            {updatingOrderId === order._id ? "Cancelling..." : "Yes, cancel"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
 
                 </div>
               </div>

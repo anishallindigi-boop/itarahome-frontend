@@ -101,7 +101,7 @@ export default function Footer() {
               ) : (
 
                 <form onSubmit={handleSubmit}>
-                  <div className="flex items-center bg-gray-900 border border-gray-700 rounded-full px-4 py-2 focus-within:border-gray-500 transition">
+                  <div className="flex items-center bg-primary border border-primary rounded-full px-4 py-2 focus-within:border-primary-500 transition">
                     <input
                       name="email"
 
