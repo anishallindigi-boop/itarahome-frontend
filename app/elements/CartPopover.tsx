@@ -38,9 +38,9 @@ export function CartPopover({ items }: { items: CartItem[] }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative cursor-pointer">
-          <ShoppingCart className="w-6 h-6 text-gray-700" />
+          <ShoppingCart className="w-6 h-6 text-primary" />
           {itemCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
+            <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse">
               {itemCount}
             </span>
           )}

@@ -329,7 +329,7 @@ export default function HeaderImproved() {
 
           <div className="relative">
             <Button variant="ghost" size="icon" className='cursor-pointer' onClick={handleUserClick}>
-              <User className="w-5 h-5" />
+              <User className="w-5 h-5 text-primary" />
             </Button>
 
             {/* PROFILE DROPDOWN */}
@@ -353,7 +353,7 @@ export default function HeaderImproved() {
     onClick={() => setShowProfile(false)}
     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
   >
-    <LayoutDashboard size={16} /> Admin Panel
+    <LayoutDashboard size={16} className='text-primary'/> Admin Panel
   </Link>
 ) : (<>
   <Link
@@ -361,14 +361,14 @@ export default function HeaderImproved() {
     onClick={() => setShowProfile(false)}
     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
   >
-    <User size={16} /> Profile
+    <User size={16} className='text-primary'/> Profile
   </Link>
    <Link
     href="/dashboard"
     onClick={() => setShowProfile(false)}
     className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
   >
-    <LayoutDashboard size={16} /> Dashboard
+    <LayoutDashboard size={16} className='text-primary'/> Dashboard
   </Link>
   </>
 )}
@@ -397,7 +397,7 @@ export default function HeaderImproved() {
                     }}
                     className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
-                    <LogOut size={16} /> Logout
+                    <LogOut size={16} className='text-primary'/> Logout
                   </button>
                 </motion.div>
               )}
@@ -405,9 +405,9 @@ export default function HeaderImproved() {
 
           </div>
           <button onClick={() => setOpenWishlist(true)} className="relative cursor-pointer">
-            <Heart size={18} />
+            <Heart size={18} className='text-primary'/>
             {wishlist.length > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] rounded-full px-1">
+              <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] rounded-full px-1">
                 {wishlist.length}
               </span>
             )}
@@ -549,7 +549,7 @@ export default function HeaderImproved() {
           <span className='font-medium'>{item.label}</span>
           <ChevronDown
             className={cn(
-              'w-4 h-4 transition-transform',
+              'w-4 h-4 transition-transform text-primary',
               openProducts && 'rotate-180'
             )}
           />
@@ -581,7 +581,7 @@ export default function HeaderImproved() {
                       </span>
                       <ChevronDown
                         className={cn(
-                          'w-4 h-4 transition-transform',
+                          'w-4 h-4 transition-transform text-primary',
                           isOpen && 'rotate-180'
                         )}
                       />
