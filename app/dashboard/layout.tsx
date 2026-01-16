@@ -61,7 +61,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1">
-         {menu.map(({ name, href, icon: Icon }) => { const active = pathname === href; return ( <Link key={href} href={href} className={clsx( "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all", active ? "bg-indigo-600 text-white shadow-lg" : "text-gray-700 hover:bg-gray-100" )} > <Icon className={clsx( "w-5 h-5 transition", active ? "text-white" : "text-gray-500 group-hover:text-indigo-600" )} /> <span className="font-medium">{name}</span> </Link> ); })}
+         {menu.map(({ name, href, icon: Icon }) => { const active = pathname === href; return ( <Link key={href} href={href} className={clsx( "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all", active ? "bg-primary text-white shadow-lg" : "!text-white hover:bg-primary" )} > <Icon className={clsx( "w-5 h-5 transition", active ? "text-white" : "text-gray-500 group-hover:text-white" )} /> <span className={clsx( "font-medium", active ? "!text-white" : "text-gray-500 group-hover:!text-white" )}>{name}</span> </Link> ); })}
         </nav>
 
         <div className="p-4 border-t">

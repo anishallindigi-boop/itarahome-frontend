@@ -73,7 +73,7 @@ export default function ProductVideo() {
 
                 {/* 🏷 Title */}
                 <div className="absolute bottom-5 left-5 right-5">
-                  <h3 className="text-white text-xl font-semibold tracking-wide">
+                  <h3 className="!text-white text-xl font-semibold tracking-wide">
                     {video.title}
                   </h3>
                   <span className="inline-block mt-2 text-sm text-white/80 border border-white/40 px-4 py-1 rounded-full backdrop-blur-sm">

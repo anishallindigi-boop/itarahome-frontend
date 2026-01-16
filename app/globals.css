@@ -51,7 +51,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: #454644;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -153,12 +153,14 @@ h1,h3,h4,h5,h6{
   font-family: "Poppins", sans-serif;
   font-weight: 400;
   font-style: normal;
+  color: var(--primary);
 }
 
 h2{
   font-size: 35px;
   font-family: "Poppins", sans-serif;
   font-weight: 400;
+  color: var(--primary);
   font-style: normal;
   font-weight:300;
   margin: 10px 0;
@@ -170,12 +172,18 @@ h2{
 
 
 p{
-  font-family: "Noto Serif", serif;
+  font-family: "Poppins", sans-serif;
   font-optical-sizing: auto;
   font-weight:300;
   font-style: normal;
+    color: var(--primary);
   font-variation-settings:
     "wdth" 100;
+}
+
+
+label{
+  color: var(--primary);
 }
 
 /* @media  and (max-width) {

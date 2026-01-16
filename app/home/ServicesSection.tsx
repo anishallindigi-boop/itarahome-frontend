@@ -26,14 +26,14 @@ const services = [
     description:
       'Our signature curated sets bring together thoughtfully paired stone objects to add character and balance to your space.',
     image: '/Gifting.avif',
-    href: '/products/e-gift-card',
+    href: '/shop',
     cta: 'SHOP NOW',
   },
 ];
 
 export default function ServicesSection() {
   return (
-    <section className="py-16">
+    <section className="py-16 bg-[#dcdad4]">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {services.map((item, index) => (
@@ -64,7 +64,7 @@ export default function ServicesSection() {
                 {item.title}
               </h3>
 
-              <p className="text-sm text-gray-600 mb-5 leading-relaxed">
+              <p className="text-sm text-primary mb-5 leading-relaxed">
                 {item.description}
               </p>
 

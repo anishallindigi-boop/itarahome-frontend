@@ -49,7 +49,7 @@ export default function Products() {
           <h2>
             Recently Curated
           </h2>
-          <p className="mt-4 text-gray-600 max-w-xl mx-auto">
+          <p className="mt-4 text-primary max-w-xl mx-auto">
             Handcrafted stone pieces designed for timeless modern interiors
           </p>
         </div>
@@ -83,12 +83,13 @@ export default function Products() {
 
                 {/* 🏷 Content */}
                 <div className="absolute bottom-8 left-8 right-8">
-                  <h3 className="text-white text-2xl font-semibold tracking-wide leading-tight line-clamp-2">
+                  <h3 className="!text-white text-2xl font-semibold tracking-wide leading-tight line-clamp-2">
                     {product.name}
                   </h3>
 
                   {/* CTA */}
                   <div className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-white/90 border border-white/40 px-5 py-2 rounded-full backdrop-blur-md transition-all duration-500 group-hover:bg-white/10">
+                
                     View Product
                     <span className="transition-transform duration-500 group-hover:translate-x-1">
                       →

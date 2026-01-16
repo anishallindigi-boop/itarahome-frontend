@@ -320,7 +320,7 @@ export default function HeaderImproved() {
         {/* LOGO */}
         <div className="w-1/3 flex justify-center">
           <Link href="/">
-            <img src="/itara.png" alt="logo" className="w-full" />
+            <img src="/logo1.png" alt="logo" className="w-full md:h-[60px] h-auto" />
           </Link>
         </div>
 
@@ -544,9 +544,9 @@ export default function HeaderImproved() {
         {/* PRODUCTS LABEL */}
         <button
           onClick={() => setOpenProducts((p) => !p)}
-          className="w-full flex justify-between items-center p-3 rounded-lg hover:bg-gray-100 font-medium cursor-pointer"
+          className="w-full flex justify-between items-center p-3 font-medium rounded-lg hover:bg-gray-100 cursor-pointer"
         >
-          <span>{item.label}</span>
+          <span className='font-medium'>{item.label}</span>
           <ChevronDown
             className={cn(
               'w-4 h-4 transition-transform',

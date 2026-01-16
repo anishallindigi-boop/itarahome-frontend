@@ -8,8 +8,8 @@ export default function Hero() {
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 text-center">
         <h1
           className="
-            text-white font-extrabold
-            text-[60px] sm:text-[36px] md:text-[48px] lg:text-[60px] xl:text-[120px]
+            !text-white font-extrabold
+            text-[60px] sm:text-[36px] md:text-[48px] lg:text-[60px] xl:text-[90px]
             drop-shadow-[0_6px_25px_rgba(0,0,0,0.9)]
             tracking-wide old-standard-tt-regular
           "
@@ -19,7 +19,7 @@ export default function Hero() {
 
         <h2
           className="
-            mt-3 text-white font-medium
+            mt-3 !text-white font-medium
          text-3xl md:text-4xl
             drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]
             tracking-wide 

@@ -62,7 +62,7 @@ export default function ShopSort() {
 
       {/* DROPDOWN */}
       {open && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-50">
+        <div className="absolute right-0 mt-2 md:w-56 w-auto bg-white border rounded-lg shadow-lg z-50">
           {SORT_OPTIONS.map((option) => (
             <button
               key={option.value}

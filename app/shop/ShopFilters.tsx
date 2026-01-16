@@ -48,8 +48,8 @@ export default function ShopFilters() {
             className={cn(
               'px-4 py-2 text-sm border whitespace-nowrap cursor-pointer',
               !activeCategory
-                ? 'bg-black text-white'
-                : 'bg-white text-black hover:bg-gray-100'
+                ? 'bg-primary text-white'
+                : 'bg-white text-primary hover:bg-primary hover:text-white'
             )}
           >
             VIEW ALL
@@ -62,8 +62,8 @@ export default function ShopFilters() {
               className={cn(
                 'px-4 py-2 text-sm border whitespace-nowrap cursor-pointer',
                 activeCategory === cat._id
-                  ? 'bg-black text-white'
-                  : 'bg-white hover:bg-gray-100'
+                  ? 'bg-primary text-white'
+                  : 'bg-white hover:bg-primary hover:text-white'
               )}
             >
               {cat.name.toUpperCase()}

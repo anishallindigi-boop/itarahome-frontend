@@ -108,7 +108,7 @@ export default function ShopFilterDrawer() {
                   className={cn(
                     'px-3 py-1.5 text-sm border rounded-full transition cursor-pointer',
                     selectedSubs.includes(sub._id)
-                      ? 'bg-black text-white border-black'
+                      ? 'bg-primary text-white border-black'
                       : 'bg-white hover:bg-gray-100'
                   )}
                 >
@@ -131,7 +131,7 @@ export default function ShopFilterDrawer() {
           <SheetClose asChild>
             <button
               onClick={applyFilter}
-              className="w-1/2 bg-black text-white py-2 text-sm cursor-pointer"
+              className="w-1/2 bg-primary text-white py-2 text-sm cursor-pointer"
             >
               Apply
             </button>

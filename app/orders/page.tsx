@@ -198,11 +198,11 @@ export default function OrderConfirmationPage() {
 
         {/* Action Buttons */}
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg">
+          <Button asChild size="lg" className="!text-white">
             <Link href="/">Continue Shopping</Link>
           </Button>
           <Button variant="outline" asChild size="lg">
-            <Link href="/orders">View All Orders</Link>
+            <Link href="/dashboard/orders">View All Orders</Link>
           </Button>
         </div>
       </Card>

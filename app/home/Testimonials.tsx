@@ -2,7 +2,7 @@ import { Play, Quote } from 'lucide-react';
 
 export default function Testimonials() {
   return (
-    <section className="py-20 px-6">
+    <section className="py-20 px-6 bg-[#dcdad4]">
       <div className="max-w-7xl mx-auto">
         <div
           className="
@@ -21,9 +21,9 @@ export default function Testimonials() {
           </div>
 
           <div className="bg-white/80 p-6 rounded-2xl backdrop-blur">
-            <Quote className="w-16 h-16 text-gray-300 mb-6" />
+            <Quote className="w-16 h-16 text-primary mb-6" />
             <h2>Testimonials</h2>
-            <p className="text-gray-700 leading-relaxed mb-8 italic">
+            <p className="text-primary leading-relaxed mb-8 italic">
            I absolutely love my purchase from Itara Home. The stone finish, the quality, and the attention to detail are beautiful. It instantly elevated my space
             </p>
             <div className="flex items-center">
@@ -33,8 +33,8 @@ export default function Testimonials() {
                 className="w-12 h-12 rounded-full object-cover mr-4"
               />
               <div>
-                <p className="font-medium">Yashika Jain</p>
-                <p className="text-sm text-gray-600">Karnal</p>
+                <p className="font-medium text-primary">Yashika Jain</p>
+                <p className="text-sm text-primary">Karnal</p>
               </div>
             </div>
           </div>

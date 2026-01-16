@@ -134,7 +134,7 @@ const WishlistDrawer = ({ isOpen, onClose }: Props) => {
                       <button
                         onClick={() => handleAddToCart(item.product._id)}
                         className="flex-1 flex items-center justify-center gap-1
-                        text-xs bg-gradient-to-r from-indigo-600 to-indigo-500
+                        text-xs bg-primary
                         text-white px-3 py-2 rounded-xl
                         hover:from-indigo-700 hover:to-indigo-600 transition"
                       >

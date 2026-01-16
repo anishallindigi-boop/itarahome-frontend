@@ -113,7 +113,7 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                 >
                   <Link href="/cart">View Cart</Link>
                 </Button>
-                <Button className="bg-indigo-600 hover:bg-indigo-700 transition text-white">
+                <Button className="bg-primary transition !text-white">
                   <Link href="/checkout">Checkout</Link>
                 </Button>
               </div>

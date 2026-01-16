@@ -280,7 +280,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
           </div>
 
           <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-bold ">₹{finalPrice}</span>
+            <span className="text-4xl font-bold text-primary">₹{finalPrice}</span>
             {discountPercent > 0 && (
               <>
                 <span className="text-xl text-stone-400 line-through">₹{originalPrice}</span>

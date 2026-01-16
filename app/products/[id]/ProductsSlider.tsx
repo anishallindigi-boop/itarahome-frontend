@@ -166,7 +166,7 @@ export default function ProductsSlider() {
 
                 {/* CONTENT */}
                 <div className="absolute bottom-8 left-8 right-8">
-                  <h3 className="text-white text-xl sm:text-2xl font-semibold line-clamp-2">
+                  <h3 className="!text-white text-xl sm:text-2xl font-semibold line-clamp-2">
                     {product.name}
                   </h3>
 

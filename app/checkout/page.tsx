@@ -288,7 +288,7 @@ export default function CheckoutPage() {
 
           <Button
             size="lg"
-            className="w-full mt-8"
+            className="w-full mt-8 !text-white"
             onClick={placeOrder}
             disabled={orderLoading}
           >

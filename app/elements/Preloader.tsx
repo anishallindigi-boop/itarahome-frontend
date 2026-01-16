@@ -46,7 +46,7 @@ const Page = ({ onComplete }: PreloaderProps) => {
         <div className="flex flex-col items-center space-y-6">
           {/* Logo with pulsing effect (optional) */}
           <div className="text-center animate-fade-in">
-            <Image src="/logo.png" alt="logo" width={150} height={150} />
+            <img src="/logo1.png" alt="logo" className="w-full md:h-[60px] h-auto" />
           </div>
 
           {/* Gradient Line Animation After Image */}

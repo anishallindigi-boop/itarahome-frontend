@@ -187,7 +187,7 @@ const UserDashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="border-dashed">
           <CardContent className="p-6 text-center">
-            <ShoppingCart className="mx-auto h-8 w-8 text-gray-400" />
+            <ShoppingCart className="mx-auto h-8 w-8 text-primary" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Continue Shopping</h3>
             <p className="mt-1 text-sm text-gray-500">Discover our latest products</p>
             <Button variant="outline" className="mt-4" asChild>
@@ -197,7 +197,7 @@ const UserDashboard = () => {
         </Card>
         <Card className="border-dashed">
           <CardContent className="p-6 text-center">
-            <Heart className="mx-auto h-8 w-8 text-gray-400" />
+            <Heart className="mx-auto h-8 w-8 text-primary" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Your Wishlist</h3>
             <p className="mt-1 text-sm text-gray-500">View your saved items</p>
             <Button variant="outline" className="mt-4" asChild onClick={() => setOpenWishlist(true)}>
@@ -207,7 +207,7 @@ const UserDashboard = () => {
         </Card>
         <Card className="border-dashed">
           <CardContent className="p-6 text-center">
-            <MapPin className="mx-auto h-8 w-8 text-gray-400" />
+            <MapPin className="mx-auto h-8 w-8 text-primary" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">Manage Addresses</h3>
             <p className="mt-1 text-sm text-gray-500">Update your delivery addresses</p>
             <Button variant="outline" className="mt-4" asChild>

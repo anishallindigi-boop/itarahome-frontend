@@ -132,7 +132,7 @@ export default function OrdersPage() {
 
                       <Link href={`/dashboard/orders/${order.orderNumber}`}
 
-                        className="border-1 p-2 bg-primary text-white cursor-pointer text-sm font-medium"
+                        className="border-1 p-2 bg-primary !text-white cursor-pointer text-sm font-medium"
                       >
                         View
 
