@@ -131,7 +131,7 @@ export default function Page() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-black/80 transition flex items-center justify-center gap-2 disabled:opacity-60"
+                      className="w-full bg-primary !text-white py-3 rounded-lg font-medium  transition flex items-center justify-center gap-2 disabled:opacity-60"
                     >
                       {loading ? 'Joining...' : 'Join Now'}
                       {!loading && <Send size={16} />}
