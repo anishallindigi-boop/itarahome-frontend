@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+// import Image from "next/image";
 import { ChevronDown, XCircle, Package, Calendar, MapPin, CreditCard, Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { getOrdersByCustomer, updateOrderStatus } from "@/redux/slice/OrderSlice";
@@ -216,10 +216,10 @@ export default function OrdersPage() {
                                 className="flex gap-3 sm:gap-4 bg-white p-3 sm:p-4 rounded-xl border border-slate-200"
                               >
                                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
-                                  <Image
+                                  <img
                                     src={`${API_URL}${item.productId?.mainImage || ""}`}
                                     alt={item.productId?.name || "Product"}
-                                    fill
+                                    // fill
                                     className="object-cover"
                                     onError={(e) => {
                                       (e.target as HTMLImageElement).src = "/placeholder.jpg";
