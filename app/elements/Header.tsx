@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 import { getCartItems } from '@/redux/slice/CartItemSlice';
 import { logoutuser, resetState } from '@/redux/slice/AuthSlice';
@@ -297,10 +297,10 @@ export default function HeaderImproved() {
                         {/* Product Image */}
                         <div className="relative w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                           {product.mainImage ? (
-                            <Image
+                            <img
                               src={API_URL + product.mainImage}
                               alt={product.name}
-                              fill
+                              // fill
                               className="object-cover"
                             />
                           ) : (
@@ -494,10 +494,10 @@ export default function HeaderImproved() {
                 >
                   <div className="relative w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                     {product.mainImage ? (
-                      <Image
+                      <img
                         src={API_URL + product.mainImage}
                         alt={product.name}
-                        fill
+                        // fill
                         className="object-cover"
                       />
                     ) : (
