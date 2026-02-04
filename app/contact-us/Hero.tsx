@@ -18,13 +18,13 @@ const Hero: React.FC = () => {
       />
 
       {/* White title box overlapping image */}
-      <div className="absolute left-1/2 bottom-0 translate-x-[-50%] ">
+      {/* <div className="absolute left-1/2 bottom-0 translate-x-[-50%] ">
         <div className="bg-white px-40 py-4 shadow-md">
           <h2 className="text-xl md:text-5xl font-medium text-gray-900 text-center">
       Contact Us
           </h2>
         </div>
-      </div>
+      </div> */}
     </section>
   );
 };

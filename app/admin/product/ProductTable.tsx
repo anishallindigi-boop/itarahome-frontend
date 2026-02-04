@@ -9,7 +9,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { RootState } from '@/redux/store';
 
 import {
-  getProducts,
+  getAdminProducts,
   deleteProduct,
   UpdateProductStatus,
   resetState,
@@ -27,30 +27,37 @@ export default function ProductTable() {
 
   /* ================= FETCH PRODUCTS ================= */
   useEffect(() => {
-    dispatch(getProducts());
+    dispatch(getAdminProducts());
   }, [dispatch]);
 
   /* ================= TOAST + REFRESH ================= */
-  useEffect(() => {
-    if (message) {
-      toast.success(message);
-      dispatch(resetState());
-    }
+ /* ================= TOAST + REFRESH ================= */
+useEffect(() => {
+  if (message) {
+    toast.success(message);
+    dispatch(resetState());
+  }
 
-    if (error) {
-      toast.error(error);
-      dispatch(resetState());
-    }
-if(isDeleted){
-   dispatch(getProducts());
-      dispatch(resetState());
-}
-    if (success) {
-      dispatch(getProducts());
-      dispatch(resetState());
-    }
-  }, [message, error, success, dispatch,isDeleted]);
+  if (error) {
+    toast.error(error);
+    dispatch(resetState());
+  }
+  
+  // Remove isDeleted from here since it has its own effect
+  if (success) {
+    dispatch(getAdminProducts()); // Refresh after any success
+    dispatch(resetState());
+  }
+}, [message, error, success, dispatch]);
 
+// Separate effect for delete
+useEffect(() => {
+  if (isDeleted) {
+    dispatch(getAdminProducts());
+    dispatch(resetState());
+    toast.success('Product deleted successfully');
+  }
+}, [isDeleted, dispatch]);
   /* ================= ACTION HANDLERS ================= */
   const handleDelete = (id: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
@@ -174,12 +181,12 @@ if(isDeleted){
                     <Edit size={16} />
                   </button>
 
-                  <button
+                  {/* <button
                     onClick={() => handleVariations(p._id)}
                     className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
                   >
                     <Layers size={16} />
-                  </button>
+                  </button> */}
 
                   <button
                     onClick={() => handleDelete(p._id)}

@@ -68,14 +68,14 @@ export default function ProfilePage() {
 
       <div className="bg-white rounded-2xl shadow-sm border p-6 flex flex-col md:flex-row gap-6 items-center">
         {/* Avatar */}
-        <div className="relative w-28 h-28 rounded-full overflow-hidden border">
+        {/* <div className="relative w-28 h-28 rounded-full overflow-hidden border">
           <img
             src="/avatar-placeholder.png"
             alt="User Avatar"
         
             className="object-cover"
           />
-        </div>
+        </div> */}
 
         {/* Basic Info */}
         <div className="flex-1">

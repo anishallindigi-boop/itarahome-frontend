@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 
 import {
-  GetProductCategory,
+  GetAdminProductCategory,
   DeleteProductCategory,
   UpdateCategoryStatus,
   resetState,
@@ -29,13 +29,13 @@ const CategoryTablePage = () => {
 
   // Fetch categories
   useEffect(() => {
-    dispatch(GetProductCategory());
+    dispatch(GetAdminProductCategory());
   }, [dispatch]);
 
   // Refetch after delete
   useEffect(() => {
     if (isdeleted) {
-      dispatch(GetProductCategory());
+      dispatch(GetAdminProductCategory());
       dispatch(resetState());
     }
   }, [isdeleted, dispatch]);

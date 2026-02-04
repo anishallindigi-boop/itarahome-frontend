@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Edit, Trash2, Loader2 } from 'lucide-react';
 
 import {
-  GetSubCategories,
+  GetAdminSubCategories,
   DeleteSubCategory,
   UpdateSubCategoryStatus,
   resetSubCategoryState,
@@ -30,14 +30,14 @@ const SubCategoryTablePage = () => {
   /* ---------------- FETCH ---------------- */
 
   useEffect(() => {
-    dispatch(GetSubCategories());
+    dispatch(GetAdminSubCategories());
   }, [dispatch]);
 
   /* ---------------- REFETCH AFTER DELETE ---------------- */
 
   useEffect(() => {
     if (isdeleted) {
-      dispatch(GetSubCategories());
+      dispatch(GetAdminSubCategories());
       dispatch(resetSubCategoryState());
     }
   }, [isdeleted, dispatch]);

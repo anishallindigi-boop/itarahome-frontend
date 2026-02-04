@@ -22,6 +22,9 @@ export interface Order {
   total: number;
   notes?: string;
   createdAt?: string;
+  couponCode?: string | null;
+  discount?: number;
+  couponDetails?: any;
 }
 
 interface OrderState {
@@ -30,6 +33,7 @@ interface OrderState {
   loading: boolean;
   error: string | null;
   message: string | null;
+  
 }
 
 const initialState: OrderState = {
@@ -71,7 +75,7 @@ export const getAllOrders = createAsyncThunk<
       headers: { "x-api-key": API_KEY },
     });
     // console.log(res.data,"ath")
-    return res.data;
+    return res.data.orders;
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.error || "Failed to fetch orders");
   }
@@ -91,12 +95,13 @@ export const getOrder = createAsyncThunk<
         headers: { "x-api-key": API_KEY },
       }
     );
-    return res.data;
+    return res.data.order;
   } catch (err: any) {
     return rejectWithValue(err.response?.data?.error || "Order not found");
   }
 });
 
+// ✅ Update Order Status
 // ✅ Update Order Status
 export const updateOrderStatus = createAsyncThunk<
   { message: string; order: Order },
@@ -112,9 +117,13 @@ export const updateOrderStatus = createAsyncThunk<
         headers: { "x-api-key": API_KEY },
       }
     );
+    
+    // Log the response for debugging
+    // console.log('Update status API response:', res.data);
+    
     return res.data;
   } catch (err: any) {
-    // console.log(err)
+    // console.error('Update status API error:', err);
     return rejectWithValue(err.response?.data?.error || "Update failed");
   }
 });
@@ -150,7 +159,7 @@ export const getOrdersByCustomer = createAsyncThunk(
         withCredentials: true,
         headers: { "x-api-key": API_KEY },
       });
-      return res.data;
+      return res.data.orders;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.error || "Fetch failed");
     }
@@ -237,15 +246,25 @@ export const OrderSlice = createSlice({
       })
 
       /* UPDATE STATUS */
-      .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        state.message = action.payload.message;
-        state.orders = state.orders.map((o) =>
-          o._id === action.payload.order._id
-            ? action.payload.order
-            : o
-        );
-      })
-
+   /* UPDATE STATUS */
+.addCase(updateOrderStatus.fulfilled, (state, action) => {
+  console.log('Status update fulfilled:', action.payload);
+  state.message = action.payload.message;
+  
+  // Check if payload has the updated order
+  if (action.payload.order) {
+    // Update the specific order in the orders array
+    const index = state.orders.findIndex(o => o._id === action.payload.order._id);
+    if (index !== -1) {
+      state.orders[index] = action.payload.order;
+    }
+  }
+  
+  // Also update the current order if it's the same one
+  if (state.order && state.order._id === action.payload.order._id) {
+    state.order = action.payload.order;
+  }
+})
 
   // GET ORDERS BY CUSTOMER
       .addCase(getOrdersByCustomer.pending, (state) => {

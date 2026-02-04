@@ -13,6 +13,7 @@ import ImageSlice from './slice/ImageSlice';
 import SubCategorySlice from './slice/SubCategorySlice';
 import EnquirySlice from './slice/EnquirySlice';
 import StylingEnquirySlice from './slice/StylingEnquirySlice';
+import CouponSlice from './slice/CouponSlice';
 
 const store = configureStore({
   reducer: {
@@ -29,7 +30,8 @@ const store = configureStore({
     image: ImageSlice,
     subcategory: SubCategorySlice,
     enquiry: EnquirySlice,
-    stylingenquiry: StylingEnquirySlice
+    stylingenquiry: StylingEnquirySlice,
+    coupon: CouponSlice
   },
 
 })

@@ -2,8 +2,8 @@ import { MapPin, Mail, Phone, Clock } from 'lucide-react';
 
 export default function ContactInfo() {
   return (
-    <section className=" py-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className=" py-20 px-6">
+      <div className="max-w-7xl mx-auto">
         
         {/* Header */}
         <div className="text-center mb-14">

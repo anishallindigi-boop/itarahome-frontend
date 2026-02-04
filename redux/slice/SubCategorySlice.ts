@@ -110,6 +110,29 @@ export const GetSubCategories = createAsyncThunk(
   }
 );
 
+
+//----get admin---------------
+export const GetAdminSubCategories = createAsyncThunk(
+  'subcategory/getAdminAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/subcategory/getAdmin`,
+        {
+          headers: { 'x-api-key': API_KEY },
+          withCredentials: true,
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch subcategories'
+      );
+    }
+  }
+);
+
+
 /* ===================== GET SINGLE ===================== */
 
 export const GetSingleSubCategory = createAsyncThunk(
@@ -130,7 +153,6 @@ export const GetSingleSubCategory = createAsyncThunk(
 );
 
 /* ===================== GET BY CATEGORY ===================== */
-
 export const GetSubCategoriesByCategory = createAsyncThunk(
   'subcategory/getByCategory',
   async (categoryId: string, { rejectWithValue }) => {
@@ -141,7 +163,7 @@ export const GetSubCategoriesByCategory = createAsyncThunk(
           headers: { 'x-api-key': API_KEY },
         }
       );
-      return res.data;  
+      return res.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch subcategories'
@@ -268,6 +290,36 @@ const SubCategorySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+
+      
+      /* GET Admin ALL */
+      .addCase(GetAdminSubCategories.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(GetAdminSubCategories.fulfilled, (state, action: PayloadAction<SubCategory[]>) => {
+        state.loading = false;
+        state.subCategories = action.payload;
+      })
+      .addCase(GetAdminSubCategories.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+
+/* GET BY CATEGORY - ADDED THIS */
+      .addCase(GetSubCategoriesByCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(GetSubCategoriesByCategory.fulfilled, (state, action: PayloadAction<SubCategory[]>) => {
+        state.loading = false;
+        state.subCategories = action.payload;
+      })
+      .addCase(GetSubCategoriesByCategory.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
 
       /* GET SINGLE */
       .addCase(GetSingleSubCategory.pending, (state) => {

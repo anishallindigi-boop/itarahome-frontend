@@ -1,38 +1,54 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 // -------------------- TYPES --------------------
+// -------------------- UPDATED TYPES --------------------
+
+export type AttributeType = 'text' | 'color' | 'image';
+
+export interface AttributeValue {
+  value: string;
+  color?: string;      // Hex code for color type
+  image?: string;      // URL for image type
+}
+
+export interface Attribute {
+  id: string;          // Unique identifier for the attribute
+  name: string;
+  type: AttributeType;
+  values: AttributeValue[];
+}
+
+export interface Variation {
+  attributes: Record<string, string>; // attributeName: value
+  price: string;
+  discountPrice: string;
+  stock: string;
+  image?: string;
+}
 
 export interface CreateProductPayload {
-    metatitle?:string;
-  metadescription?:string;
-  metakeywords?:string;
+  metatitle?: string;
+  metadescription?: string;
+  metakeywords?: string;
   name: string;
   description: string;
   content: string;
   slug: string;
   categoryid: string[];
-  subcategoryid: string[]; 
+  subcategoryid: string[];
   price: string;
   discountPrice: string;
   stock: string;
   status: 'draft' | 'published';
   mainImage: string;
   gallery: string[];
-  attributes: {
-    name: string;
-    values: string[];
-  }[];
-  variations: {
-    attributes: Record<string, string>;
-    price: string;
-    discountPrice: string;
-    stock: string;
-    image?: string;
-  }[];
+  attributes: Attribute[];  // ✅ Updated to use new Attribute type
+  variations: Variation[];
 }
 
 
@@ -54,16 +70,16 @@ export interface ProductFilterPayload {
 
 
 
-export type AttributeValue = { value: string };
-export type Attribute = { name: string; values: AttributeValue[] };
-export type Variation = {
-  attributes: Record<string, string>;
-  sku: string;
-  regularPrice: string;
-  salePrice: string;
-  stock: string;
-  image: string;
-};
+// export type AttributeValue = { value: string };
+// export type Attribute = { name: string; values: AttributeValue[] };
+// export type Variation = {
+//   attributes: Record<string, string>;
+//   sku: string;
+//   regularPrice: string;
+//   salePrice: string;
+//   stock: string;
+//   image: string;
+// };
 
 type IdObject = {
   _id: string;
@@ -106,6 +122,7 @@ interface ProductState {
   success: boolean;
   isUpdated: boolean;
   isDeleted: boolean;
+    suggestions: Product[]; // ✅ ADD THIS
 }
 
 const initialState: ProductState = {
@@ -117,6 +134,7 @@ const initialState: ProductState = {
   success: false,
   isUpdated: false,
   isDeleted: false,
+  suggestions: [], // ✅ ADD THIS
 };
 
 // -------------------- THUNKS --------------------
@@ -150,14 +168,33 @@ export const createProduct = createAsyncThunk<
   }
 );
 
+//---------------get admin products---------------
+
+export const getAdminProducts=createAsyncThunk('product/getAdminProducts',
+   async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`${API_URL}/api/product/getadminproducts`, {
+        headers: { 'x-api-key': API_KEY!,
+        },
+        withCredentials: true,
+      
+      });
+      return data.products;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch products');
+    }
+  }
+)
+
 
 // Get All Products
 export const getProducts = createAsyncThunk(
   'product/getAll',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API_URL}/api/product/getAll`, null, {
+      const { data } = await axios.get(`${API_URL}/api/product/getAll`, {
         headers: { 'x-api-key': API_KEY! },
+      
       });
       return data.products;
     } catch (err: any) {
@@ -317,6 +354,27 @@ export const filterProducts = createAsyncThunk<
 
 
 
+// Quick search for autocomplete (alphabetical)
+export const fetchSearchSuggestions = createAsyncThunk(
+  'search/fetchSuggestions',
+  async (query: string, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/product/suggestions?query=${encodeURIComponent(query)}&limit=8`,
+{headers: {
+            'x-api-key': API_KEY!,
+          },}
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Search failed'
+      );
+    }
+  }
+);
+
+
 
 
 // -------------------- SLICE --------------------
@@ -324,6 +382,9 @@ export const ProductSlice = createSlice({
   name: 'product',
   initialState,
   reducers: {
+     clearSuggestions: (state) => {
+      state.suggestions = [];
+    },
     resetState: (state) => {
       state.products = [];
       state.singleProduct = null;
@@ -352,6 +413,22 @@ export const ProductSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+//get admin produvts-------------------
+
+ .addCase(getAdminProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAdminProducts.fulfilled, (state, action: PayloadAction<Product[]>) => {
+        state.loading = false;
+        state.products = action.payload;
+      })
+      .addCase(getAdminProducts.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
 
       // GET ALL
       .addCase(getProducts.pending, (state) => {
@@ -416,14 +493,22 @@ export const ProductSlice = createSlice({
       state.loading = true;
       state.error = null;
     })
-    .addCase(UpdateProductStatus.fulfilled, (state, action) => {
-      state.loading = false;
-      state.message = action.payload.message;
-      const index = state.products.findIndex(p => p._id === action.payload.product._id);
-      if (index !== -1) {
-        state.products[index] = action.payload.product; // update product in list
-      }
-    })
+ // In your ProductSlice.ts, update this section:
+
+.addCase(UpdateProductStatus.fulfilled, (state, action) => {
+  state.loading = false;
+  state.message = action.payload.message;
+  state.success = true; // Add this to trigger refetch
+  
+  // Fix: Access action.payload.product correctly
+  const updatedProduct = action.payload.product;
+  if (updatedProduct && updatedProduct._id) {
+    const index = state.products.findIndex(p => p._id === updatedProduct._id);
+    if (index !== -1) {
+      state.products[index] = updatedProduct; // Update in place
+    }
+  }
+})
     .addCase(UpdateProductStatus.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
@@ -475,12 +560,25 @@ export const ProductSlice = createSlice({
 .addCase(filterProducts.rejected, (state, action) => {
   state.loading = false;
   state.error = action.payload as string;
-});
+})
 
+//---------------------------------------serach api--------------- 
 
+ .addCase(fetchSearchSuggestions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSearchSuggestions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.suggestions = action.payload.products;
+      })
+      .addCase(fetchSearchSuggestions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
 
   },
 });
 
-export const { resetState } = ProductSlice.actions;
+export const { resetState,clearSuggestions} = ProductSlice.actions;
 export default ProductSlice.reducer;

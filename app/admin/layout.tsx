@@ -79,6 +79,7 @@ React.useEffect(() => {
     { name: 'Blog category', href: '/admin/blog-category', icon: Users },
     { name: 'Blogs', href: '/admin/blogs', icon: FileText },
     { name: 'Orders', href: '/admin/orders', icon: FileText },
+    { name: 'Coupons', href: '/admin/coupon', icon: FileText },
     { name: 'EnquiryForm Data', href: '/admin/enquiry-form-data', icon: FileText },
     { name: 'StylingForm Data', href: '/admin/stylingform-data', icon: FileText },
     { name: 'contact Form Data', href: '/admin/contactform-data', icon: FileText },

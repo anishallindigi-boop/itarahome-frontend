@@ -109,6 +109,32 @@ export const GetProductCategory = createAsyncThunk(
   }
 );
 
+
+
+
+/* ---------------- GET ALL CATEGORIES FOR ADMIN ---------------- */
+
+export const GetAdminProductCategory = createAsyncThunk(
+  'category/getAdminAll',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/category/getadmin`,
+        {
+          headers: { 'x-api-key': API_KEY },
+          withCredentials: true,
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to fetch categories'
+      );
+    }
+  }
+);
+
+
 /* ---------------- GET SINGLE CATEGORY ---------------- */
 
 export const GetSingleProductCategory = createAsyncThunk(
@@ -248,6 +274,21 @@ const ProductCategorySlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+
+/* GET ALL */
+      .addCase(GetAdminProductCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(GetAdminProductCategory.fulfilled, (state, action: PayloadAction<Category[]>) => {
+        state.loading = false;
+        state.categories = action.payload;
+      })
+      .addCase(GetAdminProductCategory.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+
 
       /* GET SINGLE */
       .addCase(GetSingleProductCategory.pending, (state) => {
