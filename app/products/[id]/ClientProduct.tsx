@@ -579,7 +579,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
           {/* Quantity & Add to Cart */}
           <div className="flex  sm:flex-row items-stretch sm:items-center gap-3 md:gap-4">
             {/* Quantity Selector */}
-            <div className="flex items-center border-2 border-stone-200 rounded-xl bg-white w-full sm:w-auto">
+            <div className="flex items-center border-2 border-stone-200 rounded-xl bg-white ">
               <button
                 className="px-4 py-3 cursor-pointer hover:bg-stone-50 transition flex-1 sm:flex-none text-lg"
                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
@@ -612,10 +612,10 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
             {/* Wishlist Button */}
             <button
               onClick={(e) => handleAddToWishlist(e, product._id)}
-              className="p-3 rounded-xl border-2 cursor-pointer border-stone-200 bg-white hover:border-primary transition h-[52px] w-full sm:w-[52px] flex items-center justify-center"
+              className="p-3 rounded-xl border-2 cursor-pointer border-stone-200 bg-white hover:border-primary transition h-[52px]  sm:w-[52px] flex items-center justify-center"
             >
               <Heart className={`w-5 h-5 ${liked ? 'fill-primary text-primary' : 'text-stone-400'}`} />
-              <span className="ml-2 sm:hidden">Wishlist</span>
+              {/* <span className="ml-2 sm:hidden">Wishlist</span> */}
             </button>
           </div>
 

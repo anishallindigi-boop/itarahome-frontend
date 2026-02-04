@@ -1,3 +1,6 @@
+import Link from "next/link";
+
+
 export default function Hero() {
   return (
     <section className="relative sm:mt-[80px] overflow-hidden">
@@ -27,6 +30,11 @@ export default function Hero() {
         >
           Timeless Objects for Modern Homes
         </h2>
+        <Link href="/shop" >
+        <button className="mt-4 bg-white text-primary px-10 py-2 cursor-pointer font-semibold hover:bg-gray-100 transition">
+          Shop Now
+        </button>
+        </Link>
       </div>
 
       {/* 🎥 Video */}
