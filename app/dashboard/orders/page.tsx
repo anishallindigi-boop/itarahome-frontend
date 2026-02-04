@@ -191,7 +191,7 @@ export default function OrdersPage() {
 
                           <Link
                             href={`/dashboard/orders/${order._id}`}
-                            className="px-4 py-1.5 sm:py-2 bg-slate-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
+                            className="px-4 py-1.5 sm:py-2 bg-primary text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
                           >
                             View
                           </Link>

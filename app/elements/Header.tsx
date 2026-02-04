@@ -11,6 +11,7 @@ import {
   LogOut,
   LayoutDashboard,
   Heart,
+  ShoppingCart,
   ExternalLink,
   Loader2,
 } from 'lucide-react';
@@ -18,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-// import Image from 'next/image';
 
 import { getCartItems } from '@/redux/slice/CartItemSlice';
 import { logoutuser, resetState } from '@/redux/slice/AuthSlice';
@@ -146,15 +146,6 @@ export default function HeaderImproved() {
   }, [message, dispatch]);
 
   /* ---------- search handlers ---------- */
-  // const handleSearchSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (searchQuery.trim()) {
-  //     router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
-  //     setShowSearchDropdown(false);
-  //     setMobileSearchOpen(false);
-  //   }
-  // };
-
   const handleSuggestionClick = (product: any) => {
     router.push(`/products/${product.slug}`);
     setSearchQuery('');
@@ -187,16 +178,6 @@ export default function HeaderImproved() {
       })),
   }));
 
-  const handleDashboardClick = () => {
-    if (user?.role === 'admin') {
-      router.push('/admin');
-    } else {
-      router.push('/dashboard');
-    }
-    setShowProfile(false);
-    setOpen(false);
-  };
-
   const menu = [
     { key: 'home', label: 'Home', href: '/' },
     { key: 'shop', label: 'Shop', children: productMenu },
@@ -218,17 +199,23 @@ export default function HeaderImproved() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleLogout = () => {
+    dispatch(logoutuser());
+    setOpen(false);
+    router.push('/');
+  };
+
   return (
     <>
       {/* ================= HEADER ================= */}
       <header className="fixed top-0 left-0 w-full z-[9999] bg-white border-b h-20 px-4 md:px-8 flex items-center justify-between">
-        {/* LEFT */}
-        <div className="flex items-center gap-3 md:gap-5 md:w-1/3 w-auto">
+        {/* LEFT: Hamburger Menu + Desktop Search */}
+        <div className="flex items-center gap-4 md:w-1/3">
           <button onClick={() => setOpen(true)} className='cursor-pointer p-2'>
             <Menu size={24} />
           </button>
 
-          {/* DESKTOP SEARCH */}
+          {/* DESKTOP SEARCH (Left side) */}
           <div className="relative w-64 hidden md:block search-container">
             <form>
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -280,7 +267,6 @@ export default function HeaderImproved() {
                       <div className="px-5 py-8 text-center text-gray-500">
                         <p className="text-sm">No products found</p>
                         <button
-                          // onClick={}
                           className="mt-2 text-sm text-primary hover:underline"
                         >
                           Search for &quot;{searchQuery}&quot;
@@ -300,8 +286,7 @@ export default function HeaderImproved() {
                             <img
                               src={API_URL + product.mainImage}
                               alt={product.name}
-                              // fill
-                              className="object-cover"
+                              className="object-cover w-full h-full"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -330,112 +315,119 @@ export default function HeaderImproved() {
                       </button>
                     ))}
                   </div>
-
-                  {/* FOOTER */}
-                  {/* {suggestions.length > 0 && (
-                    <div className="border-t p-4">
-                      <button
-                        onClick={handleSearchSubmit}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white bg-black hover:bg-gray-900 transition-colors"
-                      >
-                        View all results
-                        <ExternalLink size={16} />
-                      </button>
-                    </div>
-                  )} */}
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+        </div>
 
-          {/* MOBILE SEARCH BUTTON */}
+        {/* CENTER: Logo */}
+        <div className="flex justify-center flex-1">
+          <Link href="/">
+            <img 
+              src="/logo1.png" 
+              alt="logo" 
+              className="h-[60px] w-auto" 
+            />
+          </Link>
+        </div>
+
+        {/* RIGHT: Desktop Icons + Mobile Search */}
+        <div className="flex items-center justify-end gap-2 md:gap-4 md:w-1/3">
+          {/* Desktop: All three icons */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* User Icon */}
+            <div className="relative">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className='cursor-pointer' 
+                onClick={handleUserClick}
+              >
+                <User className="w-5 h-5 text-primary" />
+              </Button>
+
+              {/* PROFILE DROPDOWN */}
+              <AnimatePresence>
+                {isAuthenticated && showProfile && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-[10001]"
+                  >
+                    <div className="px-4 py-3 border-b">
+                      <p className="text-sm font-semibold">
+                        {user?.name || 'My Account'}
+                      </p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+                    {user?.role === 'admin' ? (
+                      <Link
+                        href="/admin"
+                        onClick={() => setShowProfile(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <LayoutDashboard size={16} className='text-primary'/> Admin Panel
+                      </Link>
+                    ) : (<>
+                      <Link
+                        href="/dashboard/profile"
+                        onClick={() => setShowProfile(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <User size={16} className='text-primary'/> Profile
+                      </Link>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setShowProfile(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <LayoutDashboard size={16} className='text-primary'/> Dashboard
+                      </Link>
+                    </>)}
+
+                    <button
+                      onClick={() => {
+                        dispatch(logoutuser());
+                        setShowProfile(false);
+                        router.push('/');
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut size={16} className='text-primary'/> Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            {/* Wishlist Icon */}
+            <button 
+              onClick={() => setOpenWishlist(true)} 
+              className="relative cursor-pointer p-2"
+            >
+              <Heart size={20} className='text-primary'/>
+              {wishlist.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                  {wishlist.length}
+                </span>
+              )}
+            </button>
+
+            {/* Cart Icon */}
+            <div className="hidden md:block">
+              <CartPopover items={cartitems} />
+            </div>
+          </div>
+
+          {/* Mobile: Search Button Only */}
           <button 
             onClick={() => setMobileSearchOpen(true)}
             className="md:hidden p-2"
           >
             <Search size={22} />
           </button>
-        </div>
-
-        {/* LOGO */}
-        <div className="w-1/3 flex justify-center">
-          <Link href="/">
-            <img src="/logo1.png" alt="logo" className="w-full md:h-[60px] h-auto max-w-[120px] md:max-w-none" />
-          </Link>
-        </div>
-
-        {/* RIGHT */}
-        <div className="flex items-center gap-2 md:gap-4 justify-end w-1/3">
-          <div className="relative">
-            <Button variant="ghost" size="icon" className='cursor-pointer' onClick={handleUserClick}>
-              <User className="w-5 h-5 text-primary" />
-            </Button>
-
-            {/* PROFILE DROPDOWN */}
-            <AnimatePresence>
-              {isAuthenticated && showProfile && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border z-[10001]"
-                >
-                  <div className="px-4 py-3 border-b">
-                    <p className="text-sm font-semibold">
-                      {user?.name || 'My Account'}
-                    </p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
-                  </div>
-                  {user?.role === 'admin' ? (
-                    <Link
-                      href="/admin"
-                      onClick={() => setShowProfile(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <LayoutDashboard size={16} className='text-primary'/> Admin Panel
-                    </Link>
-                  ) : (<>
-                    <Link
-                      href="/dashboard/profile"
-                      onClick={() => setShowProfile(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <User size={16} className='text-primary'/> Profile
-                    </Link>
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setShowProfile(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      <LayoutDashboard size={16} className='text-primary'/> Dashboard
-                    </Link>
-                  </>)}
-
-                  <button
-                    onClick={() => {
-                      dispatch(logoutuser());
-                      setShowProfile(false);
-                      router.push('/');
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut size={16} className='text-primary'/> Logout
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          
-          <button onClick={() => setOpenWishlist(true)} className="relative cursor-pointer p-2">
-            <Heart size={20} className='text-primary'/>
-            {wishlist.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {wishlist.length}
-              </span>
-            )}
-          </button>
-
-          <CartPopover items={cartitems} />
         </div>
       </header>
 
@@ -450,7 +442,7 @@ export default function HeaderImproved() {
           >
             <div className="flex items-center gap-3 p-4 border-b">
               <Search size={20} className="text-gray-400" />
-              <form  className="flex-1">
+              <div className="flex-1">
                 <input
                   type="search"
                   placeholder="Search products..."
@@ -459,7 +451,7 @@ export default function HeaderImproved() {
                   autoFocus
                   className="w-full py-2 text-lg focus:outline-none"
                 />
-              </form>
+              </div>
               <button 
                 onClick={() => {
                   setMobileSearchOpen(false);
@@ -497,8 +489,7 @@ export default function HeaderImproved() {
                       <img
                         src={API_URL + product.mainImage}
                         alt={product.name}
-                        // fill
-                        className="object-cover"
+                        className="object-cover w-full h-full"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -514,17 +505,6 @@ export default function HeaderImproved() {
                   </div>
                 </button>
               ))}
-
-              {/* {suggestions.length > 0 && (
-                <div className="p-4">
-                  <button
-                    onClick={handleSearchSubmit}
-                    className="w-full py-3 bg-black text-white rounded-xl font-medium"
-                  >
-                    View all results
-                  </button>
-                </div>
-              )} */}
             </div>
           </motion.div>
         )}
@@ -561,7 +541,105 @@ export default function HeaderImproved() {
                 </Button>
               </div>
 
-              <nav className="p-4 space-y-1 overflow-y-auto">
+              {/* Mobile Only: User Profile Section at Top of Drawer */}
+              <div className="p-4 border-b md:hidden">
+                {isAuthenticated ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <User className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">{user?.name || 'My Account'}</p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {user?.role === 'admin' ? (
+                        <Link
+                          href="/admin"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center justify-center gap-2 p-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
+                        >
+                          <LayoutDashboard size={16} className='text-primary'/> Admin
+                        </Link>
+                      ) : (<>
+                        <Link
+                          href="/dashboard/profile"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center justify-center gap-2 p-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
+                        >
+                          <User size={16} className='text-primary'/> Profile
+                        </Link>
+                        <Link
+                          href="/dashboard"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center justify-center gap-2 p-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200"
+                        >
+                          <LayoutDashboard size={16} className='text-primary'/> Dashboard
+                        </Link>
+                      </>)}
+
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center gap-2 p-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100"
+                      >
+                        <LogOut size={16} /> Logout
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowLogin(true);
+                      setOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90"
+                  >
+                    <User size={18} />
+                    Login / Register
+                  </button>
+                )}
+              </div>
+
+              {/* Mobile Only: Wishlist and Cart in Drawer */}
+              <div className="p-4 border-b grid grid-cols-2 gap-3 md:hidden">
+                <button
+                  onClick={() => {
+                    setOpenWishlist(true);
+                    setOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 p-3 border rounded-lg hover:bg-gray-50"
+                >
+                  <Heart size={18} className='text-primary'/>
+                  <span>Wishlist</span>
+                  {wishlist.length > 0 && (
+                    <span className="bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => {
+                    router.push('/cart');
+                    setOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 p-3 border rounded-lg hover:bg-gray-50"
+                >
+                  <ShoppingCart size={18} className='text-primary'/>
+                  <span>Cart</span>
+                  {cartitems.length > 0 && (
+                    <span className="bg-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      {cartitems.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              {/* Navigation Menu (for both mobile and desktop) */}
+              <nav className="p-4 space-y-1 overflow-y-auto h-[calc(100vh-280px)] md:h-[calc(100vh-64px)]">
                 {menu.map((item) => {
                   if (item.label === 'Shop') {
                     return (
