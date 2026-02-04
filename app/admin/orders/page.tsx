@@ -43,7 +43,7 @@ export default function AdminOrdersPage() {
 
   
   // Extract orders array - check multiple possibilities
-  let ordersData = orders;
+  const ordersData = orders;
 
 
 
