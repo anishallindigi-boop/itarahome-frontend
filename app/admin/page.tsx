@@ -380,7 +380,7 @@ const AdminDashboard = () => {
                         <div className="flex items-center space-x-2">
                           {product.mainImage && (
                             <img 
-                              src={API_URL+product.mainImage}
+                              src={product.mainImage}
                               alt={product.name}
                               className="h-10 w-10 rounded-md object-cover"
                             />

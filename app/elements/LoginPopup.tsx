@@ -21,7 +21,7 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
   const dispatch = useAppDispatch();
 
   const {
-    loading,
+    authLoading ,
     error,
     message,
     isOTPSent,
@@ -174,10 +174,10 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
               />
             </div>
             <button
-              disabled={loading}
+              disabled={authLoading }
               className="w-full bg-primary text-white py-3 rounded-xl disabled:opacity-60"
             >
-              {loading ? "Sending OTP..." : "Send OTP"}
+              {authLoading  ? "Sending OTP..." : "Send OTP"}
             </button>
           </form>
         )}
@@ -263,10 +263,10 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
             />
 
             <button
-              disabled={loading}
+              disabled={authLoading }
               className="w-full bg-primary text-white py-3 rounded-xl"
             >
-              {loading ? "Creating..." : "Create Account"}
+              {authLoading  ? "Creating..." : "Create Account"}
             </button>
           </form>
         )}
@@ -283,10 +283,10 @@ export default function LoginPopup({ onClose }: { onClose: () => void }) {
             />
 
             <button
-              disabled={loading}
+              disabled={authLoading }
               className="w-full bg-primary text-white py-3 rounded-xl"
             >
-              {loading ? "Verifying..." : "Verify OTP"}
+              {authLoading  ? "Verifying..." : "Verify OTP"}
             </button>
 
             <button

@@ -230,8 +230,8 @@ console.log(singleblogcategory,"sdgf")
 
           {form.image && (
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${form.image}`}
-              className="w-full h-40 object-cover rounded border"
+              src={`${form.image}`}
+              className="w-full object-cover rounded border"
             />
           )}
 

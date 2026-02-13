@@ -34,7 +34,7 @@ export default function ProductGrid({ products }: any) {
               {/* Image Container */}
               <div className="aspect-[3/4] bg-gray-100 overflow-hidden relative">
                 <img
-                  src={API_URL + p.mainImage}
+                  src={p.mainImage}
                   alt={p.name}
                   className={`w-full h-full object-cover transition ${soldOut ? '' : 'group-hover:scale-105'}`}
                 />

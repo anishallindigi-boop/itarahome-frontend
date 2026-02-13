@@ -152,7 +152,8 @@ export default function ProductsSlider() {
 
                 {/* IMAGE */}
                 <img
-                  src={`${API_URL}${product.mainImage}`}
+                  src={`
+                    ${product.mainImage}`}
                   alt={product.name}
                   className="
                     absolute inset-0 w-full h-full object-cover

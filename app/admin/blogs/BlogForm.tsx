@@ -112,7 +112,7 @@ const handleCategoryCheckbox = (categoryId: string) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(form, "data")
+    // console.log(form, "data")
     dispatch(Createblog(form));
   };
 
@@ -285,8 +285,8 @@ const handleCategoryCheckbox = (categoryId: string) => {
 
           {form.image && (
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${form.image}`}
-              className="w-full h-40 object-cover rounded border"
+              src={`${form.image}`}
+              className="w-full object-cover rounded border"
               alt="Category"
             />
           )}

@@ -37,6 +37,19 @@ interface Variation {
   image?: string;
 }
 
+
+interface ProductDimensions {
+  length: string;
+  width: string;
+  height: string;
+  unit: 'cm';
+}
+
+interface ProductWeight {
+  value: string;
+  unit: 'kg';
+}
+
 interface ProductFormState {
   metatitle?: string;
   metadescription?: string;
@@ -55,6 +68,8 @@ interface ProductFormState {
   gallery: string[];
   attributes: Attribute[];
   variations: Variation[];
+    dimensions?: ProductDimensions;
+  weight?: ProductWeight;
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -94,6 +109,16 @@ export default function ProductUpdateForm() {
     gallery: [],
     attributes: [],
     variations: [],
+      dimensions: {
+    length: '',
+    width: '',
+    height: '',
+    unit: 'cm',
+  },
+  weight: {
+    value: '',
+    unit: 'kg',
+  },
   });
 
   /* ---------------- BASIC CHANGE ---------------- */
@@ -351,6 +376,29 @@ export default function ProductUpdateForm() {
         gallery: p.gallery || [],
         attributes: transformedAttributes,
         variations: transformedVariations,
+        dimensions: p.dimensions
+  ? {
+      length: p.dimensions.length?.toString() || '',
+      width: p.dimensions.width?.toString() || '',
+      height: p.dimensions.height?.toString() || '',
+      unit: p.dimensions.unit || 'cm',
+    }
+  : {
+      length: '',
+      width: '',
+      height: '',
+      unit: 'cm',
+    },
+
+weight: p.weight
+  ? {
+      value: p.weight.value?.toString() || '',
+      unit: p.weight.unit || 'kg',
+    }
+  : {
+      value: '',
+      unit: 'kg',
+    },
       });
     }
   }, [singleProduct]);
@@ -500,6 +548,96 @@ export default function ProductUpdateForm() {
           </div>
         </div>
 
+
+        {/* DIMENSIONS */}
+<div className="bg-white border rounded p-5 space-y-3">
+  <h3 className="font-semibold text-lg">Dimensions</h3>
+
+  <div className="grid grid-cols-3 gap-2">
+    <input
+      placeholder="Length"
+      className="border p-2 rounded"
+      value={form.dimensions?.length || ''}
+      onChange={(e) =>
+        setForm(p => ({
+          ...p,
+          dimensions: { ...p.dimensions!, length: e.target.value }
+        }))
+      }
+    />
+    <input
+      placeholder="Width"
+      className="border p-2 rounded"
+      value={form.dimensions?.width || ''}
+      onChange={(e) =>
+        setForm(p => ({
+          ...p,
+          dimensions: { ...p.dimensions!, width: e.target.value }
+        }))
+      }
+    />
+    <input
+      placeholder="Height"
+      className="border p-2 rounded"
+      value={form.dimensions?.height || ''}
+      onChange={(e) =>
+        setForm(p => ({
+          ...p,
+          dimensions: { ...p.dimensions!, height: e.target.value }
+        }))
+      }
+    />
+  </div>
+
+  <select
+    className="border p-2 rounded w-full"
+    value={form.dimensions?.unit || 'cm'}
+    onChange={(e) =>
+      setForm(p => ({
+        ...p,
+        dimensions: { ...p.dimensions!, unit: e.target.value as any }
+      }))
+    }
+  >
+    <option value="cm">Centimeter (cm)</option>
+    {/* <option value="inch">Inch</option> */}
+  </select>
+</div>
+
+{/* WEIGHT */}
+<div className="bg-white border rounded p-5 space-y-3">
+  <h3 className="font-semibold text-lg">Weight</h3>
+
+  <div className="grid grid-cols-2 gap-2">
+    <input
+      placeholder="Weight"
+      className="border p-2 rounded"
+      value={form.weight?.value || ''}
+      onChange={(e) =>
+        setForm(p => ({
+          ...p,
+          weight: { ...p.weight!, value: e.target.value }
+        }))
+      }
+    />
+
+    <select
+      className="border p-2 rounded"
+      value={form.weight?.unit || 'kg'}
+      onChange={(e) =>
+        setForm(p => ({
+          ...p,
+          weight: { ...p.weight!, unit: e.target.value as any }
+        }))
+      }
+    >
+      <option value="kg">Kg</option>
+      {/* <option value="g">Gram</option> */}
+    </select>
+  </div>
+</div>
+
+
         {/* CONTENT */}
         <div className="bg-white border rounded p-5">
           <h3 className="font-semibold text-lg mb-3">Product Content</h3>
@@ -641,7 +779,7 @@ export default function ProductUpdateForm() {
 
                 {v.image && (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL}${v.image}`}
+                    src={`${v.image}`}
                     className="w-12 h-12 object-cover rounded border"
                   />
                 )}
@@ -794,7 +932,7 @@ export default function ProductUpdateForm() {
           </button>
           {form.mainImage && (
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${form.mainImage}`}
+              src={`${form.mainImage}`}
               className="w-full h-48 object-cover rounded border"
             />
           )}
@@ -821,7 +959,7 @@ export default function ProductUpdateForm() {
             {form.gallery.map((img, i) => (
               <img
                 key={i}
-                src={`${process.env.NEXT_PUBLIC_API_URL}${img}`}
+                src={`${img}`}
                 className="w-full h-20 object-cover rounded border"
               />
             ))}
@@ -956,7 +1094,7 @@ function AttributeValues({ type, values, onAdd, onRemove, onUpdateColor, onUpdat
                 >
                   {v.image ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL}${v.image}`}
+                      src={`${v.image}`}
                       alt=""
                       className="w-full h-full object-cover"
                     />
@@ -1017,7 +1155,8 @@ function AttributeDisplay({ attr, value }: { attr?: Attribute; value: string }) 
     return (
       <div className="flex items-center gap-2">
         <img
-          src={`${process.env.NEXT_PUBLIC_API_URL}${attrValue.image}`}
+          src={`
+            ${attrValue.image}`}
           alt=""
           className="w-6 h-6 rounded object-cover border"
         />

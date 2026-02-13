@@ -113,9 +113,9 @@ const handleToggleStatus = async (
                 </td>
               </tr>
             ) : (
-              blogs.map((blog) => (
+              blogs.map((blog,index) => (
                 <tr
-                  key={blog._id}
+                  key={blog._id || index}
                   className="border-t hover:bg-gray-50"
                 >
                   {/* Title */}

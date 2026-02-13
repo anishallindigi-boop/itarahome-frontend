@@ -31,6 +31,19 @@ export interface Variation {
   image?: string;
 }
 
+
+interface Dimensions {
+  length: number;
+  width: number;
+  height: number;
+  unit: 'cm' ;
+}
+
+interface Weight {
+  value: number;
+  unit: 'kg';
+}
+
 export interface CreateProductPayload {
   metatitle?: string;
   metadescription?: string;
@@ -49,6 +62,8 @@ export interface CreateProductPayload {
   gallery: string[];
   attributes: Attribute[];  // ✅ Updated to use new Attribute type
   variations: Variation[];
+    dimensions: Dimensions;
+  weight: Weight;
 }
 
 
@@ -102,6 +117,8 @@ export interface Product {
   discountPrice?: string;
   attributes?: Attribute[];
   variations?: Variation[];
+    dimensions?: Dimensions;
+  weight?: Weight;
   message?: string;
   stock?: string;
   slug?: string;

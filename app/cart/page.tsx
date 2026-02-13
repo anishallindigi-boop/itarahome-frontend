@@ -52,7 +52,7 @@ export default function CartPage() {
   const items = useMemo(() => {
     if (!rawCart) return [];
 
-    const GST_RATE = 18; // 18% GST
+    const GST_RATE = 5; // 18% GST
 
     return rawCart.map((item) => {
       const hasVariation = !!item.variationId;
@@ -252,7 +252,7 @@ export default function CartPage() {
     <div className="shrink-0 relative">
       <div className="w-32 h-32 rounded-xl overflow-hidden border-2 border-gray-100 group-hover:border-primary/20 transition-colors">
         <img
-          src={`${IMAGE_URL}${item.image}`}
+          src={`${item.image}`}
           alt={item.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />

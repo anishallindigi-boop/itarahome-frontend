@@ -73,13 +73,18 @@ React.useEffect(() => {
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    {name:'Page SEO',href:'/admin/seo',icon:FileText},
+    {name:'Test',href:'/admin/test',icon:FileText},
     { name: 'Product Category', href: '/admin/category', icon: FolderOpen },
     { name: 'Product Sub Category', href: '/admin/sub-category', icon: FolderOpen },
     { name: 'Product', href: '/admin/product', icon: Users },
-    { name: 'Blog category', href: '/admin/blog-category', icon: Users },
-    { name: 'Blogs', href: '/admin/blogs', icon: FileText },
+    {name:'Reviews',href:'/admin/product-review',icon:FileText},
+    
     { name: 'Orders', href: '/admin/orders', icon: FileText },
     { name: 'Coupons', href: '/admin/coupon', icon: FileText },
+    {name:'Shipping Methods',href:'/admin/shipping-method',icon:FileText},
+        { name: 'Blog category', href: '/admin/blog-category', icon: Users },
+    { name: 'Blogs', href: '/admin/blogs', icon: FileText },
     { name: 'EnquiryForm Data', href: '/admin/enquiry-form-data', icon: FileText },
     { name: 'StylingForm Data', href: '/admin/stylingform-data', icon: FileText },
     { name: 'contact Form Data', href: '/admin/contactform-data', icon: FileText },
@@ -125,7 +130,7 @@ React.useEffect(() => {
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (

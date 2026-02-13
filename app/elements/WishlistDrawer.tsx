@@ -114,7 +114,7 @@ const WishlistDrawer = ({ isOpen, onClose }: Props) => {
                     onClick={onClose}
                   >
                     <img
-                      src={`${IMAGE_URL}${item.product.mainImage}`}
+                      src={`${item.product.mainImage}`}
                       alt={item.product.name}
                       className="w-[80px] h-[80px] rounded-xl object-cover"
                     />

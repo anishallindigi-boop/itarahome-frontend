@@ -217,7 +217,7 @@ export default function OrdersPage() {
                               >
                                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
                                   <img
-                                    src={`${API_URL}${item.productId?.mainImage || ""}`}
+                                    src={`${item.productId?.mainImage || ""}`}
                                     alt={item.productId?.name || "Product"}
                                     // fill
                                     className="object-cover"

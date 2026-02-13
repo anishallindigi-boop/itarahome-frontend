@@ -103,16 +103,16 @@ const SubCategoryTablePage = () => {
                 </td>
               </tr>
             ) : (
-              subCategories.map((sub) => (
+              subCategories.map((sub,index) => (
                 <tr
-                  key={sub._id}
+                  key={sub._id || index}
                   className="border-t hover:bg-gray-50"
                 >
                   {/* Image */}
                   <td className="px-4 py-3">
                     {sub.image ? (
                       <img
-                        src={`${IMAGE_URL}${sub.image}`}
+                        src={`${sub.image}`}
                         alt={sub.name}
                         width={50}
                         height={50}

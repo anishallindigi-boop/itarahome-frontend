@@ -38,15 +38,16 @@ import { toast } from 'sonner';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /* ---------- one-time helper ---------- */
-const useOnce = (fn: () => void) => {
+const useOnce = (fn: () => void, condition: boolean) => {
   const ref = React.useRef(false);
   useEffect(() => {
-    if (!ref.current) {
+    if (!ref.current && condition) {
       ref.current = true;
       fn();
     }
-  }, []);
+  }, [fn, condition]);
 };
+
 
 /* ---------- debounce hook ---------- */
 const useDebounce = (value: string, delay: number) => {
@@ -88,6 +89,9 @@ export default function HeaderImproved() {
   const { isAuthenticated, user, message } = useAppSelector(
     (state: RootState) => state.auth
   );
+
+// console.log("user",user,isAuthenticated)
+  
   const { wishlist } = useAppSelector((state: RootState) => state.wishlist);
   const { cart } = useAppSelector((state: RootState) => state.usercart);
   const { categories } = useAppSelector((state) => state.productcategory);
@@ -95,13 +99,13 @@ export default function HeaderImproved() {
   const { suggestions, loading: searchLoading } = useAppSelector((state) => state.product);
 
   /* ---------- fetch once ---------- */
-  useOnce(() => dispatch(getCartItems()));
+  useOnce(() => dispatch(getCartItems()),isAuthenticated);
 
   /* ---------- fetch categories ---------- */
   useEffect(() => {
     dispatch(GetProductCategory());
     dispatch(GetSubCategories());
-  }, [dispatch]);
+  }, []);
 
   /* ---------- search effect ---------- */
   useEffect(() => {
@@ -284,7 +288,7 @@ export default function HeaderImproved() {
                         <div className="relative w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                           {product.mainImage ? (
                             <img
-                              src={API_URL + product.mainImage}
+                              src={product.mainImage}
                               alt={product.name}
                               className="object-cover w-full h-full"
                             />
@@ -487,7 +491,7 @@ export default function HeaderImproved() {
                   <div className="relative w-16 h-16 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
                     {product.mainImage ? (
                       <img
-                        src={API_URL + product.mainImage}
+                        src={product.mainImage}
                         alt={product.name}
                         className="object-cover w-full h-full"
                       />

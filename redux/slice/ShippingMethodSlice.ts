@@ -262,14 +262,13 @@ export const ShippingMethodSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        UpdateShipping.fulfilled,
-        (state, action: PayloadAction<ShippingMethod>) => {
-          state.loading = false;
-          state.message = action.payload.message as string;
-          state.isupdated = true;
-        }
-      )
+     .addCase(UpdateShipping.fulfilled, (state, action) => {
+  state.isupdated = true;
+  state.shippingMethods = state.shippingMethods.map((item) =>
+    item._id === action.payload._id ? action.payload : item
+  );
+})
+
       .addCase(UpdateShipping.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;

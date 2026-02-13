@@ -154,7 +154,7 @@ export default function OrderConfirmationPage() {
                     >
                       <div className="relative flex-shrink-0 mx-auto sm:mx-0">
                         <img
-                          src={`${IMAGE_URL}${itemImage}`}
+                          src={`${itemImage}`}
                           alt={itemName}
                           className="w-24 h-24 sm:w-20 sm:h-20 object-cover rounded-lg shadow-sm"
                           onError={(e) => {

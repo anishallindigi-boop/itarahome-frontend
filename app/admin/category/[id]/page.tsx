@@ -230,7 +230,8 @@ export default function CategoryUpdateForm() {
 
           {form.image && (
             <img
-              src={`${process.env.NEXT_PUBLIC_API_URL}${form.image}`}
+              src={`
+                ${form.image}`}
               className="w-full h-40 object-cover rounded border"
             />
           )}

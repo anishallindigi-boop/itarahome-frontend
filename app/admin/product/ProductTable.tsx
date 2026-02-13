@@ -124,7 +124,7 @@ useEffect(() => {
                 {/* PRODUCT */}
                 <td className="px-6 py-4 flex items-center gap-3">
                   <img
-                    src={`${IMAGE_URL}${p.mainImage || p.image || ''}`}
+                    src={`${p.mainImage || p.image || ''}`}
                     alt={p.name}
                     className="w-12 h-12 rounded object-cover"
                   />

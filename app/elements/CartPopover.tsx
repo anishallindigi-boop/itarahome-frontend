@@ -70,7 +70,7 @@ export function CartPopover({ items }: { items: CartItem[] }) {
                 >
                   <div className="flex-shrink-0 w-16 h-16 relative">
                     <img
-                      src={`${process.env.NEXT_PUBLIC_IMAGE_URL}${item.image}`}
+                      src={`${item.image}`}
                       alt={item.name}
                       className="object-cover rounded-lg border"
                     />

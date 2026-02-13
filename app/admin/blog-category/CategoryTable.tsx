@@ -101,16 +101,16 @@ const CategoryTablePage = () => {
                 </td>
               </tr>
             ) : (
-              blogcategories.map((cat) => (
+              blogcategories.map((cat,index) => (
                 <tr
-                  key={cat._id}
+                  key={cat._id || index}
                   className="border-t hover:bg-gray-50"
                 >
                   {/* Image */}
                   <td className="px-4 py-3">
                     {cat.image ? (
                       <img
-                        src={`${IMAGE_URL}${cat.image}`}
+                        src={`${cat.image}`}
                         alt={cat.name}
                         width={50}
                         height={50}

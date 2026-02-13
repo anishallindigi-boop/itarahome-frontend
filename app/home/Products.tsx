@@ -95,7 +95,7 @@ export default function Products() {
 
                   {/* 🖼 Image (replaces video) */}
                   <img
-                    src={`${API_URL}${product.mainImage}`}
+                    src={`${product.mainImage}`}
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
                   />

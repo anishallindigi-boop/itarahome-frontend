@@ -22,6 +22,24 @@ import {
 } from "@/components/ui/accordion";
 import ProductsSlider from './ProductsSlider';
 
+
+// Add these imports
+import { 
+  getProductReviews, 
+  addReview, 
+  markReviewHelpful,
+  resetState as resetReviewState,
+  clearReviews
+} from '@/redux/slice/ReviewSlice';
+
+// Import the new components
+import ReviewStats from '@/components/reviews/ReviewStats';
+import ReviewForm from '@/components/reviews/ReviewForm';
+import ReviewList from '@/components/reviews/ReviewList';
+import ReviewsSection from '@/components/reviews/ReviewsSection';
+
+
+
 const IMAGE_URL = process.env.NEXT_PUBLIC_API_URL as string;
 
 type AttributeValue = {
@@ -295,7 +313,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
         >
           <div className="relative w-10 h-10 md:w-16 md:h-16 rounded-lg overflow-hidden">
             <img
-              src={`${IMAGE_URL}${valueObj.image}`}
+              src={`${valueObj.image}`}
               alt={value}
               className="w-full h-full object-cover"
               loading="lazy"
@@ -383,7 +401,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
             ×
           </button>
           <img 
-            src={`${IMAGE_URL}${zoomImage}`}
+            src={`${zoomImage}`}
             alt="Zoomed product"
             className="max-w-full max-h-[90vh] object-contain rounded-lg"
           />
@@ -402,7 +420,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
           {/* Main Image with Slider Controls */}
           <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden shadow-lg bg-white group">
             <img
-              src={`${IMAGE_URL}${allImages[currentImageIndex] || '/placeholder.jpg'}`}
+              src={`${allImages[currentImageIndex] || '/placeholder.jpg'}`}
               alt={`${name} - Image ${currentImageIndex + 1}`}
               className="w-full h-full object-cover cursor-zoom-in"
               onClick={() => setZoomImage(allImages[currentImageIndex])}
@@ -464,7 +482,8 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
                   }`}
                 >
                   <img
-                    src={`${IMAGE_URL}${img}`}
+                    src={`
+                      ${img}`}
                     alt={`Thumbnail ${idx + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
@@ -648,6 +667,18 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
         </div>
       </div>
 
+          {/* // In your ClientProduct component, add this after the related products section: */}
+
+{/* Reviews Section */}
+{product && (
+  <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 mt-8 md:mt-16">
+    <ReviewsSection 
+      productId={product._id}
+      productName={product.name}
+    />
+  </div>
+)}
+
       {/* Related Products */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 mt-8 md:mt-16">
         {/* <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-stone-800 mb-4 md:mb-6">
@@ -655,6 +686,7 @@ const ClientProduct: React.FC<ClientProductProps> = ({ slug }) => {
         </h2> */}
         <ProductsSlider />
       </div>
+  
     </div>
   );
 };

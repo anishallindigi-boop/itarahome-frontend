@@ -33,6 +33,7 @@ interface AuthState {
   isRegistered: boolean;
   isOTPSent: boolean;
   isOTPVerified: boolean;
+  authLoading: boolean;
 }
 
 const initialState: AuthState = {
@@ -44,6 +45,7 @@ const initialState: AuthState = {
   isRegistered: false,
   isOTPSent: false,
   isOTPVerified: false,
+  authLoading: false,
 };
 
 // ------------------ ASYNC ACTIONS ------------------
@@ -71,7 +73,7 @@ export const sendOTP = createAsyncThunk<
   { rejectValue: string }
 >("auth/sendOTP", async ({ phone }, { rejectWithValue }) => {
   try {
-    console.log("phone",phone)
+    // console.log("phone",phone)
     const res = await axios.post(`${API_URL}/api/auth/send-otp`, { phone },{
       headers:{"x-api-key": API_KEY}
     });
@@ -125,7 +127,7 @@ export const updateprofile = createAsyncThunk<
   { rejectValue: string }
 >("auth/updateprofile", async (payload, { rejectWithValue }) => {
   try {
-    console.log(payload,"data")
+    // console.log(payload,"data")
     const res = await axios.put(`${API_URL}/api/auth/update/profile`, payload, {
       withCredentials: true,
       headers: { "x-api-key": API_KEY },
@@ -173,17 +175,17 @@ export const AuthSlice = createSlice({
     // REGISTER
     builder
       .addCase(createuser.pending, (state) => {
-        state.loading = true;
+        state.authLoading  = true;
         state.error = null;
         state.isRegistered = false;
       })
       .addCase(createuser.fulfilled, (state, action) => {
-        state.loading = false;
+        state.authLoading  = false;
         state.message = action.payload.message;
         state.isRegistered = true;
       })
       .addCase(createuser.rejected, (state, action) => {
-        state.loading = false;
+        state.authLoading  = false;
         state.error = action.payload || "Registration failed";
         state.isRegistered = false;
       });
@@ -191,17 +193,17 @@ export const AuthSlice = createSlice({
     // SEND OTP
     builder
       .addCase(sendOTP.pending, (state) => {
-        state.loading = true;
+        state.authLoading  = true;
         state.error = null;
         state.isOTPSent = false;
       })
       .addCase(sendOTP.fulfilled, (state, action) => {
-        state.loading = false;
+        state.authLoading  = false;
         state.message = action.payload.message;
         state.isOTPSent = true;
       })
       .addCase(sendOTP.rejected, (state, action) => {
-        state.loading = false;
+        state.authLoading  = false;
         state.error = action.payload || "Failed to send OTP";
         state.isOTPSent = false;
       });
@@ -209,12 +211,12 @@ export const AuthSlice = createSlice({
     // VERIFY OTP
     builder
       .addCase(verifyotp.pending, (state) => {
-        state.loading = true;
+        state.authLoading  = true;
         state.error = null;
         state.isOTPVerified = false;
       })
  .addCase(verifyotp.fulfilled, (state, action) => {
-  state.loading = false;
+  state.authLoading  = false;
   state.message = action.payload.message;
   state.user = action.payload.user;      // ✅ ADD THIS
   state.isAuthenticated = true;
@@ -222,7 +224,7 @@ export const AuthSlice = createSlice({
 })
 
       .addCase(verifyotp.rejected, (state, action) => {
-        state.loading = false;
+        state.authLoading  = false;
         state.error = action.payload || "Invalid OTP";
         state.isOTPVerified = false;
       });

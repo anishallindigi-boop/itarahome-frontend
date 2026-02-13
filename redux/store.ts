@@ -14,6 +14,9 @@ import SubCategorySlice from './slice/SubCategorySlice';
 import EnquirySlice from './slice/EnquirySlice';
 import StylingEnquirySlice from './slice/StylingEnquirySlice';
 import CouponSlice from './slice/CouponSlice';
+import ReviewSlice from './slice/ReviewSlice';
+import SeoReducer from './slice/SeoSlice';
+
 
 const store = configureStore({
   reducer: {
@@ -31,7 +34,9 @@ const store = configureStore({
     subcategory: SubCategorySlice,
     enquiry: EnquirySlice,
     stylingenquiry: StylingEnquirySlice,
-    coupon: CouponSlice
+    coupon: CouponSlice,
+    review: ReviewSlice,
+         seo:SeoReducer,
   },
 
 })

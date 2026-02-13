@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ImageIcon, Palette, Type, Upload } from 'lucide-react';
+import { ImageIcon, Package, Palette, Ruler, Scale, Type, Upload } from 'lucide-react';
 import ImageUploadModal from '../../elements/ImageUploadModal';
 import Editor from '@/lib/Editor';
 import { GetProductCategory } from "@/redux/slice/ProductCategorySlice";
@@ -35,6 +35,18 @@ interface Variation {
   image?: string;
 }
 
+interface Dimensions {
+  length: number;
+  width: number;
+  height: number;
+  unit: 'cm';
+}
+
+interface Weight {
+  value: number;
+  unit: 'kg' ;
+}
+
 interface ProductFormState {
   metatitle?: string;
   metadescription?: string;
@@ -53,6 +65,8 @@ interface ProductFormState {
   gallery: string[];
   attributes: Attribute[];
   variations: Variation[];
+    dimensions: Dimensions;
+  weight: Weight;
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -91,6 +105,16 @@ export default function ProductCreateForm() {
     gallery: [],
     attributes: [],
     variations: [],
+    dimensions: {
+      length: 0,
+      width: 0,
+      height: 0,
+      unit: 'cm'
+    },
+    weight: {
+      value: 0,
+      unit: 'kg'
+    },
   });
 
   /* ---------------- BASIC CHANGE ---------------- */
@@ -107,13 +131,50 @@ export default function ProductCreateForm() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
-    setForm((p) => {
+    setForm((prev) => {
       if (name === 'name') {
-        return { ...p, name: value, slug: generateSlug(value) };
+        return { 
+          ...prev, 
+          name: value, 
+          slug: generateSlug(value) 
+        };
       }
-      return { ...p, [name]: value };
+
+      if (name.startsWith('dimensions.')) {
+        const dimField = name.split('.')[1];
+        return {
+          ...prev,
+          dimensions: {
+            ...prev.dimensions,
+            [dimField]: dimField === 'unit' ? value : parseFloat(value) || 0
+          }
+        };
+      }
+
+      if (name.startsWith('weight.')) {
+        const weightField = name.split('.')[1];
+        return {
+          ...prev,
+          weight: {
+            ...prev.weight,
+            [weightField]: weightField === 'unit' ? value : parseFloat(value) || 0
+          }
+        };
+      }
+
+      // Handle numeric fields
+      if (['price', 'discountPrice', 'stock', 'soldCount'].includes(name)) {
+        return { ...prev, [name]: parseFloat(value) || 0 };
+      }
+
+      // Handle boolean fields
+      if (name === 'isActive') {
+        return { ...prev, [name]: (e.target as HTMLInputElement).checked };
+      }
+
+      return { ...prev, [name]: value };
     });
   };
 
@@ -267,6 +328,16 @@ export default function ProductCreateForm() {
         gallery: [],
         attributes: [],
         variations: [],
+           dimensions: {
+          length: 0,
+          width: 0,
+          height: 0,
+          unit: 'cm'
+        },
+        weight: {
+          value: 0,
+          unit: 'kg'
+        },
       });
     }
   }, [success]);
@@ -341,6 +412,125 @@ export default function ProductCreateForm() {
             <input name="stock" placeholder="Stock" className="border p-2 rounded" value={form.stock} onChange={handleChange} />
           </div>
         </div>
+
+
+
+ {/* DIMENSIONS & WEIGHT */}
+        <div className="bg-white border rounded p-5 space-y-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <Package size={20} /> Dimensions & Weight
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-6">
+            {/* Dimensions */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2 text-gray-700">
+                <Ruler size={16} /> Dimensions
+              </h4>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Length</label>
+                  <input 
+                    type="number" 
+                    name="dimensions.length" 
+                    placeholder="Length" 
+                    className="border p-2 rounded w-full" 
+                    value={form.dimensions.length} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Width</label>
+                  <input 
+                    type="number" 
+                    name="dimensions.width" 
+                    placeholder="Width" 
+                    className="border p-2 rounded w-full" 
+                    value={form.dimensions.width} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Height</label>
+                  <input 
+                    type="number" 
+                    name="dimensions.height" 
+                    placeholder="Height" 
+                    className="border p-2 rounded w-full" 
+                    value={form.dimensions.height} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600 block mb-1">Unit</label>
+                <select 
+                  name="dimensions.unit" 
+                  className="border p-2 rounded w-full"
+                  value={form.dimensions.unit}
+                  onChange={handleChange}
+                >
+                  <option value="cm">Centimeters (cm)</option>
+                  {/* <option value="mm">Millimeters (mm)</option>
+                  <option value="inch">Inches</option>
+                  <option value="m">Meters (m)</option> */}
+                </select>
+              </div>
+            </div>
+
+            {/* Weight */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2 text-gray-700">
+                <Scale size={16} /> Weight
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Weight</label>
+                  <input 
+                    type="number" 
+                    name="weight.value" 
+                    placeholder="Weight" 
+                    className="border p-2 rounded w-full" 
+                    value={form.weight.value} 
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600 block mb-1">Unit</label>
+                  <select 
+                    name="weight.unit" 
+                    className="border p-2 rounded w-full"
+                    value={form.weight.unit}
+                    onChange={handleChange}
+                  >
+                    <option value="kg">Kilograms (kg)</option>
+                    {/* <option value="g">Grams (g)</option>
+                    <option value="lb">Pounds (lb)</option>
+                    <option value="oz">Ounces (oz)</option> */}
+                  </select>
+                </div>
+              </div>
+              <div className="bg-gray-50 p-3 rounded text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Volume:</span>
+                  <span className="font-medium">
+                    {form.dimensions.length * form.dimensions.width * form.dimensions.height} 
+                    {form.dimensions.unit}³
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         {/* CONTENT */}
         <div className="bg-white border rounded p-5">
@@ -514,8 +704,8 @@ export default function ProductCreateForm() {
         <div className="bg-white border rounded p-5">
           <h3 className="font-semibold text-lg mb-3">Categories</h3>
           <div className="space-y-4">
-            {categoryTree.map((cat: any) => (
-              <div key={cat._id} className="relative pl-4 border-l-2 border-gray-300">
+            {categoryTree.map((cat: any,index) => (
+              <div key={cat._id || index} className="relative pl-4 border-l-2 border-gray-300">
                 <label className="flex items-center gap-2 font-medium">
                   <input
                     type="checkbox"
@@ -567,7 +757,7 @@ export default function ProductCreateForm() {
             <ImageIcon size={18} /> Select Image
           </button>
           {form.mainImage && (
-            <img src={`${process.env.NEXT_PUBLIC_API_URL}${form.mainImage}`} className="w-full h-48 object-cover rounded border" />
+            <img src={`${form.mainImage}`} className="w-full  object-cover rounded border" />
           )}
           <ImageUploadModal open={openMain} multiple={false} onClose={() => setOpenMain(false)} onSelect={(urls) => setForm((p) => ({ ...p, mainImage: urls[0] }))} />
         </div>
@@ -580,7 +770,7 @@ export default function ProductCreateForm() {
           </button>
           <div className="grid grid-cols-3 gap-2">
             {form.gallery.map((img, i) => (
-              <img key={i} src={`${process.env.NEXT_PUBLIC_API_URL}${img}`} className="w-full h-20 object-cover rounded border" />
+              <img key={i} src={`${img}`} className="w-full object-cover rounded border" />
             ))}
           </div>
           <ImageUploadModal open={openGallery} multiple onClose={() => setOpenGallery(false)} onSelect={(urls) => setForm((p) => ({ ...p, gallery: urls }))} />
