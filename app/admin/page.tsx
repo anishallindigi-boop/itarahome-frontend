@@ -166,8 +166,8 @@ const AdminDashboard = () => {
   // Calculate dashboard stats from orders
   const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
   const totalOrders = orders.length;
-  const completedOrders = orders.filter(order => order.status === 'completed').length;
-  const pendingOrders = orders.filter(order => order.status === 'pending').length;
+  // const completedOrders = orders.filter(order => order.status === 'completed').length;
+  // const pendingOrders = orders.filter(order => order.status === 'pending').length;
   
   // Calculate product stats
   const totalProducts = products.length;
@@ -189,7 +189,7 @@ const AdminDashboard = () => {
       title: 'Total Orders', 
       value: totalOrders.toString(), 
       icon: ShoppingCart, 
-      change: totalOrders > 0 ? `${Math.round((completedOrders / totalOrders) * 100)}%` : '0%', 
+      // change: totalOrders > 0 ? `${Math.round((completedOrders / totalOrders) * 100)}%` : '0%', 
       trend: 'up' 
     },
     { 
@@ -213,7 +213,7 @@ const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         await Promise.all([
-          dispatch(getAllOrders()).unwrap(),
+          // dispatch(getAllOrders()).unwrap(),
           dispatch(getProducts()).unwrap()
         ]);
       } catch (error) {
