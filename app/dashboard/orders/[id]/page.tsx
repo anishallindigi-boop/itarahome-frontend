@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { getOrder } from "@/redux/slice/OrderSlice";
+import { getOrderById } from "@/redux/slice/OrderSlice";
 import {
   CheckCircle2,
   Package,
@@ -47,7 +47,7 @@ export default function OrderConfirmationPage() {
 
   useEffect(() => {
     if (orderId) {
-      dispatch(getOrder(orderId));
+      dispatch(getOrderById(orderId));
     }
   }, [orderId, dispatch]);
 
