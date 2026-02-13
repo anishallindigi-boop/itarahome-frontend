@@ -39,15 +39,15 @@ interface Variation {
 
 
 interface ProductDimensions {
-  length: string;
-  width: string;
-  height: string;
+  length: number;
+  width: number;
+  height: number;
   unit: 'cm';
 }
 
 interface ProductWeight {
-  value: string;
-  unit: 'kg';
+  value: number;
+  unit: 'kg' ;
 }
 
 interface ProductFormState {
@@ -109,16 +109,16 @@ export default function ProductUpdateForm() {
     gallery: [],
     attributes: [],
     variations: [],
-      dimensions: {
-    length: '',
-    width: '',
-    height: '',
-    unit: 'cm',
-  },
-  weight: {
-    value: '',
-    unit: 'kg',
-  },
+    dimensions: {
+      length: 0,
+      width: 0,
+      height: 0,
+      unit: 'cm'
+    },
+    weight: {
+      value: 0,
+      unit: 'kg'
+    },
   });
 
   /* ---------------- BASIC CHANGE ---------------- */
@@ -132,22 +132,56 @@ export default function ProductUpdateForm() {
       .replace(/-+/g, '-');
   }
 
-  const handleChange = (
+    const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
 
-    setForm((p) => {
+    setForm((prev) => {
       if (name === 'name') {
-        return {
-          ...p,
-          name: value,
-          slug: generateSlug(value),
+        return { 
+          ...prev, 
+          name: value, 
+          slug: generateSlug(value) 
         };
       }
-      return { ...p, [name]: value };
+
+      if (name.startsWith('dimensions.')) {
+        const dimField = name.split('.')[1];
+        return {
+          ...prev,
+          dimensions: {
+            ...prev.dimensions,
+            [dimField]: dimField === 'unit' ? value : parseFloat(value) || 0
+          }
+        };
+      }
+
+      if (name.startsWith('weight.')) {
+        const weightField = name.split('.')[1];
+        return {
+          ...prev,
+          weight: {
+            ...prev.weight,
+            [weightField]: weightField === 'unit' ? value : parseFloat(value) || 0
+          }
+        };
+      }
+
+      // Handle numeric fields
+      if (['price', 'discountPrice', 'stock', 'soldCount'].includes(name)) {
+        return { ...prev, [name]: parseFloat(value) || 0 };
+      }
+
+      // Handle boolean fields
+      if (name === 'isActive') {
+        return { ...prev, [name]: (e.target as HTMLInputElement).checked };
+      }
+
+      return { ...prev, [name]: value };
     });
   };
+
 
   /* ---------------- ATTRIBUTES ---------------- */
 
@@ -378,25 +412,25 @@ export default function ProductUpdateForm() {
         variations: transformedVariations,
         dimensions: p.dimensions
   ? {
-      length: p.dimensions.length?.toString() || '',
-      width: p.dimensions.width?.toString() || '',
-      height: p.dimensions.height?.toString() || '',
+      length: p.dimensions.length || 0,
+      width: p.dimensions.width || 0,
+      height: p.dimensions.height || 0,
       unit: p.dimensions.unit || 'cm',
     }
   : {
-      length: '',
-      width: '',
-      height: '',
+      length: 0,
+      width: 0,
+      height: 0,
       unit: 'cm',
     },
 
 weight: p.weight
   ? {
-      value: p.weight.value?.toString() || '',
+      value: p.weight.value || 0,
       unit: p.weight.unit || 'kg',
     }
   : {
-      value: '',
+      value: 0,
       unit: 'kg',
     },
       });
@@ -557,7 +591,7 @@ weight: p.weight
     <input
       placeholder="Length"
       className="border p-2 rounded"
-      value={form.dimensions?.length || ''}
+      value={form.dimensions?.length || 0}
       onChange={(e) =>
         setForm(p => ({
           ...p,
@@ -568,7 +602,7 @@ weight: p.weight
     <input
       placeholder="Width"
       className="border p-2 rounded"
-      value={form.dimensions?.width || ''}
+      value={form.dimensions?.width || 0}
       onChange={(e) =>
         setForm(p => ({
           ...p,
@@ -579,7 +613,7 @@ weight: p.weight
     <input
       placeholder="Height"
       className="border p-2 rounded"
-      value={form.dimensions?.height || ''}
+      value={form.dimensions?.height || 0}
       onChange={(e) =>
         setForm(p => ({
           ...p,
