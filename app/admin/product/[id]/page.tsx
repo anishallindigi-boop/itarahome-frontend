@@ -37,7 +37,6 @@ interface Variation {
   image?: string;
 }
 
-
 interface ProductDimensions {
   length: number;
   width: number;
@@ -47,7 +46,7 @@ interface ProductDimensions {
 
 interface ProductWeight {
   value: number;
-  unit: 'kg' ;
+  unit: 'kg';
 }
 
 interface ProductFormState {
@@ -68,8 +67,8 @@ interface ProductFormState {
   gallery: string[];
   attributes: Attribute[];
   variations: Variation[];
-    dimensions?: ProductDimensions;
-  weight?: ProductWeight;
+  dimensions: ProductDimensions;
+  weight: ProductWeight;
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -132,12 +131,13 @@ export default function ProductUpdateForm() {
       .replace(/-+/g, '-');
   }
 
-    const handleChange = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
 
     setForm((prev) => {
+      // Handle name and slug generation
       if (name === 'name') {
         return { 
           ...prev, 
@@ -146,42 +146,39 @@ export default function ProductUpdateForm() {
         };
       }
 
+      // Handle dimensions
       if (name.startsWith('dimensions.')) {
-        const dimField = name.split('.')[1];
+        const dimField = name.split('.')[1] as keyof ProductDimensions;
         return {
           ...prev,
           dimensions: {
             ...prev.dimensions,
-            [dimField]: dimField === 'unit' ? value : parseFloat(value) || 0
+            [dimField]: dimField === 'unit' ? value : (parseFloat(value) || 0)
           }
         };
       }
 
+      // Handle weight
       if (name.startsWith('weight.')) {
-        const weightField = name.split('.')[1];
+        const weightField = name.split('.')[1] as keyof ProductWeight;
         return {
           ...prev,
           weight: {
             ...prev.weight,
-            [weightField]: weightField === 'unit' ? value : parseFloat(value) || 0
+            [weightField]: weightField === 'unit' ? value : (parseFloat(value) || 0)
           }
         };
       }
 
       // Handle numeric fields
-      if (['price', 'discountPrice', 'stock', 'soldCount'].includes(name)) {
-        return { ...prev, [name]: parseFloat(value) || 0 };
+      if (['price', 'discountPrice', 'stock'].includes(name)) {
+        return { ...prev, [name]: value };
       }
 
-      // Handle boolean fields
-      if (name === 'isActive') {
-        return { ...prev, [name]: (e.target as HTMLInputElement).checked };
-      }
-
+      // Default case for other fields
       return { ...prev, [name]: value };
     });
   };
-
 
   /* ---------------- ATTRIBUTES ---------------- */
 
@@ -357,8 +354,8 @@ export default function ProductUpdateForm() {
             type: attr.type || 'text',
             values: attr.values.map((v: any) => ({
               value: v.value || v,
-              color: v.color || null,
-              image: v.image || null
+              color: v.color || undefined,
+              image: v.image || undefined
             }))
           };
         }
@@ -366,9 +363,9 @@ export default function ProductUpdateForm() {
         return {
           id: crypto.randomUUID(),
           name: attr.name,
-          type: 'text',
+          type: 'text' as AttributeType,
           values: Array.isArray(attr.values) 
-            ? attr.values.map((v: string) => ({ value: v, color: null, image: null }))
+            ? attr.values.map((v: string) => ({ value: v, color: undefined, image: undefined }))
             : []
         };
       }) || [];
@@ -410,29 +407,16 @@ export default function ProductUpdateForm() {
         gallery: p.gallery || [],
         attributes: transformedAttributes,
         variations: transformedVariations,
-        dimensions: p.dimensions
-  ? {
-      length: p.dimensions.length || 0,
-      width: p.dimensions.width || 0,
-      height: p.dimensions.height || 0,
-      unit: p.dimensions.unit || 'cm',
-    }
-  : {
-      length: 0,
-      width: 0,
-      height: 0,
-      unit: 'cm',
-    },
-
-weight: p.weight
-  ? {
-      value: p.weight.value || 0,
-      unit: p.weight.unit || 'kg',
-    }
-  : {
-      value: 0,
-      unit: 'kg',
-    },
+        dimensions: {
+          length: p.dimensions?.length || 0,
+          width: p.dimensions?.width || 0,
+          height: p.dimensions?.height || 0,
+          unit: p.dimensions?.unit || 'cm',
+        },
+        weight: {
+          value: p.weight?.value || 0,
+          unit: p.weight?.unit || 'kg',
+        },
       });
     }
   }, [singleProduct]);
@@ -582,95 +566,99 @@ weight: p.weight
           </div>
         </div>
 
-
         {/* DIMENSIONS */}
-<div className="bg-white border rounded p-5 space-y-3">
-  <h3 className="font-semibold text-lg">Dimensions</h3>
+        <div className="bg-white border rounded p-5 space-y-3">
+          <h3 className="font-semibold text-lg">Dimensions</h3>
 
-  <div className="grid grid-cols-3 gap-2">
-    <input
-      placeholder="Length"
-      className="border p-2 rounded"
-      value={form.dimensions?.length || 0}
-      onChange={(e) =>
-        setForm(p => ({
-          ...p,
-          dimensions: { ...p.dimensions!, length: e.target.value }
-        }))
-      }
-    />
-    <input
-      placeholder="Width"
-      className="border p-2 rounded"
-      value={form.dimensions?.width || 0}
-      onChange={(e) =>
-        setForm(p => ({
-          ...p,
-          dimensions: { ...p.dimensions!, width: e.target.value }
-        }))
-      }
-    />
-    <input
-      placeholder="Height"
-      className="border p-2 rounded"
-      value={form.dimensions?.height || 0}
-      onChange={(e) =>
-        setForm(p => ({
-          ...p,
-          dimensions: { ...p.dimensions!, height: e.target.value }
-        }))
-      }
-    />
-  </div>
+          <div className="grid grid-cols-3 gap-2">
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Length"
+              className="border p-2 rounded"
+              value={form.dimensions.length}
+              onChange={(e) =>
+                setForm(p => ({
+                  ...p,
+                  dimensions: { ...p.dimensions, length: parseFloat(e.target.value) || 0 }
+                }))
+              }
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Width"
+              className="border p-2 rounded"
+              value={form.dimensions.width}
+              onChange={(e) =>
+                setForm(p => ({
+                  ...p,
+                  dimensions: { ...p.dimensions, width: parseFloat(e.target.value) || 0 }
+                }))
+              }
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Height"
+              className="border p-2 rounded"
+              value={form.dimensions.height}
+              onChange={(e) =>
+                setForm(p => ({
+                  ...p,
+                  dimensions: { ...p.dimensions, height: parseFloat(e.target.value) || 0 }
+                }))
+              }
+            />
+          </div>
 
-  <select
-    className="border p-2 rounded w-full"
-    value={form.dimensions?.unit || 'cm'}
-    onChange={(e) =>
-      setForm(p => ({
-        ...p,
-        dimensions: { ...p.dimensions!, unit: e.target.value as any }
-      }))
-    }
-  >
-    <option value="cm">Centimeter (cm)</option>
-    {/* <option value="inch">Inch</option> */}
-  </select>
-</div>
+          <select
+            className="border p-2 rounded w-full"
+            value={form.dimensions.unit}
+            onChange={(e) =>
+              setForm(p => ({
+                ...p,
+                dimensions: { ...p.dimensions, unit: e.target.value as 'cm' }
+              }))
+            }
+          >
+            <option value="cm">Centimeter (cm)</option>
+          </select>
+        </div>
 
-{/* WEIGHT */}
-<div className="bg-white border rounded p-5 space-y-3">
-  <h3 className="font-semibold text-lg">Weight</h3>
+        {/* WEIGHT */}
+        <div className="bg-white border rounded p-5 space-y-3">
+          <h3 className="font-semibold text-lg">Weight</h3>
 
-  <div className="grid grid-cols-2 gap-2">
-    <input
-      placeholder="Weight"
-      className="border p-2 rounded"
-      value={form.weight?.value || ''}
-      onChange={(e) =>
-        setForm(p => ({
-          ...p,
-          weight: { ...p.weight!, value: e.target.value }
-        }))
-      }
-    />
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Weight"
+              className="border p-2 rounded"
+              value={form.weight.value}
+              onChange={(e) =>
+                setForm(p => ({
+                  ...p,
+                  weight: { ...p.weight, value: parseFloat(e.target.value) || 0 }
+                }))
+              }
+            />
 
-    <select
-      className="border p-2 rounded"
-      value={form.weight?.unit || 'kg'}
-      onChange={(e) =>
-        setForm(p => ({
-          ...p,
-          weight: { ...p.weight!, unit: e.target.value as any }
-        }))
-      }
-    >
-      <option value="kg">Kg</option>
-      {/* <option value="g">Gram</option> */}
-    </select>
-  </div>
-</div>
-
+            <select
+              className="border p-2 rounded"
+              value={form.weight.unit}
+              onChange={(e) =>
+                setForm(p => ({
+                  ...p,
+                  weight: { ...p.weight, unit: e.target.value as 'kg' }
+                }))
+              }
+            >
+              <option value="kg">Kg</option>
+            </select>
+          </div>
+        </div>
 
         {/* CONTENT */}
         <div className="bg-white border rounded p-5">
@@ -1189,8 +1177,7 @@ function AttributeDisplay({ attr, value }: { attr?: Attribute; value: string }) 
     return (
       <div className="flex items-center gap-2">
         <img
-          src={`
-            ${attrValue.image}`}
+          src={`${attrValue.image}`}
           alt=""
           className="w-6 h-6 rounded object-cover border"
         />
