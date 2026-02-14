@@ -56,6 +56,7 @@ import {
   clearOrder 
 } from "@/redux/slice/OrderSlice";
 import { applyCoupon, clearAppliedCoupon } from "@/redux/slice/CouponSlice";
+import { Order } from "@/redux/slice/OrderSlice";
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL as string;
 const GST_RATE = 0.05; // 18% GST
@@ -390,7 +391,7 @@ const placeOrderAndPay = async () => {
       originalPrice: item.originalPrice,
     }));
 
-    const orderData = {
+    const orderData: Partial<Order> = {
       customerName: address.name,
       customerEmail: address.email,
       customerPhone: address.phone,
@@ -418,8 +419,10 @@ const placeOrderAndPay = async () => {
       total,
       notes: "",
       items: orderItems,
-      ipAddress: null, // Will be set by backend
+      ipAddress: null as any, // Will be set by backend
       userAgent: navigator.userAgent,
+        couponCode: appliedCoupon?.code || null,
+
     };
 
     // Add coupon code if applied
