@@ -143,13 +143,16 @@ const initialState: OrderState = {
 
 /* ---------------- ASYNC ACTIONS ---------------- */
 
-// ✅ Create Order (Step 1: Creates order without payment)
+// store/slices/orderSlice.js - Update these specific actions
+
+// ✅ Create Order - matches your backend route POST /api/orders/create
 export const createOrder = createAsyncThunk<
   { message: string; order: Order },
   Partial<Order>,
   { rejectValue: string }
 >("order/create", async (payload, { rejectWithValue }) => {
   try {
+    // Your backend uses POST /api/orders/create (from your routes)
     const res = await axios.post(`${API_URL}/api/orders/create`, payload, {
       withCredentials: true,
       headers: { "x-api-key": API_KEY },
@@ -162,7 +165,7 @@ export const createOrder = createAsyncThunk<
   }
 });
 
-// ✅ Initiate Payment (Step 2: Creates payment session)
+// ✅ Initiate Payment - matches your backend route POST /api/orders/initiate-payment
 export const initiatePayment = createAsyncThunk<
   { 
     success: boolean;
@@ -175,6 +178,7 @@ export const initiatePayment = createAsyncThunk<
   { rejectValue: string }
 >("order/initiatePayment", async (orderId, { rejectWithValue }) => {
   try {
+    // Your backend uses POST /api/orders/initiate-payment
     const res = await axios.post(
       `${API_URL}/api/orders/initiate-payment`,
       { orderId },
@@ -192,7 +196,7 @@ export const initiatePayment = createAsyncThunk<
   }
 });
 
-// ✅ Check Payment Status
+// ✅ Check Payment Status - matches your backend route GET /api/orders/payment-status/:orderNumber
 export const checkPaymentStatus = createAsyncThunk<
   { 
     success: boolean;
@@ -209,6 +213,7 @@ export const checkPaymentStatus = createAsyncThunk<
   { rejectValue: string }
 >("order/checkPaymentStatus", async (orderNumber, { rejectWithValue }) => {
   try {
+    // Your backend uses GET /api/orders/payment-status/:orderNumber
     const res = await axios.get(
       `${API_URL}/api/orders/payment-status/${orderNumber}`,
       {
@@ -223,6 +228,9 @@ export const checkPaymentStatus = createAsyncThunk<
     );
   }
 });
+
+// ✅ Get Order by Order Number - matches your backend route GET /api/orders/order-number/:orderNumber
+
 
 // ✅ Get ALL Orders (Admin)
 export const getAllOrders = createAsyncThunk<

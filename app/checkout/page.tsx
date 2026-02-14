@@ -356,125 +356,123 @@ export default function CheckoutPage() {
   };
 
   /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
-  const placeOrderAndPay = async () => {
-    // Validation
-    if (!validateForm()) {
-      toast.error("Please fix the errors in the form");
-      return;
+  /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
+const placeOrderAndPay = async () => {
+  // Validation
+  if (!validateForm()) {
+    toast.error("Please fix the errors in the form");
+    return;
+  }
+  
+  if (!selectedShipping) {
+    toast.error("Please select a shipping method");
+    return;
+  }
+
+  if (!selectedPaymentMethod) {
+    toast.error("Please select a payment method");
+    return;
+  }
+
+  setProcessingPayment(true);
+
+  try {
+    // Step 1: Create Order - matches your backend expected format
+    const orderItems = items.map((item) => ({
+      productId: item.productId,
+      productVariationId: item.variationId || undefined,
+      quantity: item.qty,
+      price: item.price,
+      // These fields are optional but your backend might use them
+      name: item.name,
+      image: item.image,
+      attributes: item.attributes,
+      originalPrice: item.originalPrice,
+    }));
+
+    const orderData = {
+      customerName: address.name,
+      customerEmail: address.email,
+      customerPhone: address.phone,
+      shippingAddress: {
+        addressLine1: address.address,
+        addressLine2: address.landmark || "",
+        city: address.city,
+        state: address.state,
+        postalCode: address.pincode,
+        country: "India",
+      },
+      billingAddress: {
+        addressLine1: address.address,
+        addressLine2: address.landmark || "",
+        city: address.city,
+        state: address.state,
+        postalCode: address.pincode,
+        country: "India",
+      },
+      shippingMethodId: selectedShipping._id,
+      shippingCost: selectedShipping.price || 0,
+      subtotal,
+      tax,
+      discount: discountAmount,
+      total,
+      notes: "",
+      items: orderItems,
+      ipAddress: null, // Will be set by backend
+      userAgent: navigator.userAgent,
+    };
+
+    // Add coupon code if applied
+    if (appliedCoupon?.code) {
+      orderData.couponCode = appliedCoupon.code;
     }
-    
-    if (!selectedShipping) {
-      toast.error("Please select a shipping method");
-      return;
-    }
 
-    if (!selectedPaymentMethod) {
-      toast.error("Please select a payment method");
-      return;
-    }
+    console.log("Creating order with data:", orderData); // Debug log
 
-    setProcessingPayment(true);
+    const orderResult: any = await dispatch(createOrder(orderData));
 
-    try {
-      // Step 1: Create Order
-      const orderItems = items.map((item) => ({
-        productId: item.productId,
-        productVariationId: item.variationId || undefined,
-        quantity: item.qty,
-        price: item.price,
-        name: item.name,
-        image: item.image,
-        attributes: item.attributes,
-        originalPrice: item.originalPrice,
-      }));
-
-      const payload: any = {
-        status: "pending_payment", // Set as pending payment
-        customerName: address.name,
-        customerEmail: address.email,
-        customerPhone: address.phone,
-        shippingAddress: {
-          addressLine1: address.address,
-          addressLine2: address.landmark || "",
-          city: address.city,
-          state: address.state,
-          postalCode: address.pincode,
-          country: "India",
-        },
-        billingAddress: {
-          addressLine1: address.address,
-          addressLine2: address.landmark || "",
-          city: address.city,
-          state: address.state,
-          postalCode: address.pincode,
-          country: "India",
-        },
-        shippingMethodId: selectedShipping._id,
-        shippingCost: selectedShipping.price || 0,
-        subtotal,
-        tax,
-        discount: discountAmount,
-        total,
-        notes: "",
-        items: orderItems,
-        payment: {
-          status: "pending",
-          method: selectedPaymentMethod,
-        },
-      };
-
-      // Add shipping method details
-      if (selectedShipping) {
-        payload.shippingMethod = {
-          id: selectedShipping._id,
-          name: selectedShipping.name,
-          price: selectedShipping.price,
-          estimatedDays: selectedShipping.estimatedDays,
-        };
+    if (createOrder.fulfilled.match(orderResult)) {
+      const createdOrder = orderResult.payload?.order;
+      const orderId = createdOrder?._id;
+      
+      if (!orderId) {
+        throw new Error("Order ID not received from server");
       }
 
-      // Add coupon code if applied
-      if (appliedCoupon?.code) {
-        payload.couponCode = appliedCoupon.code;
-        payload.couponDetails = {
-          code: appliedCoupon.code,
-          type: appliedCoupon.type,
-          value: appliedCoupon.value,
-          discountAmount: appliedCoupon.discountAmount,
-        };
-      }
+      console.log("Order created successfully:", createdOrder);
 
-      const orderResult: any = await dispatch(createOrder(payload));
+      // Step 2: Initiate Payment
+      toast.info("Redirecting to payment gateway...");
+      
+      const paymentResult: any = await dispatch(initiatePayment(orderId));
 
-      if (createOrder.fulfilled.match(orderResult)) {
-        const orderId = orderResult.payload?.order?._id;
+      if (initiatePayment.fulfilled.match(paymentResult)) {
+        console.log("Payment initiated:", paymentResult.payload);
         
-        if (!orderId) {
-          throw new Error("Order ID not received");
-        }
-
-        // Step 2: Initiate Payment
-        toast.info("Redirecting to payment gateway...");
+        // Clear cart and coupon after successful initiation
+        await dispatch(clearCart());
+        dispatch(clearAppliedCoupon());
         
-        const paymentResult: any = await dispatch(initiatePayment(orderId));
-
-        if (initiatePayment.fulfilled.match(paymentResult)) {
-          // Clear cart and coupon
-          await dispatch(clearCart());
-          dispatch(clearAppliedCoupon());
-          
-          // Payment URL will trigger redirect via useEffect
-        } else {
-          throw new Error(paymentResult.payload || "Payment initiation failed");
-        }
+        // Store order info in session storage for reference
+        sessionStorage.setItem('lastOrder', JSON.stringify({
+          orderNumber: createdOrder.orderNumber,
+          orderId: createdOrder._id,
+          total: createdOrder.total
+        }));
+        
+        // Payment URL will trigger redirect via useEffect
       } else {
-        throw new Error(orderResult.payload?.message || "Order creation failed");
+        throw new Error(paymentResult.payload || "Payment initiation failed");
       }
-    } catch (error: any) {
-      toast.error(error.message || "Failed to process order");
-      setProcessingPayment(false);
+    } else {
+      throw new Error(orderResult.payload?.message || "Order creation failed");
     }
-  };
+  } catch (error: any) {
+    console.error("Checkout error:", error);
+    toast.error(error.message || "Failed to process order");
+    setProcessingPayment(false);
+  }
+};
 
   // Check for existing pending order on page load
   useEffect(() => {
