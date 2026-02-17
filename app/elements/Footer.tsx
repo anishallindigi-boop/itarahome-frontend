@@ -56,7 +56,7 @@ export default function Footer() {
             <div className="space-y-3 text-sm text-primary">
               <div className="flex items-start">
                 <MapPin className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                <span>Timber Market, Sadar Bazar, Karnal (132001)HR, India</span>
+                <span>house no - 1, sadar bazar, shankar bhawan, karnal, haryana, 132001</span>
               </div>
               <div className="flex items-start">
                 <Mail className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
@@ -68,7 +68,7 @@ export default function Footer() {
               </div>
               <div className="flex items-start">
                 <Clock className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                <span>09:00 AM - 09:00 PM</span>
+                <span>10:00 AM - 07:00 PM</span>
               </div>
             </div>
           </div>

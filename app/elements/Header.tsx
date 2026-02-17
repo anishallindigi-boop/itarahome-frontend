@@ -102,10 +102,13 @@ export default function HeaderImproved() {
   useOnce(() => dispatch(getCartItems()),isAuthenticated);
 
   /* ---------- fetch categories ---------- */
-  useEffect(() => {
-    dispatch(GetProductCategory());
-    dispatch(GetSubCategories());
-  }, []);
+  // useEffect(() => {
+  //   dispatch(GetProductCategory());
+  //   dispatch(GetSubCategories());
+  // }, []);
+
+  useOnce(() => dispatch(GetProductCategory()), true);
+  useOnce(() => dispatch(GetSubCategories()), true);
 
   /* ---------- search effect ---------- */
   useEffect(() => {

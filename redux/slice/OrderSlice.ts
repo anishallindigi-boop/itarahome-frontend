@@ -57,6 +57,8 @@ export interface PaymentDetails {
   initiatedAt?: string;
   completedAt?: string;
   failedAt?: string;
+  callbackReceived?: boolean;
+  callbackAt?: string;
 }
 
 export interface CouponDetails {
@@ -66,12 +68,24 @@ export interface CouponDetails {
   discountAmount: number;
 }
 
+export interface ShiprocketDetails {
+  status: 'pending' | 'created' | 'shipped' | 'delivered' | 'failed' | 'cancelled';
+  orderId?: string;
+  shipmentId?: string;
+  awbCode?: string;
+  courierName?: string;
+  retryCount?: number;
+  errors?: Array<{ message: string; timestamp: string }>;
+}
+
 export interface Order {
   _id?: string;
   orderNumber?: string;
   status: 
     | 'pending_payment'
     | 'payment_initiated'
+    | 'payment_pending'
+    | 'payment_failed'
     | 'order_success'
     | 'processing'
     | 'shipped'
@@ -94,6 +108,7 @@ export interface Order {
   couponCode?: string | null;
   couponDetails?: CouponDetails;
   payment?: PaymentDetails;
+  shiprocketDetails?: ShiprocketDetails;
   trackingNumber?: string;
   trackingUrl?: string;
   carrier?: string;
@@ -106,17 +121,23 @@ export interface Order {
   user?: string;
   ipAddress?: string;
   userAgent?: string;
+  inventoryUpdated?: boolean;
+  inventoryUpdatedAt?: string;
+  canRetryShiprocket?: boolean;
 }
 
 export interface OrderStats {
   totalOrders: number;
   todayOrders: number;
   monthOrders: number;
+  yearOrders: number;
   totalRevenue: number;
   pendingOrders: number;
   deliveredOrders: number;
   cancelledOrders: number;
   paidOrders: number;
+  shiprocketFailed: number;
+  pendingShipments: number;
 }
 
 interface OrderState {
@@ -128,6 +149,8 @@ interface OrderState {
   message: string | null;
   paymentUrl: string | null;
   sessionId: string | null;
+  // Polling for payment status
+  isPolling: boolean;
 }
 
 const initialState: OrderState = {
@@ -139,21 +162,19 @@ const initialState: OrderState = {
   message: null,
   paymentUrl: null,
   sessionId: null,
+  isPolling: false,
 };
 
 /* ---------------- ASYNC ACTIONS ---------------- */
 
-// store/slices/orderSlice.js - Update these specific actions
-
-// ✅ Create Order - matches your backend route POST /api/orders/create
+// ✅ Create Order - POST /api/orders
 export const createOrder = createAsyncThunk<
-  { message: string; order: Order },
+  { success: boolean; message: string; order: Order },
   Partial<Order>,
   { rejectValue: string }
 >("order/create", async (payload, { rejectWithValue }) => {
   try {
-    // Your backend uses POST /api/orders/create (from your routes)
-    const res = await axios.post(`${API_URL}/api/orders/create`, payload, {
+    const res = await axios.post(`${API_URL}/api/orders`, payload, {
       withCredentials: true,
       headers: { "x-api-key": API_KEY },
     });
@@ -165,7 +186,7 @@ export const createOrder = createAsyncThunk<
   }
 });
 
-// ✅ Initiate Payment - matches your backend route POST /api/orders/initiate-payment
+// ✅ Initiate Payment - POST /api/payments/initiate (NEW ROUTE)
 export const initiatePayment = createAsyncThunk<
   { 
     success: boolean;
@@ -178,15 +199,17 @@ export const initiatePayment = createAsyncThunk<
   { rejectValue: string }
 >("order/initiatePayment", async (orderId, { rejectWithValue }) => {
   try {
-    // Your backend uses POST /api/orders/initiate-payment
+    // CHANGED: Now uses /api/payments/initiate instead of /api/orders/initiate-payment
     const res = await axios.post(
-      `${API_URL}/api/orders/initiate-payment`,
+      `${API_URL}/api/payments/initiate`,
       { orderId },
       {
         withCredentials: true,
         headers: { "x-api-key": API_KEY },
       }
     );
+
+    console.log(res.data);
     return res.data;
   } catch (err: any) {
     console.log(err);
@@ -196,10 +219,11 @@ export const initiatePayment = createAsyncThunk<
   }
 });
 
-// ✅ Check Payment Status - matches your backend route GET /api/orders/payment-status/:orderNumber
+// ✅ Check Payment Status - GET /api/payments/status/:orderNumber (NEW ROUTE)
 export const checkPaymentStatus = createAsyncThunk<
   { 
     success: boolean;
+    source: 'database' | 'gateway';
     order: {
       orderNumber: string;
       status: string;
@@ -207,15 +231,20 @@ export const checkPaymentStatus = createAsyncThunk<
       total: number;
       paymentMethod?: string;
       txnId?: string;
+      shiprocketStatus?: string;
+      trackingNumber?: string;
+      trackingUrl?: string;
+      confirmed: boolean;
     };
+    warning?: string;
   },
   string, // orderNumber
   { rejectValue: string }
 >("order/checkPaymentStatus", async (orderNumber, { rejectWithValue }) => {
   try {
-    // Your backend uses GET /api/orders/payment-status/:orderNumber
+    // CHANGED: Now uses /api/payments/status/:orderNumber instead of /api/orders/payment-status/:orderNumber
     const res = await axios.get(
-      `${API_URL}/api/orders/payment-status/${orderNumber}`,
+      `${API_URL}/api/payments/status/${orderNumber}`,
       {
         withCredentials: true,
         headers: { "x-api-key": API_KEY },
@@ -229,10 +258,7 @@ export const checkPaymentStatus = createAsyncThunk<
   }
 });
 
-// ✅ Get Order by Order Number - matches your backend route GET /api/orders/order-number/:orderNumber
-
-
-// ✅ Get ALL Orders (Admin)
+// ✅ Get ALL Orders (Admin) - GET /api/orders
 export const getAllOrders = createAsyncThunk<
   { 
     success: boolean;
@@ -247,9 +273,14 @@ export const getAllOrders = createAsyncThunk<
   { 
     status?: string;
     paymentStatus?: string;
+    shiprocketStatus?: string;
     page?: number;
     limit?: number;
     search?: string;
+    fromDate?: string;
+    toDate?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   },
   { rejectValue: string }
 >("order/getAll", async (params = {}, { rejectWithValue }) => {
@@ -257,9 +288,14 @@ export const getAllOrders = createAsyncThunk<
     const queryParams = new URLSearchParams();
     if (params.status) queryParams.append('status', params.status);
     if (params.paymentStatus) queryParams.append('paymentStatus', params.paymentStatus);
+    if (params.shiprocketStatus) queryParams.append('shiprocketStatus', params.shiprocketStatus);
     if (params.page) queryParams.append('page', params.page.toString());
     if (params.limit) queryParams.append('limit', params.limit.toString());
     if (params.search) queryParams.append('search', params.search);
+    if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+    if (params.toDate) queryParams.append('toDate', params.toDate);
+    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
     const res = await axios.get(
       `${API_URL}/api/orders?${queryParams.toString()}`,
@@ -276,7 +312,7 @@ export const getAllOrders = createAsyncThunk<
   }
 });
 
-// ✅ Get Order Stats (Admin)
+// ✅ Get Order Stats (Admin) - GET /api/orders/stats
 export const getOrderStats = createAsyncThunk<
   { success: boolean; stats: OrderStats },
   void,
@@ -295,7 +331,7 @@ export const getOrderStats = createAsyncThunk<
   }
 });
 
-// ✅ Get Single Order by ID (Admin)
+// ✅ Get Single Order by ID (Admin) - GET /api/orders/:id
 export const getOrderById = createAsyncThunk<
   { success: boolean; order: Order },
   string,
@@ -314,15 +350,16 @@ export const getOrderById = createAsyncThunk<
   }
 });
 
-// ✅ Get Order by Order Number (Public/Customer)
+// ✅ Get Order by Order Number (Public/Customer) - GET /api/orders/by-number/:orderNumber
 export const getOrderByOrderNumber = createAsyncThunk<
   { success: boolean; order: Order },
   string,
   { rejectValue: string }
 >("order/getByOrderNumber", async (orderNumber, { rejectWithValue }) => {
   try {
+    // CHANGED: Route is now /by-number/:orderNumber (matching backend)
     const res = await axios.get(
-      `${API_URL}/api/orders/order-number/${orderNumber}`,
+      `${API_URL}/api/orders/by-number/${orderNumber}`,
       {
         withCredentials: true,
         headers: { "x-api-key": API_KEY },
@@ -336,14 +373,15 @@ export const getOrderByOrderNumber = createAsyncThunk<
   }
 });
 
-// ✅ Get Orders by Customer (Authenticated User)
+// ✅ Get Orders by Customer (Authenticated User) - GET /api/orders/my-orders
 export const getOrdersByCustomer = createAsyncThunk<
   { success: boolean; orders: Order[] },
   void,
   { rejectValue: string }
 >("order/getByCustomer", async (_, { rejectWithValue }) => {
   try {
-    const res = await axios.get(`${API_URL}/api/orders/customer`, {
+    // CHANGED: Route is now /my-orders (matching backend)
+    const res = await axios.get(`${API_URL}/api/orders/my-orders`, {
       withCredentials: true,
       headers: { "x-api-key": API_KEY },
     });
@@ -355,7 +393,7 @@ export const getOrdersByCustomer = createAsyncThunk<
   }
 });
 
-// ✅ Update Order Status (Admin)
+// ✅ Update Order Status (Admin) - PATCH /api/orders/:id/status
 export const updateOrderStatus = createAsyncThunk<
   { success: boolean; message: string; order: Order },
   {
@@ -385,7 +423,7 @@ export const updateOrderStatus = createAsyncThunk<
   }
 });
 
-// ✅ Cancel Order
+// ✅ Cancel Order - POST /api/orders/:id/cancel
 export const cancelOrder = createAsyncThunk<
   { success: boolean; message: string; order: Order },
   { id: string; reason?: string },
@@ -408,15 +446,16 @@ export const cancelOrder = createAsyncThunk<
   }
 });
 
-// ✅ Initiate Refund (Admin)
+// ✅ Initiate Refund (Admin) - POST /api/payments/refund/:id (NEW ROUTE)
 export const initiateRefund = createAsyncThunk<
-  { success: boolean; message: string; order: Order },
+  { success: boolean; message: string; refund: { id: string; amount: number; status: string } },
   { id: string; amount?: number; reason?: string },
   { rejectValue: string }
 >("order/refund", async ({ id, amount, reason }, { rejectWithValue }) => {
   try {
+    // CHANGED: Now uses /api/payments/refund/:id instead of /api/orders/:id/refund
     const res = await axios.post(
-      `${API_URL}/api/orders/${id}/refund`,
+      `${API_URL}/api/payments/refund/${id}`,
       { amount, reason },
       {
         withCredentials: true,
@@ -431,7 +470,7 @@ export const initiateRefund = createAsyncThunk<
   }
 });
 
-// ✅ Delete Order (Admin - only unpaid orders)
+// ✅ Delete Order (Admin - only unpaid orders) - DELETE /api/orders/:id
 export const deleteOrder = createAsyncThunk<
   { success: boolean; message: string; id: string },
   string,
@@ -450,6 +489,29 @@ export const deleteOrder = createAsyncThunk<
   }
 });
 
+// ✅ Retry Shiprocket Order (Admin) - POST /api/orders/:orderId/retry-shiprocket
+export const retryShiprocketOrder = createAsyncThunk<
+  { success: boolean; message: string; data: { orderId: string; shipmentId: string; awbCode: string; courierName: string } },
+  string, // orderId
+  { rejectValue: string }
+>("order/retryShiprocket", async (orderId, { rejectWithValue }) => {
+  try {
+    const res = await axios.post(
+      `${API_URL}/api/orders/${orderId}/retry-shiprocket`,
+      {},
+      {
+        withCredentials: true,
+        headers: { "x-api-key": API_KEY },
+      }
+    );
+    return res.data;
+  } catch (err: any) {
+    return rejectWithValue(
+      err.response?.data?.message || "Shiprocket retry failed"
+    );
+  }
+});
+
 /* ---------------- SLICE ---------------- */
 
 export const OrderSlice = createSlice({
@@ -461,12 +523,22 @@ export const OrderSlice = createSlice({
       state.message = null;
       state.paymentUrl = null;
       state.sessionId = null;
+      state.isPolling = false;
     },
     clearOrder: (state) => {
       state.order = null;
     },
     clearOrders: (state) => {
       state.orders = [];
+    },
+    setPolling: (state, action: { payload: boolean }) => {
+      state.isPolling = action.payload;
+    },
+    // Update order from callback/polling
+    updateOrderPayment: (state, action: { payload: Partial<Order> }) => {
+      if (state.order) {
+        state.order = { ...state.order, ...action.payload };
+      }
     },
   },
   extraReducers: (builder) => {
@@ -529,6 +601,12 @@ export const OrderSlice = createSlice({
               status: action.payload.order.paymentStatus as any,
               txnId: action.payload.order.txnId,
             },
+            shiprocketDetails: {
+              ...state.order.shiprocketDetails,
+              status: action.payload.order.shiprocketStatus as any,
+            },
+            trackingNumber: action.payload.order.trackingNumber,
+            trackingUrl: action.payload.order.trackingUrl,
           };
         }
       })
@@ -686,18 +764,8 @@ export const OrderSlice = createSlice({
         state.loading = false;
         state.message = action.payload.message;
         
-        // Update in orders array
-        const index = state.orders.findIndex(
-          (o) => o._id === action.payload.order._id
-        );
-        if (index !== -1) {
-          state.orders[index] = action.payload.order;
-        }
-        
-        // Update current order
-        if (state.order && state.order._id === action.payload.order._id) {
-          state.order = action.payload.order;
-        }
+        // Note: Refund response structure changed - it returns refund object, not full order
+        // You may want to refresh the order to get updated refund status
       })
       .addCase(initiateRefund.rejected, (state, action) => {
         state.loading = false;
@@ -719,9 +787,37 @@ export const OrderSlice = createSlice({
       .addCase(deleteOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Delete failed";
+      })
+
+      /* ============================================ */
+      /* RETRY SHIPROCKET ORDER */
+      /* ============================================ */
+      .addCase(retryShiprocketOrder.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(retryShiprocketOrder.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message;
+        
+        // Update shiprocket details in current order
+        if (state.order) {
+          state.order.shiprocketDetails = {
+            ...state.order.shiprocketDetails,
+            orderId: action.payload.data.orderId,
+            shipmentId: action.payload.data.shipmentId,
+            awbCode: action.payload.data.awbCode,
+            courierName: action.payload.data.courierName,
+            status: 'created',
+          };
+        }
+      })
+      .addCase(retryShiprocketOrder.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Shiprocket retry failed";
       });
   },
 });
 
-export const { resetOrderState, clearOrder, clearOrders } = OrderSlice.actions;
+export const { resetOrderState, clearOrder, clearOrders, setPolling, updateOrderPayment } = OrderSlice.actions;
 export default OrderSlice.reducer;

@@ -358,6 +358,7 @@ export default function CheckoutPage() {
 
   /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
   /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
+/* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
 const placeOrderAndPay = async () => {
   // Validation
   if (!validateForm()) {
@@ -378,13 +379,12 @@ const placeOrderAndPay = async () => {
   setProcessingPayment(true);
 
   try {
-    // Step 1: Create Order - matches your backend expected format
+    // Step 1: Create Order - FIXED ROUTE: /api/orders (not /api/orders/create)
     const orderItems = items.map((item) => ({
       productId: item.productId,
       productVariationId: item.variationId || undefined,
       quantity: item.qty,
       price: item.price,
-      // These fields are optional but your backend might use them
       name: item.name,
       image: item.image,
       attributes: item.attributes,
@@ -419,19 +419,14 @@ const placeOrderAndPay = async () => {
       total,
       notes: "",
       items: orderItems,
-      ipAddress: null as any, // Will be set by backend
+      ipAddress: undefined, // Let backend detect
       userAgent: navigator.userAgent,
-        couponCode: appliedCoupon?.code || null,
-
+      couponCode: appliedCoupon?.code || null, // Only set once here
     };
 
-    // Add coupon code if applied
-    if (appliedCoupon?.code) {
-      orderData.couponCode = appliedCoupon.code;
-    }
+    console.log("Creating order with data:", orderData);
 
-    console.log("Creating order with data:", orderData); // Debug log
-
+    // FIXED: Use /api/orders instead of /api/orders/create
     const orderResult: any = await dispatch(createOrder(orderData));
 
     if (createOrder.fulfilled.match(orderResult)) {
@@ -444,7 +439,7 @@ const placeOrderAndPay = async () => {
 
       console.log("Order created successfully:", createdOrder);
 
-      // Step 2: Initiate Payment
+      // Step 2: Initiate Payment - FIXED: This uses correct route via thunk
       toast.info("Redirecting to payment gateway...");
       
       const paymentResult: any = await dispatch(initiatePayment(orderId));

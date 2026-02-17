@@ -42,19 +42,19 @@ import {
 
 // Company details
 const COMPANY_DETAILS = {
-  name: "Your Store Name",
-  address: "123 Business Park, Main Street",
-  city: "Mumbai",
-  state: "Maharashtra",
-  pincode: "400001",
+  name: "Itara Home",
+  address: "house no - 1, sadar bazar, shankar bhawan, karnal, haryana, 132001",
+  city: "Karnal",
+  state: "Haryana",
+  pincode: "132001",
   country: "India",
-  phone: "+91 9876543210",
-  email: "support@yourstore.com",
-  website: "www.yourstore.com",
-  gstin: "27ABCDE1234F1Z5",
-  pan: "ABCDE1234F",
-  cin: "U12345MH2020PTC123456",
-  signature: "/signature.png",
+  phone: "+91 9978996817",
+  email: "itaradesigns.sj@gmail.com",
+  website: "www.itarahome.com",
+  gstin: "06CGJPJ3628L1Z4",
+  // pan: "ABCDE1234F",
+  // cin: "U12345MH2020PTC123456",
+  // signature: "/signature.png",
 };
 
 // Bank details
@@ -344,9 +344,9 @@ export default function InvoicePage() {
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                     GST: {COMPANY_DETAILS.gstin}
                   </Badge>
-                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  {/* <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                     PAN: {COMPANY_DETAILS.pan}
-                  </Badge>
+                  </Badge> */}
                 </div>
               </div>
             </div>
@@ -515,23 +515,23 @@ export default function InvoicePage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">Method:</p>
-                    <p className="text-sm font-semibold capitalize text-gray-900">{order.payment?.method || 'Not specified'}</p>
+                    <p className="text-sm font-semibold capitalize text-gray-900">{order.payment?.gatewayResponse?.payment_method_type || 'Not specified'}</p>
                   </div>
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">Transaction ID:</p>
                     <p className="text-sm font-mono font-semibold text-gray-900">{order.payment?.txnId || 'N/A'}</p>
                   </div>
-                  {order.payment?.gatewayReferenceId && (
+                  {/* {order.payment?.gatewayResponse && (
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600">Gateway Ref:</p>
-                      <p className="text-sm font-mono font-semibold text-gray-900">{order.payment.gatewayReferenceId}</p>
+                      <p className="text-sm font-mono font-semibold text-gray-900">{order.payment.gatewayResponse.status}</p>
                     </div>
-                  )}
+                  )} */}
                   <div className="flex items-center justify-between pt-2 border-t border-emerald-200">
                     <p className="text-sm text-gray-600">Paid On:</p>
                     <p className="text-sm font-semibold text-gray-900">
-                      {order.payment?.completedAt 
-                        ? new Date(order.payment.completedAt).toLocaleDateString('en-IN', {
+                      {order.payment?.initiatedAt 
+                        ? new Date(order.payment.initiatedAt).toLocaleDateString('en-IN', {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric',
@@ -670,9 +670,9 @@ export default function InvoicePage() {
                 <p className="text-sm text-gray-600 mb-3">
                   2. This is a computer generated invoice, no signature required.
                 </p>
-                <p className="text-sm text-gray-600 mb-3">
+                {/* <p className="text-sm text-gray-600 mb-3">
                   3. All disputes are subject to Mumbai jurisdiction.
-                </p>
+                </p> */}
                 {order.notes && (
                   <>
                     <Separator className="my-3 bg-amber-200" />
@@ -683,7 +683,7 @@ export default function InvoicePage() {
               </div>
 
               {/* Bank Details */}
-              <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200 shadow-sm">
+              {/* <div className="bg-gradient-to-br from-gray-50 to-white p-5 rounded-xl border border-gray-200 shadow-sm">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-br from-gray-200 to-gray-100">
                     <Landmark className="w-4 h-4 text-gray-700" />
@@ -712,7 +712,7 @@ export default function InvoicePage() {
                     <span className="font-medium text-gray-900">{BANK_DETAILS.upiId}</span>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="space-y-4">
@@ -733,7 +733,7 @@ export default function InvoicePage() {
                     <span className="font-semibold text-gray-900">₹{shippingCost.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tax (GST 18%):</span>
+                    <span className="text-gray-600">Tax (GST 05%):</span>
                     <span className="font-semibold text-blue-600">+₹{tax.toLocaleString()}</span>
                   </div>
                   {discount > 0 && (
@@ -755,28 +755,7 @@ export default function InvoicePage() {
               </div>
 
               {/* Tax Breakdown */}
-              <div className="bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-xl border border-blue-200 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-100 to-blue-50">
-                    <Percent className="w-4 h-4 text-blue-600" />
-                  </div>
-                  Tax Breakdown
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">CGST (9%):</span>
-                    <span className="font-medium text-gray-900">₹{Math.round(tax / 2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">SGST (9%):</span>
-                    <span className="font-medium text-gray-900">₹{Math.round(tax / 2)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm pt-2 border-t border-blue-200">
-                    <span className="text-gray-600">Total Tax:</span>
-                    <span className="font-semibold text-blue-600">₹{tax}</span>
-                  </div>
-                </div>
-              </div>
+             
             </div>
           </div>
 
@@ -798,13 +777,13 @@ export default function InvoicePage() {
             <div className="text-right">
               <div className="inline-block text-left">
                 <p className="text-sm font-medium text-gray-900 mb-4">For {COMPANY_DETAILS.name}</p>
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <img 
                     src={COMPANY_DETAILS.signature} 
                     alt="Signature" 
                     className="h-12 object-contain"
                   />
-                </div>
+                </div> */}
                 <Separator className="w-48 mb-2 bg-gray-300" />
                 <p className="text-xs text-gray-600">Authorized Signatory</p>
                 <div className="flex items-center gap-2 mt-4 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">

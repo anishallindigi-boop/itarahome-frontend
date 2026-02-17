@@ -133,7 +133,18 @@ const StatusBadge = ({ status }: { status: string }) => {
       color: "bg-gray-100 text-gray-800 border-gray-200",
       icon: RotateCcw,
       label: "Refunded"
-    }
+    },
+       created: {
+      color: "bg-green-100 text-green-800 border-green-200",
+      icon: CheckCircle2,
+      label: "created"
+    },
+       failed: {
+      color: "bg-red-100 text-red-800 border-red-200",
+      icon: XCircle,
+      label: "failed"
+    },
+
   };
 
   const config = statusConfig[status] || statusConfig.pending_payment;
@@ -1100,6 +1111,7 @@ export default function AdminOrdersPage() {
                   <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Payment</TableHead>
+                  <TableHead>Shiprocket</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1173,7 +1185,10 @@ export default function AdminOrdersPage() {
                         <StatusBadge status={order.status} />
                       </TableCell>
                       <TableCell>
-                        <PaymentStatusBadge status={order.payment?.status || 'pending'} />
+                        <PaymentStatusBadge status={order.payment?.gatewayResponse?.status || 'pending'} />
+                      </TableCell>
+                         <TableCell>
+                       <StatusBadge status= {order.shiprocketDetails.status} />
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>

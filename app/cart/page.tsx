@@ -131,7 +131,7 @@ export default function CartPage() {
   };
 
   /* ---------------- TOTALS WITH GST ---------------- */
-  const GST_RATE = 18; // 18% GST
+  const GST_RATE = 5; // 18% GST
 
   // Calculate subtotal (without GST)
   const subtotalWithoutGST = useMemo(() => {
@@ -413,7 +413,7 @@ export default function CartPage() {
                 </h3>
                 <div className="flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-md">
                   <Receipt className="w-3 h-3" />
-                  <span>GST 18%</span>
+                  <span>GST 05%</span>
                 </div>
               </div>
 
@@ -438,7 +438,7 @@ export default function CartPage() {
                   <div className="bg-blue-50 rounded-lg p-4 space-y-3">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-blue-800">GST (18%)</span>
+                        <span className="font-medium text-blue-800">GST (05%)</span>
                         <Badge variant="outline" className="text-xs border-blue-200 text-blue-700">
                           Added
                         </Badge>
@@ -446,7 +446,7 @@ export default function CartPage() {
                       <span className="font-semibold text-blue-900">+₹{totalGST}</span>
                     </div>
                     <p className="text-xs text-blue-600 bg-blue-100/50 p-2 rounded">
-                      ₹{subtotalWithoutGST} × 18% = ₹{totalGST}
+                      ₹{subtotalWithoutGST} × 05% = ₹{totalGST}
                     </p>
                   </div>
 
@@ -456,7 +456,7 @@ export default function CartPage() {
                   <div className="flex justify-between items-center text-2xl font-bold pt-2">
                     <div>
                       <span className="text-gray-900">Total Amount</span>
-                      <p className="text-sm font-normal text-gray-500 mt-1">Including 18% GST</p>
+                      <p className="text-sm font-normal text-gray-500 mt-1">Including 05% GST</p>
                     </div>
                     <div className="text-right">
                       <span className="text-primary">₹{totalWithGST}</span>
