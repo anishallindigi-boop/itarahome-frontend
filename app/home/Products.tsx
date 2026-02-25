@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { getProducts } from '@/redux/slice/ProductSlice';
 import type { RootState } from '@/redux/store';
@@ -20,9 +20,23 @@ export default function Products() {
     (state: RootState) => state.auth
   );
 
+  // ✅ FIX: Add mount ref to prevent duplicate API calls
+  const hasMounted = useRef(false);
+
   useEffect(() => {
+    // Prevent double API calls from React Strict Mode or re-renders
+    if (hasMounted.current) return;
+    hasMounted.current = true;
+
     dispatch(getProducts());
+
+    // Optional: Reset on unmount if you want to allow refetching when remounting
+    return () => {
+      hasMounted.current = false;
+    };
   }, [dispatch]);
+
+  // console.log(products, "products");
 
   const handleAddToWishlist = (e: React.MouseEvent, productId: string) => {
     e.preventDefault();

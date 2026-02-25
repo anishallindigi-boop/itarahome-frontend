@@ -16,6 +16,7 @@ import StylingEnquirySlice from './slice/StylingEnquirySlice';
 import CouponSlice from './slice/CouponSlice';
 import ReviewSlice from './slice/ReviewSlice';
 import SeoReducer from './slice/SeoSlice';
+import { categoryApi } from './slice/categoryApi';
 
 
 const store = configureStore({
@@ -37,9 +38,13 @@ const store = configureStore({
     coupon: CouponSlice,
     review: ReviewSlice,
          seo:SeoReducer,
+            [categoryApi.reducerPath]: categoryApi.reducer,
   },
-
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(categoryApi.middleware),
 })
+
+
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>

@@ -11,7 +11,7 @@ import {
 import { getProducts } from '@/redux/slice/ProductSlice';
 import { GetProductCategory } from '@/redux/slice/ProductCategorySlice';
 import { toast } from 'sonner';
-import { X, Calendar, Percent, IndianRupee, Truck, Tag } from 'lucide-react';
+import { X, Calendar, Percent, IndianRupee, Truck, Tag, Users, Infinity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CouponFormProps {
@@ -24,6 +24,16 @@ const COUPON_TYPES = [
   { value: 'percentage', label: 'Percentage Discount', icon: Percent },
   { value: 'fixed', label: 'Fixed Amount', icon: IndianRupee },
   { value: 'free_shipping', label: 'Free Shipping', icon: Truck },
+];
+
+// ⭐ NEW: Per user limit options
+const PER_USER_LIMITS = [
+  { value: null, label: 'Unlimited', icon: Infinity },
+  { value: 1, label: 'Once per user', icon: Users },
+  { value: 2, label: 'Twice per user', icon: Users },
+  { value: 3, label: '3 times per user', icon: Users },
+  { value: 5, label: '5 times per user', icon: Users },
+  { value: 10, label: '10 times per user', icon: Users },
 ];
 
 export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormProps) {
@@ -41,6 +51,7 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
     value: '',
     minOrderAmount: '',
     maxUses: '',
+    maxUsesPerUser: null as number | null, // ⭐ NEW
     validFrom: '',
     validUntil: '',
     applicableProducts: [] as string[],
@@ -73,6 +84,7 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
         value: singleCoupon.value.toString(),
         minOrderAmount: singleCoupon.minOrderAmount?.toString() || '',
         maxUses: singleCoupon.maxUses?.toString() || '',
+        maxUsesPerUser: singleCoupon.maxUsesPerUser, // ⭐ NEW
         validFrom: singleCoupon.validFrom
           ? new Date(singleCoupon.validFrom).toISOString().split('T')[0]
           : '',
@@ -139,10 +151,14 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
     
-    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  // ⭐ NEW: Handle per user limit change
+  const handlePerUserLimitChange = (limit: number | null) => {
+    setFormData((prev) => ({ ...prev, maxUsesPerUser: limit }));
   };
 
   // Handle multi-select for products
@@ -176,6 +192,7 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
       value: formData.type === 'free_shipping' ? 0 : Number(formData.value),
       minOrderAmount: formData.minOrderAmount ? Number(formData.minOrderAmount) : undefined,
       maxUses: formData.maxUses ? Number(formData.maxUses) : null,
+      maxUsesPerUser: formData.maxUsesPerUser, // ⭐ NEW
       validFrom: formData.validFrom || null,
       validUntil: formData.validUntil || null,
     };
@@ -334,7 +351,7 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
             {/* Max Uses */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Max Uses
+                Max Uses (Global)
               </label>
               <input
                 type="number"
@@ -345,6 +362,40 @@ export default function CouponForm({ couponId, onClose, onSuccess }: CouponFormP
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
+          </div>
+
+          {/* ⭐ NEW: Per User Limit Section */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Usage Limit Per User
+            </label>
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+              {PER_USER_LIMITS.map((option) => {
+                const Icon = option.icon;
+                const isSelected = formData.maxUsesPerUser === option.value;
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => handlePerUserLimitChange(option.value)}
+                    className={cn(
+                      'flex flex-col items-center gap-1 p-3 rounded-xl border text-xs font-medium transition-all',
+                      isSelected
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    )}
+                  >
+                    <Icon className={cn('w-4 h-4', option.value === null && 'w-5 h-5')} />
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              {formData.maxUsesPerUser === null 
+                ? 'Users can use this coupon unlimited times' 
+                : `Each user can use this coupon maximum ${formData.maxUsesPerUser} time(s)`}
+            </p>
           </div>
 
           {/* Validity Dates */}

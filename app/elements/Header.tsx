@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Menu,
@@ -22,16 +22,15 @@ import { useRouter } from 'next/navigation';
 
 import { getCartItems } from '@/redux/slice/CartItemSlice';
 import { logoutuser, resetState } from '@/redux/slice/AuthSlice';
-import { GetSubCategories } from '@/redux/slice/SubCategorySlice';
-import { GetProductCategory } from '@/redux/slice/ProductCategorySlice';
-import { fetchSearchSuggestions, clearSuggestions } from '@/redux/slice/ProductSlice';
 
+import { fetchSearchSuggestions, clearSuggestions } from '@/redux/slice/ProductSlice';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { RootState } from '@/redux/store';
 
 import { CartPopover } from './CartPopover';
 import LoginPopup from './LoginPopup';
 import WishlistDrawer from './WishlistDrawer';
+import { useGetCategoriesQuery,useGetSubCategoriesQuery,useGetCartItemsQuery } from '@/redux/slice/categoryApi';
 
 import { toast } from 'sonner';
 
@@ -93,22 +92,38 @@ export default function HeaderImproved() {
 // console.log("user",user,isAuthenticated)
   
   const { wishlist } = useAppSelector((state: RootState) => state.wishlist);
-  const { cart } = useAppSelector((state: RootState) => state.usercart);
-  const { categories } = useAppSelector((state) => state.productcategory);
-  const { subCategories } = useAppSelector((state) => state.subcategory);
+  // const { cart } = useAppSelector((state: RootState) => state.usercart);
+ 
   const { suggestions, loading: searchLoading } = useAppSelector((state) => state.product);
 
   /* ---------- fetch once ---------- */
-  useOnce(() => dispatch(getCartItems()),isAuthenticated);
+  // useOnce(() => dispatch(getCartItems()),isAuthenticated);
 
-  /* ---------- fetch categories ---------- */
-  // useEffect(() => {
-  //   dispatch(GetProductCategory());
-  //   dispatch(GetSubCategories());
-  // }, []);
+const {
+  data: categoryData,
+  isLoading: categoryLoading,
+  error: categoryError,
+} = useGetCategoriesQuery();
 
-  useOnce(() => dispatch(GetProductCategory()), true);
-  useOnce(() => dispatch(GetSubCategories()), true);
+const {
+  data: subCategoryData,
+  isLoading: subCategoryLoading,
+  error: subCategoryError,
+} = useGetSubCategoriesQuery();
+
+const { data:cartquery } = useGetCartItemsQuery(undefined, {
+  refetchOnMountOrArgChange: true,
+});
+
+
+// Extract arrays properly
+const categories = categoryData || [];
+const subCategories = subCategoryData || [];
+const cart = cartquery || [];
+console.log("cart",cart)
+
+
+// console.log("categories",categories);
 
   /* ---------- search effect ---------- */
   useEffect(() => {

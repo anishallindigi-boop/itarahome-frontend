@@ -22,7 +22,9 @@ import {
   Percent,
   IndianRupee,
   Truck,
-  MoreHorizontal,
+  Users,
+  Infinity,
+  UserCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CouponForm from './CouponForm';
@@ -51,12 +53,10 @@ export default function CouponTable() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  // Fetch coupons on mount
   useEffect(() => {
     dispatch(getAllCoupons());
   }, [dispatch]);
 
-  // Handle success/error messages
   useEffect(() => {
     if (isDeleted) {
       toast.success('Coupon deleted successfully');
@@ -68,7 +68,6 @@ export default function CouponTable() {
     }
   }, [isDeleted, error, dispatch]);
 
-  // Filter coupons
   const filteredCoupons = coupons.filter((coupon) => {
     const matchesSearch =
       coupon.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -85,7 +84,6 @@ export default function CouponTable() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  // Handle delete
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this coupon?')) {
       await dispatch(deleteCoupon(id));
@@ -93,43 +91,36 @@ export default function CouponTable() {
     }
   };
 
-  // Handle toggle status
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     await dispatch(toggleCouponStatus({ id, isActive: !currentStatus }));
     dispatch(getAllCoupons());
   };
 
-  // Handle edit
   const handleEdit = (id: string) => {
     setEditingCouponId(id);
     setShowForm(true);
   };
 
-  // Handle create new
   const handleCreate = () => {
     setEditingCouponId(undefined);
     setShowForm(true);
   };
 
-  // Close form
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingCouponId(undefined);
   };
 
-  // Copy code to clipboard
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast.success('Coupon code copied!');
   };
 
-  // Check if coupon is expired
   const isExpired = (validUntil: string | null) => {
     if (!validUntil) return false;
     return new Date(validUntil) < new Date();
   };
 
-  // Format date
   const formatDate = (date: string | null) => {
     if (!date) return 'No expiry';
     return new Date(date).toLocaleDateString('en-IN', {
@@ -137,6 +128,13 @@ export default function CouponTable() {
       month: 'short',
       year: 'numeric',
     });
+  };
+
+  // ⭐ NEW: Get per-user limit display text
+  const getPerUserLimitText = (maxUsesPerUser: number | null) => {
+    if (maxUsesPerUser === null) return 'Unlimited';
+    if (maxUsesPerUser === 1) return '1x per user';
+    return `${maxUsesPerUser}x per user`;
   };
 
   return (
@@ -158,7 +156,6 @@ export default function CouponTable() {
 
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 bg-white p-4 rounded-xl border border-gray-200">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -170,7 +167,6 @@ export default function CouponTable() {
           />
         </div>
 
-        {/* Type Filter */}
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
@@ -182,7 +178,6 @@ export default function CouponTable() {
           <option value="free_shipping">Free Shipping</option>
         </select>
 
-        {/* Status Filter */}
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
@@ -195,7 +190,7 @@ export default function CouponTable() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-xl border border-gray-200">
           <p className="text-sm text-gray-500">Total Coupons</p>
           <p className="text-2xl font-bold text-gray-900 mt-1">{coupons.length}</p>
@@ -216,6 +211,12 @@ export default function CouponTable() {
           <p className="text-sm text-gray-500">Total Uses</p>
           <p className="text-2xl font-bold text-primary mt-1">
             {coupons.reduce((acc, c) => acc + (c.usedCount || 0), 0)}
+          </p>
+        </div>
+        <div className="bg-white p-4 rounded-xl border border-gray-200">
+          <p className="text-sm text-gray-500">User Limited</p>
+          <p className="text-2xl font-bold text-blue-600 mt-1">
+            {coupons.filter((c) => c.maxUsesPerUser !== null).length}
           </p>
         </div>
       </div>
@@ -249,7 +250,10 @@ export default function CouponTable() {
                     Value
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Usage
+                    Global Usage
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Per User
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     Validity
@@ -266,6 +270,7 @@ export default function CouponTable() {
                 {filteredCoupons.map((coupon) => {
                   const TypeIcon = COUPON_TYPE_ICONS[coupon.type];
                   const expired = isExpired(coupon.validUntil);
+                  const perUserLimit = getPerUserLimitText(coupon.maxUsesPerUser);
 
                   return (
                     <tr
@@ -318,7 +323,7 @@ export default function CouponTable() {
                         </span>
                       </td>
 
-                      {/* Usage */}
+                      {/* Global Usage */}
                       <td className="px-6 py-4">
                         <div className="text-sm">
                           <span className="font-medium text-gray-900">
@@ -341,6 +346,28 @@ export default function CouponTable() {
                               }}
                             />
                           </div>
+                        )}
+                      </td>
+
+                      {/* ⭐ NEW: Per User Limit */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          {coupon.maxUsesPerUser === null ? (
+                            <Infinity className="w-4 h-4 text-gray-400" />
+                          ) : (
+                            <UserCheck className="w-4 h-4 text-blue-500" />
+                          )}
+                          <span className={cn(
+                            "text-sm font-medium",
+                            coupon.maxUsesPerUser !== null ? "text-blue-600" : "text-gray-500"
+                          )}>
+                            {perUserLimit}
+                          </span>
+                        </div>
+                        {coupon.maxUsesPerUser !== null && coupon.usedBy && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            {coupon.usedBy.length} user(s) used
+                          </p>
                         )}
                       </td>
 

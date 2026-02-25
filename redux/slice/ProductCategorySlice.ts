@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -43,6 +44,7 @@ interface CategoryState {
   isupdated: boolean;
   isdeleted: boolean;
   singleCategory: Category | null;
+    fetched: boolean;
 }
 
 /* ---------------- INITIAL STATE ---------------- */
@@ -56,6 +58,7 @@ const initialState: CategoryState = {
   isupdated: false,
   isdeleted: false,
   singleCategory: null,
+  fetched: false
 };
 
 /* ---------------- API CONFIG ---------------- */
@@ -243,6 +246,15 @@ const ProductCategorySlice = createSlice({
       state.isdeleted = false;
       state.singleCategory = null;
     },
+        resetFetched: (state) => {
+      state.fetched = false;
+    },
+    // Add a reducer to clear categories (useful for logout)
+    clearCategories: (state) => {
+      state.categories = [];
+      state.fetched = false;
+    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -265,10 +277,14 @@ const ProductCategorySlice = createSlice({
       /* GET ALL */
       .addCase(GetProductCategory.pending, (state) => {
         state.loading = true;
+      
       })
       .addCase(GetProductCategory.fulfilled, (state, action: PayloadAction<Category[]>) => {
         state.loading = false;
         state.categories = action.payload;
+        state.fetched = true;
+   
+
       })
       .addCase(GetProductCategory.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
@@ -282,6 +298,7 @@ const ProductCategorySlice = createSlice({
       .addCase(GetAdminProductCategory.fulfilled, (state, action: PayloadAction<Category[]>) => {
         state.loading = false;
         state.categories = action.payload;
+        state.fetched = true;
       })
       .addCase(GetAdminProductCategory.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;

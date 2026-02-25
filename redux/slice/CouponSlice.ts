@@ -11,11 +11,22 @@ interface CouponInput {
   value: number;
   minOrderAmount?: number;
   maxUses?: number | null;
+  maxUsesPerUser?: number | null; // ⭐ NEW
   validFrom?: string | null;
   validUntil?: string | null;
   applicableProducts?: string[];
   applicableCategories?: string[];
   isActive?: boolean;
+}
+
+interface CouponUserUsage {
+  user: {
+    _id: string;
+    name: string;
+    email?: string;
+  };
+  count: number;
+  lastUsedAt: string;
 }
 
 interface Coupon {
@@ -25,7 +36,9 @@ interface Coupon {
   value: number;
   minOrderAmount: number;
   maxUses: number | null;
+  maxUsesPerUser: number | null; // ⭐ NEW
   usedCount: number;
+  usedBy: CouponUserUsage[]; // ⭐ NEW
   validFrom: string | null;
   validUntil: string | null;
   isActive: boolean;
@@ -51,6 +64,14 @@ interface CouponState {
     value: number;
     discountAmount: number;
     newTotal?: number;
+    userUseCount?: number; // ⭐ NEW
+    maxUsesPerUser?: number | null; // ⭐ NEW
+  } | null;
+  userCouponUsage: { // ⭐ NEW
+    code: string;
+    yourUsage: number;
+    maxAllowed: number | null;
+    remainingUses: number | 'unlimited';
   } | null;
 }
 
@@ -64,6 +85,7 @@ const initialState: CouponState = {
   isUpdated: false,
   isDeleted: false,
   appliedCoupon: null,
+  userCouponUsage: null, // ⭐ NEW
 };
 
 // -------------------------- Thunks --------------------------
@@ -96,9 +118,9 @@ export const getAllCoupons = createAsyncThunk(
         headers: {
           'x-api-key': API_KEY,
         },
-        withCredentials:true
+        withCredentials: true
       });
-      return res.data.coupons; // assuming your API returns { success: true, coupons: [...] }
+      return res.data.coupons;
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Error fetching coupons';
       return rejectWithValue(errorMessage);
@@ -115,7 +137,7 @@ export const getSingleCoupon = createAsyncThunk(
         headers: {
           'x-api-key': API_KEY,
         },
-        withCredentials:true
+        withCredentials: true
       });
       return res.data.coupon;
     } catch (error: any) {
@@ -135,7 +157,6 @@ export const updateCoupon = createAsyncThunk(
         headers: {
           'x-api-key': API_KEY,
         },
-      
       });
       return res.data.coupon;
     } catch (error: any) {
@@ -145,7 +166,7 @@ export const updateCoupon = createAsyncThunk(
   }
 );
 
-// DELETE COUPON (soft delete - set isActive: false)
+// DELETE COUPON
 export const deleteCoupon = createAsyncThunk(
   'coupon/deleteCoupon',
   async (id: string, { rejectWithValue }) => {
@@ -156,7 +177,7 @@ export const deleteCoupon = createAsyncThunk(
           'x-api-key': API_KEY,
         },
       });
-      return res.data; // { success, message }
+      return res.data;
     } catch (error: any) {
       const errorMessage = error?.response?.data?.message || 'Error deleting coupon';
       return rejectWithValue(errorMessage);
@@ -164,7 +185,7 @@ export const deleteCoupon = createAsyncThunk(
   }
 );
 
-// TOGGLE COUPON STATUS (active/inactive)
+// TOGGLE COUPON STATUS
 export const toggleCouponStatus = createAsyncThunk(
   'coupon/toggleStatus',
   async ({ id, isActive }: { id: string; isActive: boolean }, { rejectWithValue }) => {
@@ -184,17 +205,19 @@ export const toggleCouponStatus = createAsyncThunk(
   }
 );
 
-// APPLY COUPON (user-facing)
+// APPLY COUPON
 export const applyCoupon = createAsyncThunk(
   'coupon/applyCoupon',
   async ({ 
     code, 
     cartTotal, 
-    shippingCost = 0 
+    shippingCost = 0 ,
+    productIds 
   }: { 
     code: string; 
     cartTotal: number; 
     shippingCost?: number;
+    productIds: string[];
   }, { rejectWithValue }) => {
     try {
       const res = await axios.post(
@@ -202,7 +225,8 @@ export const applyCoupon = createAsyncThunk(
         { 
           code, 
           cartTotal, 
-          shippingCost 
+          shippingCost ,
+          productIds 
         },
         {
           withCredentials: true,
@@ -216,6 +240,43 @@ export const applyCoupon = createAsyncThunk(
     }
   }
 );
+
+// ⭐ NEW: MARK COUPON AS USED (Call after successful order)
+export const markCouponUsed = createAsyncThunk(
+  'coupon/markCouponUsed',
+  async (code: string, { rejectWithValue }) => {
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/coupons/mark-used`,
+        { code },
+        {
+          withCredentials: true,
+          headers: { 'x-api-key': API_KEY },
+        }
+      );
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message || 'Error recording coupon usage');
+    }
+  }
+);
+
+// ⭐ NEW: GET USER'S COUPON USAGE
+export const getUserCouponUsage = createAsyncThunk(
+  'coupon/getUserCouponUsage',
+  async (code: string, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${API_URL}/api/coupons/usage/${code}`, {
+        withCredentials: true,
+        headers: { 'x-api-key': API_KEY },
+      });
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message || 'Error fetching usage');
+    }
+  }
+);
+
 // -------------------------- Slice --------------------------
 export const couponSlice = createSlice({
   name: 'coupon',
@@ -231,9 +292,13 @@ export const couponSlice = createSlice({
       state.isUpdated = false;
       state.isDeleted = false;
       state.appliedCoupon = null;
+      state.userCouponUsage = null; // ⭐ NEW
     },
     clearAppliedCoupon: (state) => {
       state.appliedCoupon = null;
+    },
+    clearUserCouponUsage: (state) => { // ⭐ NEW
+      state.userCouponUsage = null;
     },
   },
   extraReducers: (builder) => {
@@ -305,7 +370,6 @@ export const couponSlice = createSlice({
         state.loading = false;
         state.isDeleted = true;
         state.success = true;
-        // Optionally remove from list if you want
       })
       .addCase(deleteCoupon.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
@@ -342,9 +406,40 @@ export const couponSlice = createSlice({
       .addCase(applyCoupon.rejected, (state, action: PayloadAction<any>) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ⭐ NEW: MARK COUPON USED
+      .addCase(markCouponUsed.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(markCouponUsed.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.success = true;
+        // Update local coupon data if needed
+        const couponIndex = state.coupons.findIndex(c => c.code === action.payload.coupon.code);
+        if (couponIndex !== -1) {
+          state.coupons[couponIndex].usedCount = action.payload.coupon.usedCount;
+        }
+      })
+      .addCase(markCouponUsed.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ⭐ NEW: GET USER COUPON USAGE
+      .addCase(getUserCouponUsage.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getUserCouponUsage.fulfilled, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.userCouponUsage = action.payload;
+      })
+      .addCase(getUserCouponUsage.rejected, (state, action: PayloadAction<any>) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });
 
-export const { resetCouponState, clearAppliedCoupon } = couponSlice.actions;
+export const { resetCouponState, clearAppliedCoupon, clearUserCouponUsage } = couponSlice.actions;
 export default couponSlice.reducer;

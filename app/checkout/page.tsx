@@ -17,7 +17,6 @@ import {
   Lock,
   ArrowLeft,
   MapPin,
-  Calendar,
   CheckCircle2,
   IndianRupee,
   Phone,
@@ -36,10 +35,6 @@ import {
   Trash2,
   ShoppingBag,
   CreditCard,
-  Wallet,
-  Landmark,
-  Smartphone,
-  Banknote,
 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { 
@@ -59,41 +54,7 @@ import { applyCoupon, clearAppliedCoupon } from "@/redux/slice/CouponSlice";
 import { Order } from "@/redux/slice/OrderSlice";
 
 const IMAGE_URL = process.env.NEXT_PUBLIC_IMAGE_URL as string;
-const GST_RATE = 0.05; // 18% GST
-
-// Payment method options
-const PAYMENT_METHODS = [
-  {
-    id: 'card',
-    name: 'Credit/Debit Card',
-    icon: CreditCard,
-    description: 'Pay via Visa, Mastercard, RuPay, Amex',
-  },
-  {
-    id: 'upi',
-    name: 'UPI',
-    icon: Smartphone,
-    description: 'Pay via Google Pay, PhonePe, Paytm, BHIM',
-  },
-  {
-    id: 'netbanking',
-    name: 'Net Banking',
-    icon: Landmark,
-    description: 'All major banks supported',
-  },
-  {
-    id: 'wallet',
-    name: 'Wallet',
-    icon: Wallet,
-    description: 'Paytm, PhonePe, Amazon Pay, Mobikwik',
-  },
-  {
-    id: 'emi',
-    name: 'EMI',
-    icon: Banknote,
-    description: 'No cost EMI options available',
-  },
-];
+const GST_RATE = 0.05; // 5% GST
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -104,7 +65,6 @@ export default function CheckoutPage() {
   const [loadingClear, setLoadingClear] = useState(false);
 
   /* ---------------- PAYMENT STATE ---------------- */
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('card');
   const [processingPayment, setProcessingPayment] = useState(false);
 
   /* ---------------- CART DATA ---------------- */
@@ -118,7 +78,6 @@ export default function CheckoutPage() {
   // Fetch fresh cart data on mount
   useEffect(() => {
     dispatch(getCartItems());
-    // Reset order state when component mounts
     dispatch(resetOrderState());
     dispatch(clearOrder());
   }, [dispatch]);
@@ -126,13 +85,10 @@ export default function CheckoutPage() {
   // Redirect to payment when payment URL is available
   useEffect(() => {
     if (paymentUrl && sessionId) {
-      // Store order ID in session storage for reference
       if (createdOrder?._id) {
         sessionStorage.setItem('pendingOrderId', createdOrder._id);
         sessionStorage.setItem('paymentSessionId', sessionId);
       }
-      
-      // Redirect to payment gateway
       window.location.href = paymentUrl;
     }
   }, [paymentUrl, sessionId, createdOrder]);
@@ -230,12 +186,10 @@ export default function CheckoutPage() {
 
   const [selectedShipping, setSelectedShipping] = useState<any>(null);
 
-  // Fetch shipping methods on component mount
   useEffect(() => {
     dispatch(GetAllShipping());
   }, [dispatch]);
 
-  // Auto-select first shipping method when methods are loaded
   useEffect(() => {
     if (shippingMethods?.length > 0 && !selectedShipping) {
       setSelectedShipping(shippingMethods[0]);
@@ -245,18 +199,17 @@ export default function CheckoutPage() {
   const shippingCost = selectedShipping?.price || 0;
 
   /* ---------------- TAX & TOTAL ---------------- */
-  const tax = Math.round(subtotal * GST_RATE);
-  
-  // Calculate discount
+const tax = Number((subtotal * GST_RATE).toFixed(2));
   const discountAmount = appliedCoupon?.discountAmount || 0;
-  
-  // Calculate total with coupon
   const total = Math.max(0, subtotal + tax + shippingCost - discountAmount);
-
-  // Calculate total items
   const totalItems = items.reduce((sum, item) => sum + item.qty, 0);
 
-  // Apply coupon handler
+  // ⭐⭐⭐ GET PRODUCT IDs FOR COUPON ⭐⭐⭐
+  const productIds = useMemo(() => {
+    return items.map(item => item.productId);
+  }, [items]);
+
+  // Apply coupon handler with product IDs
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
       toast.error("Please enter a coupon code");
@@ -274,6 +227,7 @@ export default function CheckoutPage() {
       code: couponCode.trim(),
       cartTotal: subtotal,
       shippingCost: shippingCost,
+      productIds: productIds, // ⭐ SEND PRODUCT IDs
     }));
     
     setApplyingCoupon(false);
@@ -323,7 +277,6 @@ export default function CheckoutPage() {
       setAddress({ ...address, [name]: value });
     }
     
-    // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -357,131 +310,106 @@ export default function CheckoutPage() {
   };
 
   /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
-  /* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
-/* ---------------- PLACE ORDER & INITIATE PAYMENT ---------------- */
-const placeOrderAndPay = async () => {
-  // Validation
-  if (!validateForm()) {
-    toast.error("Please fix the errors in the form");
-    return;
-  }
-  
-  if (!selectedShipping) {
-    toast.error("Please select a shipping method");
-    return;
-  }
-
-  if (!selectedPaymentMethod) {
-    toast.error("Please select a payment method");
-    return;
-  }
-
-  setProcessingPayment(true);
-
-  try {
-    // Step 1: Create Order - FIXED ROUTE: /api/orders (not /api/orders/create)
-    const orderItems = items.map((item) => ({
-      productId: item.productId,
-      productVariationId: item.variationId || undefined,
-      quantity: item.qty,
-      price: item.price,
-      name: item.name,
-      image: item.image,
-      attributes: item.attributes,
-      originalPrice: item.originalPrice,
-    }));
-
-    const orderData: Partial<Order> = {
-      customerName: address.name,
-      customerEmail: address.email,
-      customerPhone: address.phone,
-      shippingAddress: {
-        addressLine1: address.address,
-        addressLine2: address.landmark || "",
-        city: address.city,
-        state: address.state,
-        postalCode: address.pincode,
-        country: "India",
-      },
-      billingAddress: {
-        addressLine1: address.address,
-        addressLine2: address.landmark || "",
-        city: address.city,
-        state: address.state,
-        postalCode: address.pincode,
-        country: "India",
-      },
-      shippingMethodId: selectedShipping._id,
-      shippingCost: selectedShipping.price || 0,
-      subtotal,
-      tax,
-      discount: discountAmount,
-      total,
-      notes: "",
-      items: orderItems,
-      ipAddress: undefined, // Let backend detect
-      userAgent: navigator.userAgent,
-      couponCode: appliedCoupon?.code || null, // Only set once here
-    };
-
-    console.log("Creating order with data:", orderData);
-
-    // FIXED: Use /api/orders instead of /api/orders/create
-    const orderResult: any = await dispatch(createOrder(orderData));
-
-    if (createOrder.fulfilled.match(orderResult)) {
-      const createdOrder = orderResult.payload?.order;
-      const orderId = createdOrder?._id;
-      
-      if (!orderId) {
-        throw new Error("Order ID not received from server");
-      }
-
-      console.log("Order created successfully:", createdOrder);
-
-      // Step 2: Initiate Payment - FIXED: This uses correct route via thunk
-      toast.info("Redirecting to payment gateway...");
-      
-      const paymentResult: any = await dispatch(initiatePayment(orderId));
-
-      if (initiatePayment.fulfilled.match(paymentResult)) {
-        console.log("Payment initiated:", paymentResult.payload);
-        
-        // Clear cart and coupon after successful initiation
-        await dispatch(clearCart());
-        dispatch(clearAppliedCoupon());
-        
-        // Store order info in session storage for reference
-        sessionStorage.setItem('lastOrder', JSON.stringify({
-          orderNumber: createdOrder.orderNumber,
-          orderId: createdOrder._id,
-          total: createdOrder.total
-        }));
-        
-        // Payment URL will trigger redirect via useEffect
-      } else {
-        throw new Error(paymentResult.payload || "Payment initiation failed");
-      }
-    } else {
-      throw new Error(orderResult.payload?.message || "Order creation failed");
+  const placeOrderAndPay = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
     }
-  } catch (error: any) {
-    console.error("Checkout error:", error);
-    toast.error(error.message || "Failed to process order");
-    setProcessingPayment(false);
-  }
-};
+    
+    if (!selectedShipping) {
+      toast.error("Please select a shipping method");
+      return;
+    }
 
-  // Check for existing pending order on page load
+    setProcessingPayment(true);
+
+    try {
+      const orderItems = items.map((item) => ({
+        productId: item.productId,
+        productVariationId: item.variationId || undefined,
+        quantity: item.qty,
+        price: item.price,
+        name: item.name,
+        image: item.image,
+        attributes: item.attributes,
+        originalPrice: item.originalPrice,
+      }));
+
+      const orderData: Partial<Order> = {
+        customerName: address.name,
+        customerEmail: address.email,
+        customerPhone: address.phone,
+        shippingAddress: {
+          addressLine1: address.address,
+          addressLine2: address.landmark || "",
+          city: address.city,
+          state: address.state,
+          postalCode: address.pincode,
+          country: "India",
+        },
+        billingAddress: {
+          addressLine1: address.address,
+          addressLine2: address.landmark || "",
+          city: address.city,
+          state: address.state,
+          postalCode: address.pincode,
+          country: "India",
+        },
+        shippingMethodId: selectedShipping._id,
+        shippingCost: selectedShipping.price || 0,
+        subtotal,
+        tax,
+        discount: discountAmount,
+        total,
+        notes: "",
+        items: orderItems,
+        ipAddress: undefined,
+        userAgent: navigator.userAgent,
+        couponCode: appliedCoupon?.code || null,
+      };
+
+      const orderResult: any = await dispatch(createOrder(orderData));
+
+      if (createOrder.fulfilled.match(orderResult)) {
+        const createdOrder = orderResult.payload?.order;
+        const orderId = createdOrder?._id;
+        
+        if (!orderId) {
+          throw new Error("Order ID not received from server");
+        }
+
+        toast.info("Redirecting to payment gateway...");
+        
+        const paymentResult: any = await dispatch(initiatePayment(orderId));
+
+        if (initiatePayment.fulfilled.match(paymentResult)) {
+          await dispatch(clearCart());
+          dispatch(clearAppliedCoupon());
+          
+          sessionStorage.setItem('lastOrder', JSON.stringify({
+            orderNumber: createdOrder.orderNumber,
+            orderId: createdOrder._id,
+            total: createdOrder.total
+          }));
+        } else {
+          throw new Error(paymentResult.payload || "Payment initiation failed");
+        }
+      } else {
+        throw new Error(orderResult.payload?.message || "Order creation failed");
+      }
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error(error.message || "Failed to process order");
+      setProcessingPayment(false);
+    }
+  };
+
   useEffect(() => {
     const pendingOrderId = sessionStorage.getItem('pendingOrderId');
     const paymentSessionId = sessionStorage.getItem('paymentSessionId');
     
     if (pendingOrderId && paymentSessionId) {
-      // Ask user if they want to continue with pending payment
       toast.info("You have a pending payment. Redirecting to payment...");
-      
-      // Clear stored data
       sessionStorage.removeItem('pendingOrderId');
       sessionStorage.removeItem('paymentSessionId');
     }
@@ -563,7 +491,7 @@ const placeOrderAndPay = async () => {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left: Address, Shipping & Payment */}
+          {/* Left: Address, Shipping */}
           <div className="lg:col-span-2 space-y-8">
             {/* Cart Items with Quantity Controls */}
             <Card className="p-6 border-0 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
@@ -585,11 +513,10 @@ const placeOrderAndPay = async () => {
 
                   return (
                     <div key={item.cartId} className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100/80 transition-colors">
-                      {/* Product Image */}
                       <div className="relative shrink-0">
                         <div className="w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200">
                           <img
-                            src={`${IMAGE_URL}${item.image}`}
+                            src={`${item.image}`}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
@@ -601,7 +528,6 @@ const placeOrderAndPay = async () => {
                         )}
                       </div>
 
-                      {/* Product Details */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
                           <div>
@@ -609,7 +535,6 @@ const placeOrderAndPay = async () => {
                               {item.name}
                             </h3>
                             
-                            {/* Attributes */}
                             {Object.keys(item.attributes).length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {Object.entries(item.attributes).map(([key, value]: any) => (
@@ -624,7 +549,6 @@ const placeOrderAndPay = async () => {
                               </div>
                             )}
 
-                            {/* Price */}
                             <div className="flex items-baseline gap-2">
                               <span className="text-xl font-bold text-primary">₹{item.price}</span>
                               {item.originalPrice > item.price && (
@@ -635,14 +559,12 @@ const placeOrderAndPay = async () => {
                             </div>
                           </div>
 
-                          {/* Item Total */}
                           <div className="text-right">
                             <p className="text-sm text-gray-500 mb-1">Item Total</p>
                             <p className="text-lg font-bold text-gray-900">₹{itemTotal}</p>
                           </div>
                         </div>
 
-                        {/* Quantity Controls */}
                         <div className="flex items-center justify-between mt-4">
                           <div className="flex items-center gap-3">
                             <Button
@@ -685,7 +607,6 @@ const placeOrderAndPay = async () => {
                           </Button>
                         </div>
 
-                        {/* Stock Status */}
                         {item.stock !== null && (
                           <div className="mt-2">
                             <div className="flex items-center gap-2">
@@ -909,6 +830,7 @@ const placeOrderAndPay = async () => {
                         code: appliedCoupon.code,
                         cartTotal: subtotal,
                         shippingCost: method?.price || 0,
+                        productIds: productIds, // ⭐ SEND PRODUCT IDs
                       }));
                     }
                   }}
@@ -977,7 +899,6 @@ const placeOrderAndPay = async () => {
                 </div>
               )}
 
-              {/* Delivery Promise */}
               {selectedShipping && (
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg flex items-center gap-3">
                   <ShieldCheck className="w-5 h-5 text-blue-600" />
@@ -990,70 +911,6 @@ const placeOrderAndPay = async () => {
                   </div>
                 </div>
               )}
-            </Card>
-
-            {/* Payment Method */}
-            <Card className="p-8 border-0 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50">
-                  <CreditCard className="w-6 h-6 text-emerald-600" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Payment Method</h2>
-                  <p className="text-gray-600">Select your preferred payment option</p>
-                </div>
-              </div>
-              
-              <RadioGroup 
-                value={selectedPaymentMethod} 
-                onValueChange={setSelectedPaymentMethod}
-                className="space-y-4"
-              >
-                {PAYMENT_METHODS.map((method) => {
-                  const Icon = method.icon;
-                  return (
-                    <label
-                      key={method.id}
-                      className={`flex items-center justify-between p-6 border-2 rounded-xl cursor-pointer transition-all hover:border-primary hover:shadow-md ${
-                        selectedPaymentMethod === method.id 
-                          ? 'border-primary bg-primary/5 shadow-md' 
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <RadioGroupItem value={method.id} className="h-5 w-5" />
-                        <div className="flex items-center gap-3">
-                          <div className="p-2.5 rounded-lg bg-gray-100">
-                            <Icon className="w-5 h-5 text-gray-700" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">{method.name}</p>
-                            <p className="text-sm text-gray-600 mt-0.5">{method.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                      {method.id === 'upi' && (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          Instant
-                        </Badge>
-                      )}
-                      {method.id === 'emi' && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                          No Cost EMI
-                        </Badge>
-                      )}
-                    </label>
-                  );
-                })}
-              </RadioGroup>
-
-              {/* Secure Payment Badge */}
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-                <p className="text-sm text-blue-700">
-                  Your payment information is secure. We use 256-bit encryption and are PCI DSS compliant.
-                </p>
-              </div>
             </Card>
           </div>
 
@@ -1070,9 +927,9 @@ const placeOrderAndPay = async () => {
                 {items.map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded overflow-hidden border border-gray-200">
+                      <div className="w-15 h-15 rounded overflow-hidden border border-gray-200">
                         <img
-                          src={`${IMAGE_URL}${item.image}`}
+                          src={`${item.image}`}
                           alt={item.name}
                           className="w-full h-full object-cover"
                         />
@@ -1200,7 +1057,6 @@ const placeOrderAndPay = async () => {
                   </div>
                 </div>
 
-                {/* Discount Row */}
                 {appliedCoupon && (
                   <div className="flex justify-between text-lg">
                     <span className="text-green-600 flex items-center gap-2">
@@ -1237,7 +1093,6 @@ const placeOrderAndPay = async () => {
                     orderLoading || 
                     shippingLoading || 
                     !selectedShipping ||
-                    !selectedPaymentMethod ||
                     items.length === 0 ||
                     processingPayment
                   }
@@ -1252,36 +1107,21 @@ const placeOrderAndPay = async () => {
                       <Truck className="w-5 h-5 mr-2" />
                       Select Shipping Method
                     </>
-                  ) : !selectedPaymentMethod ? (
-                    <>
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      Select Payment Method
-                    </>
                   ) : (
                     <>
                       <Lock className="w-5 h-5 mr-2" />
-                      Pay ₹{total} via {
-                        PAYMENT_METHODS.find(m => m.id === selectedPaymentMethod)?.name || 'Card'
-                      }
+                      Pay ₹{total}
                     </>
                   )}
                 </Button>
 
-                {/* Selected Shipping & Payment Summary */}
+                {/* Selected Shipping Summary */}
                 <div className="mt-4 space-y-2 text-xs text-gray-500">
                   {selectedShipping && (
                     <div className="flex items-center justify-between">
                       <span>Delivery by:</span>
                       <span className="font-medium text-gray-700">
                         {selectedShipping.estimatedDays || '3-5 business days'}
-                      </span>
-                    </div>
-                  )}
-                  {selectedPaymentMethod && (
-                    <div className="flex items-center justify-between">
-                      <span>Payment:</span>
-                      <span className="font-medium text-gray-700">
-                        {PAYMENT_METHODS.find(m => m.id === selectedPaymentMethod)?.name}
                       </span>
                     </div>
                   )}
