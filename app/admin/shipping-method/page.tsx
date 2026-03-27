@@ -287,8 +287,8 @@ const filteredShippingMethods = shippingMethods.filter((method) => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredShippingMethods.map((method) => (
-                      <TableRow key={method._id}>
+                    filteredShippingMethods.map((method,i) => (
+                      <TableRow key={method._id || i}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
                             <Truck className="h-4 w-4 text-muted-foreground" />

@@ -147,8 +147,8 @@ export default function SubCategoryCreateForm() {
             required
           >
             <option value="">Select Parent Category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
+            {categories.map((cat,i) => (
+              <option key={i} value={cat._id}>
                 {cat.name}
               </option>
             ))}

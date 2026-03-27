@@ -1185,7 +1185,7 @@ export default function AdminOrdersPage() {
                         <StatusBadge status={order.status} />
                       </TableCell>
                       <TableCell>
-                        <PaymentStatusBadge status={order.payment?.gatewayResponse?.status || 'pending'} />
+                        <PaymentStatusBadge status={order.payment?.status} />
                       </TableCell>
                          <TableCell>
                        <StatusBadge status= {order.shiprocketDetails.status} />
