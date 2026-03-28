@@ -204,6 +204,7 @@ console.log("cart",cart)
     { key: 'home', label: 'Home', href: '/' },
     { key: 'shop', label: 'Shop', children: productMenu },
     { key: 'about', label: 'About Us', href: '/about-us' },
+    { key: 'curated', label: 'Curated Sets', href: '/shop?categories=69c6224463512c1128fb58c9' },
     { key: 'contact', label: 'Contact', href: '/contact-us' },
     { key: 'bulk', label: 'Bulk Enquiry', href: '/enquiry-form' },
     { key: 'consult', label: 'Book Styling Consultation', href: '/styling-consultation-form' },
